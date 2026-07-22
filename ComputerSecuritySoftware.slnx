@@ -1,0 +1,19 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Css.AcceptanceFixtures/Css.AcceptanceFixtures.csproj" />
+    <Project Path="src/Css.Agent/Css.Agent.csproj" />
+    <Project Path="src/Css.App/Css.App.csproj" />
+    <Project Path="src/Css.Core/Css.Core.csproj" />
+    <Project Path="src/Css.Elevated/Css.Elevated.csproj" />
+    <Project Path="src/Css.InstallGuard/Css.InstallGuard.csproj" />
+    <Project Path="src/Css.Ipc/Css.Ipc.csproj" />
+    <Project Path="src/Css.Rules/Css.Rules.csproj" />
+    <Project Path="src/Css.Scanner/Css.Scanner.csproj" />
+    <Project Path="src/Css.SmokeTools/Css.SmokeTools.csproj" />
+    <Project Path="src/Css.Snapshot/Css.Snapshot.csproj" />
+    <Project Path="src/Css.Win32/Css.Win32.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Css.Tests/Css.Tests.csproj" />
+  </Folder>
+</Solution>

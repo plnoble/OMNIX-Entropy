@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check out source
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+
+      - name: Set up .NET 8
+        uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Restore
+        run: dotnet restore ComputerSecuritySoftware.slnx
+
+      - name: Run full test suite
+        run: dotnet test ComputerSecuritySoftware.slnx --configuration Debug --no-restore
+
+      - name: Build production binaries
+        run: dotnet build ComputerSecuritySoftware.slnx --configuration Release --no-restore
+
+      - name: Verify source integrity
+        shell: powershell
+        run: powershell -NoProfile -ExecutionPolicy Bypass -File .omx/verify-source-integrity.ps1

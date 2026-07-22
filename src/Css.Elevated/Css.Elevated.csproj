@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\Css.Core\Css.Core.csproj" />
+    <ProjectReference Include="..\Css.Ipc\Css.Ipc.csproj" />
+    <ProjectReference Include="..\Css.Win32\Css.Win32.csproj" />
+    <ProjectReference Include="..\Css.Snapshot\Css.Snapshot.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(Configuration)' == 'Release'">
+    <Compile Remove="OfficialUninstallFakeWorker.cs" />
+  </ItemGroup>
+
+</Project>

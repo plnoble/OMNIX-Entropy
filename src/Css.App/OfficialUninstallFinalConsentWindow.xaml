@@ -1,0 +1,157 @@
+<Window x:Class="Css.App.OfficialUninstallFinalConsentWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="&#x6700;&#x7EC8;&#x786E;&#x8BA4;"
+        Height="650"
+        Width="720"
+        MinHeight="590"
+        MinWidth="640"
+        Background="#F6F7F9"
+        WindowStartupLocation="CenterOwner"
+        AutomationProperties.Name="&#x5B98;&#x65B9;&#x5378;&#x8F7D;&#x6700;&#x7EC8;&#x786E;&#x8BA4;&#x7A97;&#x53E3;">
+    <Grid Background="#F6F7F9">
+      <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <ScrollViewer VerticalScrollBarVisibility="Auto"
+                      HorizontalScrollBarVisibility="Disabled">
+            <StackPanel>
+                <TextBlock x:Name="OfficialUninstallFinalConsentTitleTextBlock"
+                           AutomationProperties.AutomationId="OfficialUninstallFinalConsentTitleTextBlock"
+                           Text="{Binding Title}"
+                           FontSize="26"
+                           FontWeight="SemiBold"
+                           Foreground="#111827"
+                           TextWrapping="Wrap"/>
+                <TextBlock x:Name="OfficialUninstallFinalConsentSoftwareTextBlock"
+                           AutomationProperties.AutomationId="OfficialUninstallFinalConsentSoftwareTextBlock"
+                           Text="{Binding SoftwareName}"
+                           FontSize="20"
+                           FontWeight="SemiBold"
+                           Foreground="#1D4ED8"
+                           TextWrapping="Wrap"
+                           Margin="0,10,0,0"/>
+                <TextBlock x:Name="OfficialUninstallFinalConsentSummaryTextBlock"
+                           AutomationProperties.AutomationId="OfficialUninstallFinalConsentSummaryTextBlock"
+                           Text="{Binding Summary}"
+                           Foreground="#4B5563"
+                           TextWrapping="Wrap"
+                           Margin="0,8,0,0"/>
+
+                <Border Background="White"
+                        BorderBrush="#E5E7EB"
+                        BorderThickness="1"
+                        CornerRadius="8"
+                        Padding="16"
+                        Margin="0,16,0,0">
+                    <StackPanel>
+                        <TextBlock Text="&#x786E;&#x8BA4;&#x524D;&#x5148;&#x770B;&#x6E05;&#x5F71;&#x54CD;"
+                                   FontSize="17"
+                                   FontWeight="SemiBold"
+                                   Foreground="#111827"/>
+                        <ListBox x:Name="OfficialUninstallFinalConsentImpactListBox"
+                                 AutomationProperties.AutomationId="OfficialUninstallFinalConsentImpactListBox"
+                                 ItemsSource="{Binding ImpactLines}"
+                                 BorderThickness="0"
+                                 Background="Transparent"
+                                 IsHitTestVisible="False"
+                                 Focusable="False"
+                                 HorizontalContentAlignment="Stretch"
+                                 ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                 Margin="0,6,0,0">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Margin="0,4,0,0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="&#x2022;" Foreground="#4B5563" Margin="0,0,7,0"/>
+                                        <TextBlock Grid.Column="1" Text="{Binding}" Foreground="#374151" TextWrapping="Wrap"/>
+                                    </Grid>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </StackPanel>
+                </Border>
+
+                <Border Background="#EFF6FF"
+                        BorderBrush="#60A5FA"
+                        BorderThickness="1"
+                        CornerRadius="8"
+                        Padding="16"
+                        Margin="0,14,0,0">
+                    <StackPanel>
+                        <CheckBox x:Name="OfficialUninstallFinalConsentCommandCheckBox"
+                                  AutomationProperties.AutomationId="OfficialUninstallFinalConsentCommandCheckBox"
+                                  Content="&#x6211;&#x5DF2;&#x5173;&#x95ED;&#x8F6F;&#x4EF6;&#x548C;&#x6258;&#x76D8;&#xFF0C;&#x5E76;&#x786E;&#x8BA4;&#x5C06;&#x6253;&#x5F00;&#x5B98;&#x65B9;&#x5378;&#x8F7D;&#x5668;"
+                                  Foreground="#1F2937"
+                                  Checked="Acknowledgement_Changed"
+                                  Unchecked="Acknowledgement_Changed"/>
+                        <CheckBox x:Name="OfficialUninstallFinalConsentUndoCheckBox"
+                                  AutomationProperties.AutomationId="OfficialUninstallFinalConsentUndoCheckBox"
+                                  Content="&#x6211;&#x660E;&#x767D;&#x5378;&#x8F7D;&#x8F6F;&#x4EF6;&#x672C;&#x8EAB;&#x4E0D;&#x80FD;&#x9760;&#x9694;&#x79BB;&#x533A;&#x6062;&#x590D;"
+                                  Foreground="#1F2937"
+                                  Margin="0,12,0,0"
+                                  Checked="Acknowledgement_Changed"
+                                  Unchecked="Acknowledgement_Changed"/>
+                        <CheckBox x:Name="OfficialUninstallFinalConsentPostScanCheckBox"
+                                  AutomationProperties.AutomationId="OfficialUninstallFinalConsentPostScanCheckBox"
+                                  Content="&#x6211;&#x540C;&#x610F;&#x5378;&#x8F7D;&#x7ED3;&#x675F;&#x540E;&#x8FDB;&#x884C;&#x53EA;&#x8BFB;&#x590D;&#x67E5;"
+                                  Foreground="#1F2937"
+                                  Margin="0,12,0,0"
+                                  Checked="Acknowledgement_Changed"
+                                  Unchecked="Acknowledgement_Changed"/>
+                        <TextBlock x:Name="OfficialUninstallFinalConsentReadinessTextBlock"
+                                   AutomationProperties.AutomationId="OfficialUninstallFinalConsentReadinessTextBlock"
+                                   Text="&#x8FD8;&#x9700;&#x786E;&#x8BA4; 3 &#x9879;"
+                                   Foreground="#1E3A8A"
+                                   FontWeight="SemiBold"
+                                   TextWrapping="Wrap"
+                                   Margin="0,14,0,0"/>
+                    </StackPanel>
+                </Border>
+
+                <TextBlock x:Name="OfficialUninstallFinalConsentSafetyTextBlock"
+                           AutomationProperties.AutomationId="OfficialUninstallFinalConsentSafetyTextBlock"
+                           Text="{Binding SafetyText}"
+                           Foreground="#166534"
+                           FontWeight="SemiBold"
+                           TextWrapping="Wrap"
+                           Margin="0,14,0,8"/>
+            </StackPanel>
+        </ScrollViewer>
+
+        <Grid Grid.Row="1" Margin="0,16,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <Button x:Name="OfficialUninstallFinalConsentCancelButton"
+                    Grid.Column="1"
+                    AutomationProperties.AutomationId="OfficialUninstallFinalConsentCancelButton"
+                    Content="&#x53D6;&#x6D88;"
+                    MinWidth="100"
+                    Height="38"
+                    Padding="16,0"
+                    Margin="0,0,10,0"
+                    IsCancel="True"
+                    Click="Cancel_Click"/>
+            <Button x:Name="OfficialUninstallFinalConsentConfirmButton"
+                    Grid.Column="2"
+                    AutomationProperties.AutomationId="OfficialUninstallFinalConsentConfirmButton"
+                    Content="&#x786E;&#x8BA4;&#x5E76;&#x7EE7;&#x7EED;"
+                    MinWidth="140"
+                    Height="38"
+                    Padding="16,0"
+                    IsEnabled="False"
+                    IsDefault="True"
+                    Click="Confirm_Click"/>
+        </Grid>
+      </Grid>
+    </Grid>
+</Window>

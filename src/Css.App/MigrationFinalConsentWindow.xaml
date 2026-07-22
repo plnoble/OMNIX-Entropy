@@ -1,0 +1,162 @@
+<Window x:Class="Css.App.MigrationFinalConsentWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="&#x8fc1;&#x79fb;&#x524d;&#x6700;&#x540e;&#x786e;&#x8ba4;"
+        Height="680"
+        Width="720"
+        MinHeight="600"
+        MinWidth="640"
+        Background="#F6F7F9"
+        WindowStartupLocation="CenterOwner"
+        AutomationProperties.Name="&#x8fc1;&#x79fb;&#x524d;&#x6700;&#x540e;&#x786e;&#x8ba4;&#x7a97;&#x53e3;">
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <ScrollViewer VerticalScrollBarVisibility="Auto"
+                      HorizontalScrollBarVisibility="Disabled">
+            <StackPanel>
+                <TextBlock x:Name="MigrationFinalConsentTitleTextBlock"
+                           AutomationProperties.AutomationId="MigrationFinalConsentTitleTextBlock"
+                           Text="{Binding Title}"
+                           FontSize="26"
+                           FontWeight="SemiBold"
+                           Foreground="#111827"
+                           TextWrapping="Wrap"/>
+                <TextBlock x:Name="MigrationFinalConsentSoftwareTextBlock"
+                           AutomationProperties.AutomationId="MigrationFinalConsentSoftwareTextBlock"
+                           Text="{Binding SoftwareName}"
+                           FontSize="20"
+                           FontWeight="SemiBold"
+                           Foreground="#1D4ED8"
+                           TextWrapping="Wrap"
+                           Margin="0,10,0,0"/>
+                <TextBlock x:Name="MigrationFinalConsentSummaryTextBlock"
+                           AutomationProperties.AutomationId="MigrationFinalConsentSummaryTextBlock"
+                           Text="{Binding Summary}"
+                           Foreground="#4B5563"
+                           TextWrapping="Wrap"
+                           Margin="0,8,0,0"/>
+
+                <Border Background="White"
+                        BorderBrush="#E5E7EB"
+                        BorderThickness="1"
+                        CornerRadius="8"
+                        Padding="16"
+                        Margin="0,16,0,0">
+                    <StackPanel>
+                        <TextBlock Text="&#x8fd9;&#x6b21;&#x4f1a;&#x53d1;&#x751f;&#x4ec0;&#x4e48;"
+                                   FontSize="17"
+                                   FontWeight="SemiBold"
+                                   Foreground="#111827"/>
+                        <ListBox x:Name="MigrationFinalConsentImpactListBox"
+                                 AutomationProperties.AutomationId="MigrationFinalConsentImpactListBox"
+                                 ItemsSource="{Binding ImpactLines}"
+                                 BorderThickness="0"
+                                 Background="Transparent"
+                                 IsHitTestVisible="False"
+                                 Focusable="False"
+                                 HorizontalContentAlignment="Stretch"
+                                 ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                 Margin="0,6,0,0">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Margin="0,4,0,0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="&#x2022;" Foreground="#4B5563" Margin="0,0,7,0"/>
+                                        <TextBlock Grid.Column="1" Text="{Binding}" Foreground="#374151" TextWrapping="Wrap"/>
+                                    </Grid>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </StackPanel>
+                </Border>
+
+                <Border Background="#EFF6FF"
+                        BorderBrush="#60A5FA"
+                        BorderThickness="1"
+                        CornerRadius="8"
+                        Padding="16"
+                        Margin="0,14,0,0">
+                    <StackPanel>
+                        <CheckBox x:Name="MigrationFinalConsentPlanCheckBox"
+                                  AutomationProperties.AutomationId="MigrationFinalConsentPlanCheckBox"
+                                  Content="&#x6211;&#x5df2;&#x770b;&#x8fc7;&#x76ee;&#x6807;&#x4f4d;&#x7f6e;&#x548c;&#x9884;&#x8ba1;&#x5904;&#x7406;&#x5185;&#x5bb9;"
+                                  Foreground="#1F2937"
+                                  Checked="Acknowledgement_Changed"
+                                  Unchecked="Acknowledgement_Changed"/>
+                        <CheckBox x:Name="MigrationFinalConsentClosedCheckBox"
+                                  AutomationProperties.AutomationId="MigrationFinalConsentClosedCheckBox"
+                                  Content="&#x6211;&#x5df2;&#x5173;&#x95ed;&#x8f6f;&#x4ef6;&#x7a97;&#x53e3;&#x548c;&#x6258;&#x76d8;&#x7a0b;&#x5e8f;"
+                                  Foreground="#1F2937"
+                                  Margin="0,12,0,0"
+                                  Checked="Acknowledgement_Changed"
+                                  Unchecked="Acknowledgement_Changed"/>
+                        <CheckBox x:Name="MigrationFinalConsentRollbackCheckBox"
+                                  AutomationProperties.AutomationId="MigrationFinalConsentRollbackCheckBox"
+                                  Content="&#x6211;&#x660e;&#x767d;&#x5931;&#x8d25;&#x65f6;&#x4f1a;&#x5c1d;&#x8bd5;&#x56de;&#x6eda;&#xff0c;&#x56de;&#x6eda;&#x4e0d;&#x5b8c;&#x6574;&#x65f6;&#x5fc5;&#x987b;&#x505c;&#x6b62;"
+                                  Foreground="#1F2937"
+                                  Margin="0,12,0,0"
+                                  Checked="Acknowledgement_Changed"
+                                  Unchecked="Acknowledgement_Changed"/>
+                        <CheckBox x:Name="MigrationFinalConsentMonitoringCheckBox"
+                                  AutomationProperties.AutomationId="MigrationFinalConsentMonitoringCheckBox"
+                                  Content="&#x6211;&#x540c;&#x610f;&#x8fc1;&#x79fb;&#x540e;&#x7ee7;&#x7eed;&#x89c2;&#x5bdf;&#x539f; C &#x76d8;&#x4f4d;&#x7f6e;"
+                                  Foreground="#1F2937"
+                                  Margin="0,12,0,0"
+                                  Checked="Acknowledgement_Changed"
+                                  Unchecked="Acknowledgement_Changed"/>
+                        <TextBlock x:Name="MigrationFinalConsentReadinessTextBlock"
+                                   AutomationProperties.AutomationId="MigrationFinalConsentReadinessTextBlock"
+                                   Text="&#x8fd8;&#x9700;&#x786e;&#x8ba4; 4 &#x9879;"
+                                   Foreground="#1E3A8A"
+                                   FontWeight="SemiBold"
+                                   TextWrapping="Wrap"
+                                   Margin="0,14,0,0"/>
+                    </StackPanel>
+                </Border>
+
+                <TextBlock x:Name="MigrationFinalConsentSafetyTextBlock"
+                           AutomationProperties.AutomationId="MigrationFinalConsentSafetyTextBlock"
+                           Text="{Binding SafetyText}"
+                           Foreground="#166534"
+                           FontWeight="SemiBold"
+                           TextWrapping="Wrap"
+                           Margin="0,14,0,8"/>
+            </StackPanel>
+        </ScrollViewer>
+
+        <Grid Grid.Row="1" Margin="0,16,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <Button x:Name="MigrationFinalConsentCancelButton"
+                    Grid.Column="1"
+                    AutomationProperties.AutomationId="MigrationFinalConsentCancelButton"
+                    Content="&#x53d6;&#x6d88;"
+                    MinWidth="100"
+                    Height="38"
+                    Padding="16,0"
+                    Margin="0,0,10,0"
+                    IsCancel="True"
+                    Click="Cancel_Click"/>
+            <Button x:Name="MigrationFinalConsentConfirmButton"
+                    Grid.Column="2"
+                    AutomationProperties.AutomationId="MigrationFinalConsentConfirmButton"
+                    Content="&#x786e;&#x8ba4;&#x5e76;&#x8bf7;&#x6c42;&#x8fc1;&#x79fb;"
+                    MinWidth="160"
+                    Height="38"
+                    Padding="16,0"
+                    IsEnabled="False"
+                    IsDefault="True"
+                    Click="Confirm_Click"/>
+        </Grid>
+    </Grid>
+</Window>

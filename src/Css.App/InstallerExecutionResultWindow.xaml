@@ -1,0 +1,106 @@
+<Window x:Class="Css.App.InstallerExecutionResultWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="安装状态"
+        Width="700"
+        Height="560"
+        MinWidth="620"
+        MinHeight="500"
+        WindowStartupLocation="CenterOwner"
+        Background="#F7F8FA"
+        AutomationProperties.Name="安装状态窗口">
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <ScrollViewer VerticalScrollBarVisibility="Auto"
+                      HorizontalScrollBarVisibility="Disabled">
+            <StackPanel>
+                <TextBlock x:Name="InstallerExecutionResultTitleTextBlock"
+                           AutomationProperties.AutomationId="InstallerExecutionResultTitleTextBlock"
+                           Text="{Binding Title}"
+                           FontSize="26"
+                           FontWeight="SemiBold"
+                           Foreground="#111827"
+                           TextWrapping="Wrap"/>
+                <TextBlock x:Name="InstallerExecutionResultStatusTextBlock"
+                           AutomationProperties.AutomationId="InstallerExecutionResultStatusTextBlock"
+                           Text="{Binding StatusLabel}"
+                           FontWeight="SemiBold"
+                           Foreground="#1D4ED8"
+                           TextWrapping="Wrap"
+                           Margin="0,12,0,0"/>
+                <TextBlock x:Name="InstallerExecutionResultConclusionTextBlock"
+                           AutomationProperties.AutomationId="InstallerExecutionResultConclusionTextBlock"
+                           Text="{Binding Conclusion}"
+                           FontSize="16"
+                           Foreground="#1F2937"
+                           TextWrapping="Wrap"
+                           Margin="0,14,0,0"/>
+                <TextBlock Text="Computer Agent 建议"
+                           FontSize="17"
+                           FontWeight="SemiBold"
+                           Foreground="#111827"
+                           Margin="0,22,0,0"/>
+                <TextBlock x:Name="InstallerExecutionResultAgentAdviceTextBlock"
+                           AutomationProperties.AutomationId="InstallerExecutionResultAgentAdviceTextBlock"
+                           Text="{Binding AgentAdvice}"
+                           Foreground="#374151"
+                           TextWrapping="Wrap"
+                           Margin="0,8,0,0"/>
+                <ListBox x:Name="InstallerExecutionResultNextStepsListBox"
+                         AutomationProperties.AutomationId="InstallerExecutionResultNextStepsListBox"
+                         ItemsSource="{Binding NextSteps}"
+                         BorderThickness="0"
+                         Background="Transparent"
+                         IsHitTestVisible="False"
+                         Focusable="False"
+                         HorizontalContentAlignment="Stretch"
+                         ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                         Margin="0,8,0,0">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <Grid Margin="0,4,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="18"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="&#x2022;" Foreground="#4B5563"/>
+                                <TextBlock Grid.Column="1" Text="{Binding}" Foreground="#374151" TextWrapping="Wrap"/>
+                            </Grid>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+                <TextBlock x:Name="InstallerExecutionResultSafetyTextBlock"
+                           AutomationProperties.AutomationId="InstallerExecutionResultSafetyTextBlock"
+                           Text="{Binding SafetyText}"
+                           Foreground="#166534"
+                           FontWeight="SemiBold"
+                           TextWrapping="Wrap"
+                           Margin="0,18,0,8"/>
+            </StackPanel>
+        </ScrollViewer>
+
+        <StackPanel Grid.Row="1"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Right">
+            <Button x:Name="InstallerExecutionResultPostScanRetryButton"
+                    AutomationProperties.AutomationId="InstallerExecutionResultPostScanRetryButton"
+                    Content="{Binding PostScanRetryButtonText}"
+                    MinWidth="190"
+                    Height="38"
+                    Margin="0,16,10,0"
+                    Visibility="Collapsed"
+                    Click="PostScanRetry_Click"/>
+            <Button x:Name="InstallerExecutionResultCloseButton"
+                    AutomationProperties.AutomationId="InstallerExecutionResultCloseButton"
+                    Content="{Binding CloseButtonText}"
+                    Width="120"
+                    Height="38"
+                    Margin="0,16,0,0"
+                    Click="Close_Click"/>
+        </StackPanel>
+    </Grid>
+</Window>

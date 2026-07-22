@@ -1,0 +1,38 @@
+using System.Collections.Generic;
+using Css.Core.Software;
+
+namespace Css.Core.Apps;
+
+public sealed class UninstallWorkflowGuideViewModel
+{
+    public required IReadOnlyList<string> Steps { get; init; }
+    public required IReadOnlyList<string> DrawerLines { get; init; }
+    public required string SafetyLine { get; init; }
+}
+
+public static class UninstallWorkflowGuidePresenter
+{
+    public static UninstallWorkflowGuideViewModel Create(SoftwareProfile profile)
+    {
+        var intro = string.IsNullOrWhiteSpace(profile.UninstallCommand)
+            ? "\u53ea\u9884\u89c8\uff1a\u672a\u53d1\u73b0\u5b98\u65b9\u5378\u8f7d\u5668\uff0cOMNIX-Entropy \u4e0d\u4f1a\u731c\u6d4b\u5378\u8f7d\u65b9\u5f0f\u3002"
+            : "\u53ea\u9884\u89c8\uff1a\u4e0b\u9762\u662f\u201c\u5378\u8f7d\u5e72\u51c0\u70b9\u201d\u7684\u5b89\u5168\u6d41\u7a0b\uff0c\u4e0d\u4f1a\u4ece\u62bd\u5c49\u76f4\u63a5\u8fd0\u884c\u5378\u8f7d\u5668\u3002";
+
+        IReadOnlyList<string> steps =
+        [
+            "\u5148\u770b\u6e05\u5b98\u65b9\u5378\u8f7d\u5668\uff1a\u786e\u8ba4\u5b83\u6765\u81ea\u8fd9\u4e2a\u8f6f\u4ef6\uff0c\u4e0d\u4ece\u62bd\u5c49\u76f4\u63a5\u8fd0\u884c\u3002",
+            "\u5148\u5173\u95ed\u8f6f\u4ef6\uff1a\u5173\u95ed\u7a97\u53e3\u3001\u6258\u76d8\u548c\u76f8\u5173\u540e\u53f0\u8fdb\u7a0b\u3002",
+            "\u4ee5\u540e\u53ea\u6709\u5728\u6700\u7ec8\u786e\u8ba4\u540e\uff0c\u624d\u5141\u8bb8\u8bf7\u6c42\u8fd0\u884c\u5b98\u65b9\u5378\u8f7d\u5668\u3002",
+            "\u5378\u8f7d\u5b8c\u6210\u540e\u56de\u5230\u201c\u5378\u8f7d\u540e\u68c0\u67e5\u6b8b\u7559\u201d\uff0c\u91cd\u65b0\u626b\u63cf\u662f\u5426\u8fd8\u5728\u3002",
+            "\u53ea\u628a\u4f4e\u98ce\u9669\u7f13\u5b58/\u65e5\u5fd7\u6b8b\u7559\u79fb\u52a8\u5230\u9694\u79bb\u533a\uff0c\u65b9\u4fbf\u540e\u6094\u836f\u4e2d\u5fc3\u8fd8\u539f\u3002",
+            "\u4e2d/\u9ad8\u98ce\u9669\u6b8b\u7559\u53ea\u89e3\u91ca\u548c\u6807\u8bb0\uff0c\u4e0d\u4f1a\u81ea\u52a8\u5904\u7406\u3002"
+        ];
+
+        return new UninstallWorkflowGuideViewModel
+        {
+            Steps = steps,
+            DrawerLines = [intro, ..steps],
+            SafetyLine = "\u5b89\u5168\u8fb9\u754c\uff1a\u5f53\u524d\u7248\u672c\u53ea\u751f\u6210\u65b9\u6848\uff1b\u4e0d\u8fd0\u884c\u5378\u8f7d\u5668\uff0c\u4e0d\u5220\u6587\u4ef6\uff0c\u4e0d\u6539\u670d\u52a1/\u81ea\u542f/\u6ce8\u518c\u8868\u3002"
+        };
+    }
+}

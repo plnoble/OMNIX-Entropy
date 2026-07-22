@@ -1,0 +1,123 @@
+<Window x:Class="Css.App.InstallerFinalConsentWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="安装前最后确认"
+        Width="720"
+        Height="650"
+        MinWidth="640"
+        MinHeight="580"
+        WindowStartupLocation="CenterOwner"
+        Background="#F7F8FA"
+        AutomationProperties.Name="安装前最后确认窗口">
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <ScrollViewer VerticalScrollBarVisibility="Auto"
+                      HorizontalScrollBarVisibility="Disabled">
+            <StackPanel>
+                <TextBlock x:Name="InstallerFinalConsentTitleTextBlock"
+                           AutomationProperties.AutomationId="InstallerFinalConsentTitleTextBlock"
+                           Text="{Binding Title}"
+                           FontSize="26"
+                           FontWeight="SemiBold"
+                           Foreground="#111827"
+                           TextWrapping="Wrap"/>
+                <TextBlock x:Name="InstallerFinalConsentHeadlineTextBlock"
+                           AutomationProperties.AutomationId="InstallerFinalConsentHeadlineTextBlock"
+                           Text="{Binding Headline}"
+                           FontSize="18"
+                           FontWeight="SemiBold"
+                           Foreground="#1D4ED8"
+                           TextWrapping="Wrap"
+                           Margin="0,10,0,0"/>
+                <TextBlock x:Name="InstallerFinalConsentPublisherTextBlock"
+                           AutomationProperties.AutomationId="InstallerFinalConsentPublisherTextBlock"
+                           Text="{Binding PublisherText}"
+                           Foreground="#374151"
+                           TextWrapping="Wrap"
+                           Margin="0,14,0,0"/>
+                <TextBlock x:Name="InstallerFinalConsentTargetTextBlock"
+                           AutomationProperties.AutomationId="InstallerFinalConsentTargetTextBlock"
+                           Text="{Binding TargetText}"
+                           FontWeight="SemiBold"
+                           Foreground="#111827"
+                           TextWrapping="Wrap"
+                           Margin="0,7,0,0"/>
+                <TextBlock x:Name="InstallerFinalConsentLocationWarningTextBlock"
+                           AutomationProperties.AutomationId="InstallerFinalConsentLocationWarningTextBlock"
+                           Text="{Binding LocationWarning}"
+                           Foreground="#92400E"
+                           TextWrapping="Wrap"
+                           Margin="0,10,0,0"/>
+
+                <StackPanel Margin="0,22,0,0">
+                    <CheckBox x:Name="InstallerConsentPackageCheckBox"
+                              AutomationProperties.AutomationId="InstallerConsentPackageCheckBox"
+                              Content="{Binding PackageAcknowledgement}"
+                              Foreground="#1F2937"
+                              Checked="Acknowledgement_Changed"
+                              Unchecked="Acknowledgement_Changed"/>
+                    <CheckBox x:Name="InstallerConsentLocationCheckBox"
+                              AutomationProperties.AutomationId="InstallerConsentLocationCheckBox"
+                              Content="{Binding LocationAcknowledgement}"
+                              Foreground="#1F2937"
+                              Margin="0,14,0,0"
+                              Checked="Acknowledgement_Changed"
+                              Unchecked="Acknowledgement_Changed"/>
+                    <CheckBox x:Name="InstallerConsentInteractionCheckBox"
+                              AutomationProperties.AutomationId="InstallerConsentInteractionCheckBox"
+                              Content="{Binding InteractionAcknowledgement}"
+                              Foreground="#1F2937"
+                              Margin="0,14,0,0"
+                              Checked="Acknowledgement_Changed"
+                              Unchecked="Acknowledgement_Changed"/>
+                    <CheckBox x:Name="InstallerConsentReportCheckBox"
+                              AutomationProperties.AutomationId="InstallerConsentReportCheckBox"
+                              Content="{Binding ReportAcknowledgement}"
+                              Foreground="#1F2937"
+                              Margin="0,14,0,0"
+                              Checked="Acknowledgement_Changed"
+                              Unchecked="Acknowledgement_Changed"/>
+                    <TextBlock x:Name="InstallerFinalConsentReadinessTextBlock"
+                               AutomationProperties.AutomationId="InstallerFinalConsentReadinessTextBlock"
+                               Text="还需确认 4 项"
+                               FontWeight="SemiBold"
+                               Foreground="#1E3A8A"
+                               TextWrapping="Wrap"
+                               Margin="0,18,0,0"/>
+                </StackPanel>
+            </StackPanel>
+        </ScrollViewer>
+
+        <Grid Grid.Row="1" Margin="0,16,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <Button x:Name="InstallerFinalConsentCancelButton"
+                    AutomationProperties.AutomationId="InstallerFinalConsentCancelButton"
+                    Grid.Column="1"
+                    Content="{Binding CancelButtonText}"
+                    MinWidth="110"
+                    Height="38"
+                    Margin="0,0,10,0"
+                    Padding="16,0"
+                    IsCancel="True"
+                    Click="Cancel_Click"/>
+            <Button x:Name="InstallerFinalConsentConfirmButton"
+                    AutomationProperties.AutomationId="InstallerFinalConsentConfirmButton"
+                    Grid.Column="2"
+                    Content="{Binding ConfirmButtonText}"
+                    MinWidth="150"
+                    Height="38"
+                    Padding="16,0"
+                    IsDefault="True"
+                    IsEnabled="False"
+                    Click="Confirm_Click"/>
+        </Grid>
+    </Grid>
+</Window>

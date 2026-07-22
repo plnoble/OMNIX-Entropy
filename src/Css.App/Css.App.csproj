@@ -1,0 +1,70 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\Css.Core\Css.Core.csproj" />
+    <ProjectReference Include="..\Css.Win32\Css.Win32.csproj" />
+    <ProjectReference Include="..\Css.Rules\Css.Rules.csproj" />
+    <ProjectReference Include="..\Css.Scanner\Css.Scanner.csproj" />
+    <ProjectReference Include="..\Css.InstallGuard\Css.InstallGuard.csproj" />
+    <ProjectReference Include="..\Css.Ipc\Css.Ipc.csproj" />
+    <ProjectReference Include="..\Css.Agent\Css.Agent.csproj" />
+    <ProjectReference Include="..\Css.Snapshot\Css.Snapshot.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.9" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.9" />
+    <PackageReference Include="Serilog.Extensions.Hosting" Version="10.0.0" />
+    <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="rules.scan.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+    <Version>0.1.0</Version>
+    <ElevatedWorkerProject>$(MSBuildProjectDirectory)\..\Css.Elevated\Css.Elevated.csproj</ElevatedWorkerProject>
+    <ElevatedWorkerOutput>$(MSBuildProjectDirectory)\..\Css.Elevated\bin\$(Configuration)\net8.0-windows</ElevatedWorkerOutput>
+  </PropertyGroup>
+
+  <Target Name="BuildAndCopyElevatedWorker" AfterTargets="Build"
+          Condition="'$(DesignTimeBuild)' != 'true'">
+    <MSBuild Projects="$(ElevatedWorkerProject)"
+             Targets="Build"
+             BuildInParallel="false"
+             Properties="Configuration=$(Configuration);TargetFramework=net8.0-windows;UseSharedCompilation=$(UseSharedCompilation)" />
+    <ItemGroup>
+      <_ElevatedWorkerFiles Include="$(ElevatedWorkerOutput)\Css.Elevated.exe" />
+      <_ElevatedWorkerFiles Include="$(ElevatedWorkerOutput)\Css.Elevated.dll" />
+      <_ElevatedWorkerFiles Include="$(ElevatedWorkerOutput)\Css.Elevated.deps.json" />
+      <_ElevatedWorkerFiles Include="$(ElevatedWorkerOutput)\Css.Elevated.runtimeconfig.json" />
+    </ItemGroup>
+    <Error Condition="!Exists('$(ElevatedWorkerOutput)\Css.Elevated.exe')"
+           Text="The fake-only elevated worker was not built for $(Configuration)." />
+    <Copy SourceFiles="@(_ElevatedWorkerFiles)"
+          DestinationFolder="$(OutDir)"
+          SkipUnchangedFiles="true" />
+  </Target>
+
+  <Target Name="CopyElevatedWorkerToPublish" AfterTargets="Publish"
+          Condition="'$(DesignTimeBuild)' != 'true' and '$(PublishDir)' != ''">
+    <ItemGroup>
+      <_ElevatedWorkerPublishFiles Include="$(ElevatedWorkerOutput)\Css.Elevated.exe" />
+      <_ElevatedWorkerPublishFiles Include="$(ElevatedWorkerOutput)\Css.Elevated.dll" />
+      <_ElevatedWorkerPublishFiles Include="$(ElevatedWorkerOutput)\Css.Elevated.deps.json" />
+      <_ElevatedWorkerPublishFiles Include="$(ElevatedWorkerOutput)\Css.Elevated.runtimeconfig.json" />
+    </ItemGroup>
+    <Copy SourceFiles="@(_ElevatedWorkerPublishFiles)"
+          DestinationFolder="$(PublishDir)"
+          SkipUnchangedFiles="true" />
+  </Target>
+
+</Project>

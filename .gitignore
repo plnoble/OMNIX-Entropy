@@ -1,0 +1,58 @@
+# .NET build output
+bin/
+obj/
+[Bb]in/
+[Oo]bj/
+*.user
+*.suo
+.vs/
+*.lock.json
+
+# NuGet
+*.nupkg
+*.snupkg
+.nuget/
+
+# Test results
+TestResults/
+[Tt]est[Rr]esult*/
+
+# Logs
+*.log
+logs/
+
+# IDE
+.idea/
+*.swp
+
+# Runtime / local data
+*.db
+*.db-shm
+*.db-wal
+/quarantine/
+/CssQuarantine/
+appsettings.*.Local.json
+*.local.json
+
+# Reproducible local test packages
+.artifacts/
+
+# Local agent evidence and machine-specific QA output
+.omx/*
+!.omx/development/
+!.omx/development/**
+!.omx/verify-source-integrity.ps1
+
+# Signing material must never enter the public repository
+*.pfx
+*.p12
+*.pvk
+*.snk
+*.key
+*.cer
+*.crt
+
+# Local release authentication/configuration
+.env
+.env.*
+!.env.example

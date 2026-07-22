@@ -1,0 +1,573 @@
+<Window x:Class="Css.App.UninstallPlanWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="&#x5378;&#x8F7D;&#x5B89;&#x5168;&#x65B9;&#x6848;"
+        Height="660"
+        Width="760"
+        MinHeight="560"
+        MinWidth="680"
+        Background="#F6F7F9"
+        WindowStartupLocation="CenterOwner"
+        AutomationProperties.Name="&#x5378;&#x8F7D;&#x5B89;&#x5168;&#x65B9;&#x6848;&#x7A97;&#x53E3;">
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel>
+            <TextBlock x:Name="UninstallPlanTitleTextBlock"
+                       AutomationProperties.AutomationId="UninstallPlanTitleTextBlock"
+                       Text="{Binding Title}"
+                       FontSize="28"
+                       FontWeight="SemiBold"
+                       Foreground="#111827"/>
+            <TextBlock x:Name="UninstallPlanSummaryTextBlock"
+                       AutomationProperties.AutomationId="UninstallPlanSummaryTextBlock"
+                       Text="{Binding Summary}"
+                       FontSize="15"
+                       Foreground="#4B5563"
+                       TextWrapping="Wrap"
+                       Margin="0,8,0,0"/>
+            <Border Background="#FEF3C7"
+                    BorderBrush="#F59E0B"
+                    BorderThickness="1"
+                    CornerRadius="8"
+                    Padding="12"
+                    Margin="0,14,0,0">
+                <TextBlock x:Name="UninstallPlanSafetyTextBlock"
+                           AutomationProperties.AutomationId="UninstallPlanSafetyTextBlock"
+                           Text="{Binding RecoveryAssessment.SafetyBoundary}"
+                           Foreground="#78350F"
+                           FontWeight="SemiBold"
+                           TextWrapping="Wrap"/>
+            </Border>
+            <Border Background="#EFF6FF"
+                    BorderBrush="#60A5FA"
+                    BorderThickness="1"
+                    CornerRadius="8"
+                    Padding="12"
+                    Margin="0,10,0,0">
+                <StackPanel>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock x:Name="UninstallPlanProductionReadinessTitleTextBlock"
+                                   AutomationProperties.AutomationId="UninstallPlanProductionReadinessTitleTextBlock"
+                                   FontWeight="SemiBold"
+                                   Foreground="#1E3A8A"
+                                   TextWrapping="Wrap"/>
+                        <TextBlock x:Name="UninstallPlanProductionReadinessStatusTextBlock"
+                                   Grid.Column="1"
+                                   AutomationProperties.AutomationId="UninstallPlanProductionReadinessStatusTextBlock"
+                                   Foreground="#1E40AF"
+                                   FontWeight="SemiBold"
+                                   Margin="12,0,0,0"/>
+                    </Grid>
+                    <TextBlock x:Name="UninstallPlanProductionReadinessConclusionTextBlock"
+                               AutomationProperties.AutomationId="UninstallPlanProductionReadinessConclusionTextBlock"
+                               Foreground="#1F2937"
+                               TextWrapping="Wrap"
+                               Margin="0,6,0,0"/>
+                    <TextBlock x:Name="UninstallPlanProductionReadinessNextStepTextBlock"
+                               AutomationProperties.AutomationId="UninstallPlanProductionReadinessNextStepTextBlock"
+                               Foreground="#374151"
+                               TextWrapping="Wrap"
+                               Margin="0,4,0,0"/>
+                    <TextBlock x:Name="UninstallPlanProductionReadinessSafetyTextBlock"
+                               AutomationProperties.AutomationId="UninstallPlanProductionReadinessSafetyTextBlock"
+                               Foreground="#1E3A8A"
+                               TextWrapping="Wrap"
+                               Margin="0,4,0,0"/>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+
+        <ScrollViewer Grid.Row="1"
+                      VerticalScrollBarVisibility="Auto"
+                      HorizontalScrollBarVisibility="Disabled"
+                      Margin="0,16,0,16">
+            <StackPanel>
+                <Border Background="#EFF6FF"
+                        BorderBrush="#60A5FA"
+                        BorderThickness="1"
+                        CornerRadius="8"
+                        Padding="16"
+                        Margin="0,0,0,12">
+                    <StackPanel>
+                        <TextBlock Text="Agent &#x7ED3;&#x8BBA;"
+                                   FontSize="18"
+                                   FontWeight="SemiBold"
+                                   Foreground="#111827"/>
+                        <TextBlock x:Name="UninstallPlanAgentConclusionTextBlock"
+                                   AutomationProperties.AutomationId="UninstallPlanAgentConclusionTextBlock"
+                                   Text="{Binding DecisionSummary.Conclusion}"
+                                   Foreground="#1D4ED8"
+                                   FontWeight="SemiBold"
+                                   TextWrapping="Wrap"
+                                   Margin="0,10,0,0"/>
+                        <TextBlock x:Name="UninstallPlanUndoHeadlineTextBlock"
+                                   AutomationProperties.AutomationId="UninstallPlanUndoHeadlineTextBlock"
+                                   Text="{Binding DecisionSummary.ProcessSummary}"
+                                   Foreground="#111827"
+                                   TextWrapping="Wrap"
+                                   Margin="0,8,0,0"/>
+                        <TextBlock x:Name="UninstallPlanDecisionResidueTextBlock"
+                                   AutomationProperties.AutomationId="UninstallPlanDecisionResidueTextBlock"
+                                   Text="{Binding DecisionSummary.ResidueSummary}"
+                                   Foreground="#374151"
+                                   TextWrapping="Wrap"
+                                   Margin="0,6,0,0"/>
+                        <TextBlock x:Name="UninstallPlanDecisionUndoTextBlock"
+                                   AutomationProperties.AutomationId="UninstallPlanDecisionUndoTextBlock"
+                                   Text="{Binding DecisionSummary.UndoSummary}"
+                                   Foreground="#374151"
+                                   TextWrapping="Wrap"
+                                   Margin="0,6,0,0"/>
+                        <TextBlock x:Name="UninstallPlanDecisionNextStepTextBlock"
+                                   AutomationProperties.AutomationId="UninstallPlanDecisionNextStepTextBlock"
+                                   Text="{Binding DecisionSummary.NextStep, StringFormat=&#x4E0B;&#x4E00;&#x6B65;&#xFF1A;{0}}"
+                                   Foreground="#111827"
+                                   FontWeight="SemiBold"
+                                   TextWrapping="Wrap"
+                                   Margin="0,8,0,0"/>
+                        <Expander x:Name="UninstallPlanPreparationExpander"
+                                  AutomationProperties.AutomationId="UninstallPlanPreparationExpander"
+                                  Header="&#x51C6;&#x5907;&#x5378;&#x8F7D;&#xFF08;&#x6B63;&#x5F0F;&#x7248;&#x53EF;&#x7528;&#xFF09;"
+                                  IsExpanded="False"
+                                  Foreground="#374151"
+                                  Margin="0,12,0,0">
+                            <StackPanel Margin="0,10,0,0">
+                        <Border Background="#DBEAFE"
+                                BorderBrush="#93C5FD"
+                                BorderThickness="1"
+                                CornerRadius="6"
+                                Padding="10"
+                                Margin="0,10,0,0">
+                            <StackPanel>
+                                <TextBlock x:Name="UninstallPlanReinstallReadinessTextBlock"
+                                           AutomationProperties.AutomationId="UninstallPlanReinstallReadinessTextBlock"
+                                           Text="{Binding ReinstallReadiness.StatusLabel, StringFormat=&#x6062;&#x590D;&#x51C6;&#x5907;&#xFF1A;{0}}"
+                                           Foreground="#1E3A8A"
+                                           FontWeight="SemiBold"
+                                           TextWrapping="Wrap"/>
+                                <TextBlock x:Name="UninstallPlanReinstallNextActionTextBlock"
+                                           AutomationProperties.AutomationId="UninstallPlanReinstallNextActionTextBlock"
+                                           Text="{Binding ReinstallReadiness.NextAction}"
+                                           Foreground="#374151"
+                                           TextWrapping="Wrap"
+                                           Margin="0,4,0,0"/>
+                                <TextBlock x:Name="UninstallPlanRestorePointStatusTextBlock"
+                                           AutomationProperties.AutomationId="UninstallPlanRestorePointStatusTextBlock"
+                                           Text="{Binding RecoveryPreparation.RestorePointStatus}"
+                                           Foreground="#374151"
+                                           TextWrapping="Wrap"
+                                           Margin="0,6,0,0"/>
+                                <WrapPanel Margin="0,8,0,0">
+                                    <Button x:Name="UninstallPlanChooseInstallerButton"
+                                            AutomationProperties.AutomationId="UninstallPlanChooseInstallerButton"
+                                            Content="&#x9009;&#x62E9;&#x5B98;&#x65B9;&#x5B89;&#x88C5;&#x5305;"
+                                            MinWidth="150"
+                                            Height="34"
+                                            Padding="14,0"
+                                            Click="ChooseInstaller_Click"/>
+                                    <CheckBox x:Name="UninstallPlanBackupCheckBox"
+                                              AutomationProperties.AutomationId="UninstallPlanBackupCheckBox"
+                                              Content="&#x6211;&#x5DF2;&#x786E;&#x8BA4;&#x91CD;&#x8981;&#x4E2A;&#x4EBA;&#x6587;&#x4EF6;&#x5DF2;&#x5907;&#x4EFD;"
+                                              IsEnabled="{Binding RecoveryPreparation.RequiresPersonalDataBackup}"
+                                              VerticalAlignment="Center"
+                                              Margin="14,0,0,0"
+                                              Checked="BackupAcknowledgement_Changed"
+                                              Unchecked="BackupAcknowledgement_Changed"/>
+                                </WrapPanel>
+                                <TextBlock x:Name="UninstallPlanPreparationSummaryTextBlock"
+                                           AutomationProperties.AutomationId="UninstallPlanPreparationSummaryTextBlock"
+                                           Text="{Binding RecoveryPreparation.Summary}"
+                                           Foreground="#1E3A8A"
+                                           FontWeight="SemiBold"
+                                           TextWrapping="Wrap"
+                                           Margin="0,8,0,0"/>
+                                <Button x:Name="UninstallPlanBuildFinalChecklistButton"
+                                        AutomationProperties.AutomationId="UninstallPlanBuildFinalChecklistButton"
+                                        Content="&#x751F;&#x6210;&#x6700;&#x7EC8;&#x786E;&#x8BA4;&#x6E05;&#x5355;"
+                                        HorizontalAlignment="Left"
+                                        MinWidth="170"
+                                        Height="34"
+                                        Padding="14,0"
+                                        Margin="0,10,0,0"
+                                        Click="BuildFinalChecklist_Click"/>
+                            </StackPanel>
+                        </Border>
+                        <ListBox x:Name="UninstallPlanProtectionListBox"
+                                 AutomationProperties.AutomationId="UninstallPlanProtectionListBox"
+                                 ItemsSource="{Binding RecoveryAssessment.ProtectionLines}"
+                                 BorderThickness="0"
+                                 Background="Transparent"
+                                 IsHitTestVisible="False"
+                                 Focusable="False"
+                                 HorizontalContentAlignment="Stretch"
+                                 ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                 Margin="0,6,0,0">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Margin="0,3,0,0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="&#x2022;" Foreground="#374151" Margin="0,0,6,0"/>
+                                        <TextBlock Grid.Column="1"
+                                                   Text="{Binding}"
+                                                   Foreground="#374151"
+                                                   TextWrapping="Wrap"/>
+                                    </Grid>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                        <TextBlock x:Name="UninstallPlanNextActionTextBlock"
+                                   AutomationProperties.AutomationId="UninstallPlanNextActionTextBlock"
+                                   Text="{Binding RecoveryAssessment.NextAction}"
+                                   Foreground="#111827"
+                                   FontWeight="SemiBold"
+                                   TextWrapping="Wrap"
+                                   Margin="0,10,0,0"/>
+                            </StackPanel>
+                        </Expander>
+                    </StackPanel>
+                </Border>
+
+                <Border x:Name="UninstallPlanFinalChecklistPanel"
+                        Visibility="Collapsed"
+                        Background="#F0FDF4"
+                        BorderBrush="#4ADE80"
+                        BorderThickness="1"
+                        CornerRadius="8"
+                        Padding="16"
+                        Margin="0,0,0,12">
+                    <StackPanel>
+                        <TextBlock x:Name="UninstallPlanFinalChecklistTitleTextBlock"
+                                   AutomationProperties.AutomationId="UninstallPlanFinalChecklistTitleTextBlock"
+                                   Text="&#x6700;&#x7EC8;&#x786E;&#x8BA4;&#x6E05;&#x5355;"
+                                   FontSize="18"
+                                   FontWeight="SemiBold"
+                                   Foreground="#111827"/>
+                        <TextBlock x:Name="UninstallPlanFinalChecklistStatusTextBlock"
+                                   AutomationProperties.AutomationId="UninstallPlanFinalChecklistStatusTextBlock"
+                                   Foreground="#166534"
+                                   FontWeight="SemiBold"
+                                   TextWrapping="Wrap"
+                                   Margin="0,8,0,0"/>
+                        <TextBlock x:Name="UninstallPlanFinalChecklistSummaryTextBlock"
+                                   AutomationProperties.AutomationId="UninstallPlanFinalChecklistSummaryTextBlock"
+                                   Foreground="#374151"
+                                   TextWrapping="Wrap"
+                                   Margin="0,6,0,0"/>
+                        <TextBlock Text="&#x5DF2;&#x51C6;&#x5907;" FontWeight="SemiBold" Foreground="#111827" Margin="0,10,0,2"/>
+                        <ListBox x:Name="UninstallPlanFinalChecklistReadyListBox"
+                                 AutomationProperties.AutomationId="UninstallPlanFinalChecklistReadyListBox"
+                                 BorderThickness="0"
+                                 Background="Transparent"
+                                 IsHitTestVisible="False"
+                                 Focusable="False"
+                                 HorizontalContentAlignment="Stretch"/>
+                        <TextBlock Text="&#x8FD8;&#x9700;&#x4F60;&#x786E;&#x8BA4;" FontWeight="SemiBold" Foreground="#111827" Margin="0,8,0,2"/>
+                        <ListBox x:Name="UninstallPlanFinalChecklistPendingListBox"
+                                 AutomationProperties.AutomationId="UninstallPlanFinalChecklistPendingListBox"
+                                 BorderThickness="0"
+                                 Background="Transparent"
+                                 IsHitTestVisible="False"
+                                 Focusable="False"
+                                 HorizontalContentAlignment="Stretch"/>
+                        <TextBlock Text="&#x76EE;&#x524D;&#x7F3A;&#x5C11;" FontWeight="SemiBold" Foreground="#111827" Margin="0,8,0,2"/>
+                        <ListBox x:Name="UninstallPlanFinalChecklistMissingListBox"
+                                 AutomationProperties.AutomationId="UninstallPlanFinalChecklistMissingListBox"
+                                 BorderThickness="0"
+                                 Background="Transparent"
+                                 IsHitTestVisible="False"
+                                 Focusable="False"
+                                 HorizontalContentAlignment="Stretch"/>
+                        <TextBlock x:Name="UninstallPlanFinalChecklistSafetyTextBlock"
+                                   AutomationProperties.AutomationId="UninstallPlanFinalChecklistSafetyTextBlock"
+                                   Text="&#x8FD9;&#x4EFD;&#x6E05;&#x5355;&#x53EA;&#x505A;&#x786E;&#x8BA4;&#x51C6;&#x5907;&#xFF0C;&#x4E0D;&#x4F1A;&#x8FD0;&#x884C;&#x5378;&#x8F7D;&#x5668;&#x3002;"
+                                   Foreground="#166534"
+                                   FontWeight="SemiBold"
+                                   TextWrapping="Wrap"
+                                   Margin="0,10,0,0"/>
+                        <Button x:Name="UninstallPlanContinueFinalConsentButton"
+                                AutomationProperties.AutomationId="UninstallPlanContinueFinalConsentButton"
+                                Content="&#x7EE7;&#x7EED;&#x6700;&#x7EC8;&#x786E;&#x8BA4;"
+                                HorizontalAlignment="Left"
+                                MinWidth="170"
+                                Height="36"
+                                Padding="14,0"
+                                Margin="0,12,0,0"
+                                Visibility="Collapsed"
+                                IsEnabled="False"
+                                Click="ContinueFinalConsent_Click"/>
+                        <TextBlock x:Name="UninstallPlanRequestStatusTextBlock"
+                                   AutomationProperties.AutomationId="UninstallPlanRequestStatusTextBlock"
+                                   Foreground="#166534"
+                                   FontWeight="SemiBold"
+                                   TextWrapping="Wrap"
+                                   Visibility="Collapsed"
+                                   Margin="0,10,0,0"/>
+                    </StackPanel>
+                </Border>
+
+                <Expander x:Name="UninstallPlanWorkflowExpander"
+                          AutomationProperties.AutomationId="UninstallPlanWorkflowExpander"
+                          Header="&#x4E86;&#x89E3;&#x5B8C;&#x6574;&#x5378;&#x8F7D;&#x6D41;&#x7A0B;"
+                          IsExpanded="False"
+                          Foreground="#374151"
+                          Margin="0,0,0,12">
+                    <Border Background="White"
+                            BorderBrush="#E5E7EB"
+                            BorderThickness="1"
+                            CornerRadius="8"
+                            Padding="14"
+                            Margin="0,8,0,0">
+                        <StackPanel>
+                        <TextBlock Text="&#x5378;&#x8F7D;&#x5E72;&#x51C0;&#x70B9;&#xFF0C;&#x53EA;&#x9700;&#x770B;&#x8FD9; 3 &#x6B65;"
+                                   FontSize="17"
+                                   FontWeight="SemiBold"
+                                   Foreground="#111827"/>
+                        <ListBox x:Name="UninstallPlanSimpleStepsListBox"
+                                 AutomationProperties.AutomationId="UninstallPlanSimpleStepsListBox"
+                                 ItemsSource="{Binding RecoveryAssessment.SimpleSteps}"
+                                 BorderThickness="0"
+                                 Background="Transparent"
+                                 IsHitTestVisible="False"
+                                 Focusable="False"
+                                 HorizontalContentAlignment="Stretch"
+                                 ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                 Margin="0,6,0,0">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding}"
+                                               Foreground="#374151"
+                                               TextWrapping="Wrap"
+                                               Margin="0,4,0,0"/>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                        </StackPanel>
+                    </Border>
+                </Expander>
+
+                <Expander x:Name="UninstallPlanTechnicalDetailsExpander"
+                          AutomationProperties.AutomationId="UninstallPlanTechnicalDetailsExpander"
+                          Header="&#x67E5;&#x770B;&#x8BE6;&#x7EC6;&#x5B89;&#x5168;&#x68C0;&#x67E5;&#xFF08;&#x9AD8;&#x7EA7;&#xFF09;"
+                          IsExpanded="False"
+                          Foreground="#374151">
+                    <StackPanel Margin="0,10,0,0">
+                        <Border Background="White" BorderBrush="#E5E7EB" BorderThickness="1" CornerRadius="8" Padding="14" Margin="0,0,0,12">
+                            <StackPanel>
+                                <TextBlock Text="&#x91CD;&#x88C5;&#x6765;&#x6E90;&#x68C0;&#x67E5;"
+                                           FontSize="17"
+                                           FontWeight="SemiBold"
+                                           Foreground="#111827"/>
+                                <TextBlock Text="{Binding ReinstallReadiness.AgentConclusion}"
+                                           Foreground="#4B5563"
+                                           TextWrapping="Wrap"
+                                           Margin="0,8,0,4"/>
+                                <ListBox x:Name="UninstallPlanReinstallTechnicalListBox"
+                                         AutomationProperties.AutomationId="UninstallPlanReinstallTechnicalListBox"
+                                         ItemsSource="{Binding ReinstallReadiness.TechnicalDetails}"
+                                         BorderThickness="0"
+                                         Background="Transparent"
+                                         IsHitTestVisible="False"
+                                         Focusable="False"
+                                         HorizontalContentAlignment="Stretch"
+                                         ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding}" Foreground="#6B7280" TextWrapping="Wrap" Margin="0,3,0,0"/>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
+                                <Separator Margin="0,12,0,12"/>
+                                <TextBlock x:Name="UninstallPlanOfficialUninstallerTextBlock"
+                                           AutomationProperties.AutomationId="UninstallPlanOfficialUninstallerTextBlock"
+                                           Text="{Binding OfficialUninstallerLine}"
+                                           Foreground="#374151"
+                                           TextWrapping="Wrap"/>
+                                <TextBlock x:Name="UninstallPlanPostScanTextBlock"
+                                           AutomationProperties.AutomationId="UninstallPlanPostScanTextBlock"
+                                           Text="{Binding PostUninstallScanLine}"
+                                           Foreground="#374151"
+                                           TextWrapping="Wrap"
+                                           Margin="0,8,0,0"/>
+                                <TextBlock Text="&#x5B8C;&#x6574;&#x6D41;&#x7A0B;"
+                                           FontSize="17"
+                                           FontWeight="SemiBold"
+                                           Foreground="#111827"
+                                           Margin="0,14,0,0"/>
+                                <TextBlock Text="{Binding WorkflowGuide.SafetyLine}" Foreground="#4B5563" TextWrapping="Wrap" Margin="0,8,0,8"/>
+                                <ListBox x:Name="UninstallPlanWorkflowListBox"
+                                         AutomationProperties.AutomationId="UninstallPlanWorkflowListBox"
+                                         ItemsSource="{Binding WorkflowGuide.Steps}"
+                                         BorderThickness="0"
+                                         Background="Transparent"
+                                         HorizontalContentAlignment="Stretch"
+                                         ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding}" Foreground="#6B7280" TextWrapping="Wrap" Margin="0,4,0,0"/>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Background="White" BorderBrush="#E5E7EB" BorderThickness="1" CornerRadius="8" Padding="14" Margin="0,0,0,12">
+                            <StackPanel>
+                                <TextBlock Text="&#x5B98;&#x65B9;&#x5378;&#x8F7D;&#x786E;&#x8BA4;" FontSize="17" FontWeight="SemiBold" Foreground="#111827"/>
+                                <TextBlock x:Name="UninstallPlanOfficialConfirmationTextBlock"
+                                           AutomationProperties.AutomationId="UninstallPlanOfficialConfirmationTextBlock"
+                                           Text="{Binding OfficialConfirmation.SafetySummary}"
+                                           Foreground="#4B5563"
+                                           TextWrapping="Wrap"
+                                           Margin="0,8,0,0"/>
+                                <TextBlock Text="{Binding OfficialConfirmation.ExecutablePath, StringFormat=&#x547D;&#x4EE4;: {0}}" Foreground="#374151" TextWrapping="Wrap" Margin="0,8,0,0"/>
+                                <TextBlock Text="{Binding OfficialConfirmation.ArgumentsLine, StringFormat=&#x53C2;&#x6570;: {0}}" Foreground="#374151" TextWrapping="Wrap" Margin="0,4,0,0"/>
+                                <TextBlock Text="&#x6267;&#x884C;&#x524D;&#x786E;&#x8BA4;" FontWeight="SemiBold" Foreground="#111827" Margin="0,12,0,4"/>
+                                <ListBox x:Name="UninstallPlanOfficialWarningsListBox"
+                                         AutomationProperties.AutomationId="UninstallPlanOfficialWarningsListBox"
+                                         ItemsSource="{Binding OfficialConfirmation.ReadinessWarnings}"
+                                         BorderThickness="0"
+                                         Background="Transparent"
+                                         HorizontalContentAlignment="Stretch"
+                                         ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding}" Foreground="#6B7280" TextWrapping="Wrap" Margin="0,3,0,0"/>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
+                                <TextBlock Text="&#x68C0;&#x67E5;&#x6E05;&#x5355;" FontWeight="SemiBold" Foreground="#111827" Margin="0,12,0,4"/>
+                                <ListBox x:Name="UninstallPlanOfficialChecklistListBox"
+                                         AutomationProperties.AutomationId="UninstallPlanOfficialChecklistListBox"
+                                         ItemsSource="{Binding OfficialConfirmation.Checklist}"
+                                         BorderThickness="0"
+                                         Background="Transparent"
+                                         HorizontalContentAlignment="Stretch"
+                                         ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding}" Foreground="#6B7280" TextWrapping="Wrap" Margin="0,3,0,0"/>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
+                                <Border Background="#F9FAFB" BorderBrush="#E5E7EB" BorderThickness="1" CornerRadius="6" Padding="10" Margin="0,12,0,0">
+                                    <StackPanel>
+                                        <TextBlock Text="&#x5378;&#x8F7D;&#x524D;&#x5B89;&#x5168;&#x68C0;&#x67E5;" FontWeight="SemiBold" Foreground="#111827"/>
+                                        <TextBlock Text="{Binding OfficialConfirmation.PreflightChecklist.NextActionText}" Foreground="#4B5563" TextWrapping="Wrap" Margin="0,6,0,8"/>
+                                        <ListBox x:Name="UninstallPlanPreflightListBox"
+                                                 AutomationProperties.AutomationId="UninstallPlanPreflightListBox"
+                                                 ItemsSource="{Binding OfficialConfirmation.PreflightChecklist.Steps}"
+                                                 BorderThickness="0"
+                                                 Background="Transparent"
+                                                 HorizontalContentAlignment="Stretch"
+                                                 ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                                            <ListBox.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Grid Margin="0,4,0,0">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="150"/>
+                                                            <ColumnDefinition Width="90"/>
+                                                            <ColumnDefinition Width="*"/>
+                                                        </Grid.ColumnDefinitions>
+                                                        <TextBlock Text="{Binding Title}" Foreground="#111827" FontWeight="SemiBold" TextWrapping="Wrap"/>
+                                                        <TextBlock Grid.Column="1" Text="{Binding StatusLabel}" Foreground="#4B5563" TextWrapping="Wrap"/>
+                                                        <TextBlock Grid.Column="2" Text="{Binding Detail}" Foreground="#6B7280" TextWrapping="Wrap"/>
+                                                    </Grid>
+                                                </DataTemplate>
+                                            </ListBox.ItemTemplate>
+                                        </ListBox>
+                                    </StackPanel>
+                                </Border>
+                                <Border Background="#F9FAFB" BorderBrush="#E5E7EB" BorderThickness="1" CornerRadius="6" Padding="10" Margin="0,12,0,0">
+                                    <StackPanel>
+                                        <TextBlock Text="&#x6267;&#x884C;&#x95E8;&#x72B6;&#x6001;" FontWeight="SemiBold" Foreground="#111827"/>
+                                        <TextBlock x:Name="UninstallPlanExecutionGateTextBlock"
+                                                   AutomationProperties.AutomationId="UninstallPlanExecutionGateTextBlock"
+                                                   Text="{Binding OfficialConfirmation.ExecutionGate.PrimaryButtonText}"
+                                                   Foreground="#4B5563"
+                                                   TextWrapping="Wrap"
+                                                   Margin="0,6,0,4"/>
+                                        <TextBlock Text="{Binding OfficialConfirmation.ExecutionGate.CommandTrust.Summary, StringFormat=&#x547D;&#x4EE4;&#x53EF;&#x4FE1;&#x5EA6;: {0}}" Foreground="#4B5563" TextWrapping="Wrap" Margin="0,2,0,4"/>
+                                        <ItemsControl ItemsSource="{Binding OfficialConfirmation.ExecutionGate.BlockingReasons}">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding}" Foreground="#6B7280" TextWrapping="Wrap" Margin="0,3,0,0"/>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </StackPanel>
+                                </Border>
+                            </StackPanel>
+                        </Border>
+
+                        <ListBox x:Name="UninstallPlanSectionsListBox"
+                                 AutomationProperties.AutomationId="UninstallPlanSectionsListBox"
+                                 ItemsSource="{Binding Sections}"
+                                 BorderThickness="0"
+                                 Background="Transparent"
+                                 HorizontalContentAlignment="Stretch"
+                                 ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Background="White" BorderBrush="#E5E7EB" BorderThickness="1" CornerRadius="8" Padding="14" Margin="0,0,0,12">
+                                        <StackPanel>
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Text="{Binding Title}" FontSize="17" FontWeight="SemiBold" Foreground="#111827"/>
+                                                <Border Grid.Column="1" Background="#EEF2FF" CornerRadius="6" Padding="8,4">
+                                                    <TextBlock Text="{Binding RiskLabel}" Foreground="#3730A3" FontWeight="SemiBold"/>
+                                                </Border>
+                                            </Grid>
+                                            <TextBlock Text="{Binding ActionLine}" Foreground="#4B5563" TextWrapping="Wrap" Margin="0,8,0,8"/>
+                                            <ItemsControl ItemsSource="{Binding Items}">
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <TextBlock Text="{Binding}" Foreground="#6B7280" TextWrapping="Wrap" Margin="0,3,0,0"/>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+                                        </StackPanel>
+                                    </Border>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </StackPanel>
+                </Expander>
+            </StackPanel>
+        </ScrollViewer>
+
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock x:Name="UninstallPlanFinalReminderTextBlock"
+                       AutomationProperties.AutomationId="UninstallPlanFinalReminderTextBlock"
+                       Text="{Binding FinalReminder}"
+                       Foreground="#4B5563"
+                       TextWrapping="Wrap"
+                       VerticalAlignment="Center"/>
+            <Button x:Name="UninstallPlanCloseButton"
+                    AutomationProperties.AutomationId="UninstallPlanCloseButton"
+                    Grid.Column="1"
+                    Content="&#x6211;&#x77E5;&#x9053;&#x4E86;"
+                    Width="104"
+                    Height="36"
+                    Click="Close_Click"/>
+        </Grid>
+    </Grid>
+</Window>

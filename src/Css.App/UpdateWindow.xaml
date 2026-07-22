@@ -1,0 +1,51 @@
+<Window x:Class="Css.App.UpdateWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="OMNIX-Entropy 软件更新"
+        Width="520" Height="390"
+        ResizeMode="NoResize"
+        WindowStartupLocation="CenterOwner"
+        Background="#F6F7F9">
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel>
+            <TextBlock Text="软件更新" FontSize="24" FontWeight="SemiBold" Foreground="#111827"/>
+            <TextBlock x:Name="CurrentVersionTextBlock"
+                       AutomationProperties.AutomationId="UpdateCurrentVersionTextBlock"
+                       Margin="0,8,0,0" Foreground="#4B5563"/>
+        </StackPanel>
+
+        <Border Grid.Row="1" Margin="0,18,0,18" Padding="18"
+                Background="White" BorderBrush="#D7DEE8" BorderThickness="1" CornerRadius="6">
+            <StackPanel>
+                <TextBlock x:Name="UpdateStatusTitleTextBlock"
+                           AutomationProperties.AutomationId="UpdateStatusTitleTextBlock"
+                           Text="还没有检查更新"
+                           FontSize="17" FontWeight="SemiBold" Foreground="#111827"/>
+                <TextBlock x:Name="UpdateStatusBodyTextBlock"
+                           AutomationProperties.AutomationId="UpdateStatusBodyTextBlock"
+                           Text="点击检查后，只会读取固定 GitHub 仓库的公开版本信息。"
+                           Margin="0,8,0,0" TextWrapping="Wrap" Foreground="#374151"/>
+                <TextBlock Text="检查不会下载或安装程序，也不会弹出 UAC。只有版本、地址、哈希和同签名字段都符合规则时，才会显示发布页入口。"
+                           Margin="0,14,0,0" TextWrapping="Wrap" Foreground="#6B7280" FontSize="12"/>
+            </StackPanel>
+        </Border>
+
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button x:Name="OpenReleasePageButton"
+                    AutomationProperties.AutomationId="OpenReleasePageButton"
+                    Content="查看发布页" Width="104" Height="36" Margin="0,0,8,0"
+                    Visibility="Collapsed" Click="OpenReleasePage_Click"/>
+            <Button x:Name="CheckForUpdatesButton"
+                    AutomationProperties.AutomationId="CheckForUpdatesButton"
+                    Content="检查更新" Width="96" Height="36" Margin="0,0,8,0"
+                    Click="CheckForUpdates_Click"/>
+            <Button Content="关闭" Width="72" Height="36" IsCancel="True"/>
+        </StackPanel>
+    </Grid>
+</Window>

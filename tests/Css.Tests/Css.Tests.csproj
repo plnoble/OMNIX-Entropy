@@ -1,0 +1,47 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <UseWPF>true</UseWPF>
+
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="coverlet.collector" Version="6.0.0" />
+    <PackageReference Include="FluentAssertions" Version="8.10.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
+    <PackageReference Include="xunit" Version="2.5.3" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.5.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="System" />
+    <Using Include="System.Collections.Generic" />
+    <Using Include="System.IO" />
+    <Using Include="System.Linq" />
+    <Using Include="System.Net.Http" />
+    <Using Include="System.Threading" />
+    <Using Include="System.Threading.Tasks" />
+    <Using Include="Xunit" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Css.AcceptanceFixtures\Css.AcceptanceFixtures.csproj" />
+    <ProjectReference Include="..\..\src\Css.Core\Css.Core.csproj" />
+    <ProjectReference Include="..\..\src\Css.App\Css.App.csproj" />
+    <ProjectReference Include="..\..\src\Css.InstallGuard\Css.InstallGuard.csproj" />
+    <ProjectReference Include="..\..\src\Css.Ipc\Css.Ipc.csproj" />
+    <ProjectReference Include="..\..\src\Css.Elevated\Css.Elevated.csproj" />
+    <ProjectReference Include="..\..\src\Css.Rules\Css.Rules.csproj" />
+    <ProjectReference Include="..\..\src\Css.Scanner\Css.Scanner.csproj" />
+    <ProjectReference Include="..\..\src\Css.Snapshot\Css.Snapshot.csproj" />
+    <ProjectReference Include="..\..\src\Css.Win32\Css.Win32.csproj" />
+    <ProjectReference Include="..\..\src\Css.SmokeTools\Css.SmokeTools.csproj"
+                      ReferenceOutputAssembly="false" />
+  </ItemGroup>
+
+</Project>

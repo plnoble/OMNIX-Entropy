@@ -1,0 +1,93 @@
+<Window x:Class="Css.App.PersonalStorageInspectionWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="&#x67E5;&#x770B;&#x6587;&#x4EF6;&#x4F4D;&#x7F6E;"
+        Height="500"
+        Width="720"
+        MinHeight="440"
+        MinWidth="620"
+        Background="#F6F7F9"
+        WindowStartupLocation="CenterOwner"
+        AutomationProperties.Name="&#x67E5;&#x770B;&#x4E2A;&#x4EBA;&#x6587;&#x4EF6;&#x4F4D;&#x7F6E;&#x7A97;&#x53E3;">
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock x:Name="PersonalStorageInspectionTitleTextBlock"
+                   AutomationProperties.AutomationId="PersonalStorageInspectionTitleTextBlock"
+                   Text="{Binding Title}"
+                   FontSize="26"
+                   FontWeight="SemiBold"
+                   Foreground="#111827"
+                   TextWrapping="Wrap"/>
+
+        <TextBlock Grid.Row="1"
+                   x:Name="PersonalStorageInspectionConclusionTextBlock"
+                   AutomationProperties.AutomationId="PersonalStorageInspectionConclusionTextBlock"
+                   Text="&#x9009;&#x62E9;&#x4E00;&#x4E2A;&#x4F4D;&#x7F6E;&#x540E;&#xFF0C;&#x53EA;&#x4F1A;&#x8BA9; Windows &#x8D44;&#x6E90;&#x7BA1;&#x7406;&#x5668;&#x5E2E;&#x4F60;&#x5B9A;&#x4F4D;&#x6587;&#x4EF6;&#x3002;"
+                   Foreground="#374151"
+                   FontSize="16"
+                   TextWrapping="Wrap"
+                   Margin="0,12,0,0"/>
+
+        <ListBox Grid.Row="2"
+                 x:Name="PersonalStorageInspectionPathsListBox"
+                 AutomationProperties.AutomationId="PersonalStorageInspectionPathsListBox"
+                 ItemsSource="{Binding EvidencePaths}"
+                 SelectionChanged="PathsListBox_SelectionChanged"
+                 HorizontalContentAlignment="Stretch"
+                 ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                 Margin="0,16,0,0">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <TextBlock Text="{Binding}"
+                               ToolTip="{Binding}"
+                               Foreground="#1F2937"
+                               TextTrimming="CharacterEllipsis"
+                               Padding="8,7"/>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+
+        <TextBlock Grid.Row="3"
+                   x:Name="PersonalStorageInspectionSafetyTextBlock"
+                   AutomationProperties.AutomationId="PersonalStorageInspectionSafetyTextBlock"
+                   Text="&#x53EA;&#x8BFB;&#x67E5;&#x770B;&#xFF1A;OMNIX-Entropy &#x4E0D;&#x4F1A;&#x6253;&#x5F00;&#x6587;&#x4EF6;&#xFF0C;&#x4E5F;&#x4E0D;&#x4F1A;&#x5220;&#x9664;&#x3001;&#x79FB;&#x52A8;&#x6216;&#x52A0;&#x5165;&#x6E05;&#x7406;&#x8BA1;&#x5212;&#x3002;"
+                   Foreground="#166534"
+                   FontWeight="SemiBold"
+                   TextWrapping="Wrap"
+                   Margin="0,14,0,0"/>
+
+        <Grid Grid.Row="4" Margin="0,18,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <Button x:Name="PersonalStorageInspectionOpenButton"
+                    Grid.Column="1"
+                    AutomationProperties.AutomationId="PersonalStorageInspectionOpenButton"
+                    Content="&#x5728;&#x8D44;&#x6E90;&#x7BA1;&#x7406;&#x5668;&#x4E2D;&#x67E5;&#x770B;"
+                    MinWidth="178"
+                    Height="38"
+                    Padding="16,0"
+                    Margin="0,0,8,0"
+                    IsEnabled="False"
+                    Click="Open_Click"/>
+            <Button x:Name="PersonalStorageInspectionCloseButton"
+                    Grid.Column="2"
+                    AutomationProperties.AutomationId="PersonalStorageInspectionCloseButton"
+                    Content="&#x5173;&#x95ED;"
+                    MinWidth="100"
+                    Height="38"
+                    Padding="16,0"
+                    IsCancel="True"
+                    Click="Close_Click"/>
+        </Grid>
+    </Grid>
+</Window>

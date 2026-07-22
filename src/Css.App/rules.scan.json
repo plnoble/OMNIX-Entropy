@@ -1,0 +1,57 @@
+{
+  "version": 1,
+  "expectedRootDirs": [
+    "Windows",
+    "Program Files",
+    "Program Files (x86)",
+    "ProgramData",
+    "Users",
+    "$Recycle.Bin",
+    "System Volume Information",
+    "PerfLogs",
+    "Recovery",
+    "pagefile.sys",
+    "hiberfil.sys",
+    "swapfile.sys",
+    "Documents and Settings",
+    "inetpub",
+    "WUDownloadCache",
+    "config.msi"
+  ],
+  "categoryPatterns": {
+    "System": [
+      "%SystemRoot%",
+      "C:\\Windows",
+      "C:\\Recovery",
+      "C:\\PerfLogs",
+      "C:\\ProgramData\\Microsoft"
+    ],
+    "Programs": [
+      "C:\\Program Files",
+      "C:\\Program Files (x86)"
+    ],
+    "PackageCaches": [
+      "**\\.nuget\\packages",
+      "**\\npm-cache",
+      "**\\AppData\\Local\\pip\\Cache",
+      "**\\AppData\\Local\\Docker",
+      "**\\AppData\\Local\\Microsoft\\WinGet\\Cache",
+      "**\\AppData\\Local\\Programs\\Microsoft VS Code\\Cache*",
+      "**\\AppData\\Local\\Google\\Chrome\\User Data\\*\\Cache*",
+      "**\\AppData\\Local\\Microsoft\\Edge\\User Data\\*\\Cache*"
+    ],
+    "AppData": [
+      "**\\AppData\\Local\\*",
+      "**\\AppData\\Roaming\\*",
+      "**\\AppData\\Local\\Packages"
+    ],
+    "Temp": [
+      "**\\Temp",
+      "**\\Temp\\*",
+      "**\\tmp",
+      "**\\tmp\\*",
+      "%SystemRoot%\\Temp",
+      "C:\\Windows\\Temp"
+    ]
+  }
+}
