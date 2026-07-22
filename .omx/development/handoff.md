@@ -1,5 +1,14 @@
 # Agent Handoff
 
+## Latest Update - 2026-07-22 Public CI remediation in progress
+
+- Current objective: make `plnoble/OMNIX-Entropy` reproducible from tracked files and obtain a passing GitHub Actions run after the successful initial push.
+- What changed: top-level `.omx` smoke/helper scripts are now public test inputs; LF checkout policy, Actions v5 pins, Release-before-Debug order, and disabled xUnit collection parallelism are implemented with repository contracts.
+- What is verified: smoke-script privacy scan is clean except neutral `Fixture` paths; focused 4/4; local full 1048/1048; Release build succeeded; integrity 378 files and 18/18 XAML.
+- What is not verified: the committed tracked-only archive and replacement GitHub Actions run are still pending.
+- Known risk: local NuGet vulnerability-index access emitted `NU1900` warnings because the sandbox could not reach nuget.org; compilation and tests still completed.
+- Exact next recommended action: commit the remediation, verify an archive of that commit, push `main`, and watch the new GitHub Actions run to completion before marking this slice done.
+
 ## Latest handoff - 2026-07-22 GitHub personal release foundation
 
 - Current objective: publish the audited source baseline to `https://github.com/plnoble/OMNIX-Entropy`, then add a directory-selectable D-first installer and verified update application.

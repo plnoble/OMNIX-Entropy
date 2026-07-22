@@ -1,5 +1,15 @@
 # Error Ledger
 
+## 2026-07-22 - Local green suite masked an incomplete public checkout
+
+- Symptom: the first GitHub Actions run failed 31 tests even though the same 1048-test suite passed locally before publication.
+- Wrong assumption: a passing test run in the working tree proved that every runtime test dependency would be present in a fresh clone and that Debug tests were independent of Release output.
+- Root cause: `.omx/*` ignored 22 smoke scripts still read by source-contract tests; those untracked local files masked the omission. The workflow also ran Debug tests before building Release binaries, lacked an LF checkout policy, and allowed pipe-sensitive tests to contend in parallel on the hosted Windows runner.
+- Detection method: inspected failed run `29932623250`, correlated every FileNotFound/line-ending/production-authorizer/timeout failure with repository tracking, workflow order, and runner scheduling.
+- Fix: allowlist top-level `.omx/*.ps1`, add `.gitattributes` with LF normalization, build Release before Debug tests, disable xUnit collection parallelization, and add repository contracts for all four conditions.
+- Prevention rule: before public push, verify a source archive or clean clone made only from tracked files; CI must encode artifact prerequisites in order and portable source-text tests need an explicit line-ending policy.
+- Skill candidate: yes.
+
 ## 2026-07-22 - CI ran debug-only worker tests against Release binaries
 
 - Symptom: ten worker-lifecycle tests timed out or observed early child exit when run with `--configuration Release`.

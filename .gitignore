@@ -41,6 +41,7 @@ appsettings.*.Local.json
 .omx/*
 !.omx/development/
 !.omx/development/**
+!.omx/*.ps1
 !.omx/verify-source-integrity.ps1
 
 # Signing material must never enter the public repository

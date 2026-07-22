@@ -1,5 +1,11 @@
 # Decision Log
 
+## 2026-07-22 - Public CI must reproduce from tracked files with deterministic scheduling
+
+- Decision: version the top-level `.omx` PowerShell smoke contracts that tests consume, enforce LF through `.gitattributes`, build required Release outputs before Debug tests, and disable xUnit collection parallelization for this Windows integration-heavy suite.
+- Rejected: keep smoke scripts as local evidence, normalize line endings inside individual tests, or retry timed-out parallel tests. Each option would preserve a mismatch between local and public evidence or hide nondeterminism.
+- Consequence: a fresh public checkout is self-contained and runner-stable; the 1048-test suite takes longer because collection parallelism is disabled.
+
 ## 2026-07-22 - Personal GitHub updates keep same-signer trust and D-drive ownership
 
 - Decision: use GitHub Releases for version transport, a local-only personal Authenticode key for publisher identity, and an app-side fixed-repository metadata check. CI never receives the private key, and the release helper creates drafts only.

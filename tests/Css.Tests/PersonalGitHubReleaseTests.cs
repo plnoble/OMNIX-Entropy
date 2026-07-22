@@ -11,6 +11,7 @@ public sealed class PersonalGitHubReleaseTests
 
         ignore.Should().Contain(".omx/*")
             .And.Contain("!.omx/development/**")
+            .And.Contain("!.omx/*.ps1")
             .And.Contain("/quarantine/")
             .And.Contain("*.pfx")
             .And.Contain("*.p12")
@@ -18,6 +19,8 @@ public sealed class PersonalGitHubReleaseTests
             .And.Contain(".env.*");
         ignore.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries)
             .Should().NotContain("quarantine/");
+
+        Read(".gitattributes").Should().Contain("* text=auto eol=lf");
     }
 
     [Fact]
@@ -26,14 +29,19 @@ public sealed class PersonalGitHubReleaseTests
         var workflow = Read(".github", "workflows", "ci.yml");
 
         workflow.Should().Contain("contents: read")
-            .And.Contain("actions/checkout@11d5960a326750d5838078e36cf38b85af677262")
-            .And.Contain("actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9")
+            .And.Contain("actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09")
+            .And.Contain("actions/setup-dotnet@26b0ec14cb23fa6904739307f278c14f94c95bf1")
             .And.Contain("dotnet test ComputerSecuritySoftware.slnx --configuration Debug --no-restore")
             .And.Contain("dotnet build ComputerSecuritySoftware.slnx --configuration Release --no-restore")
             .And.Contain(".omx/verify-source-integrity.ps1");
+        workflow.IndexOf("dotnet build ComputerSecuritySoftware.slnx --configuration Release --no-restore", StringComparison.Ordinal)
+            .Should().BeLessThan(workflow.IndexOf("dotnet test ComputerSecuritySoftware.slnx --configuration Debug --no-restore", StringComparison.Ordinal));
         workflow.Should().NotContain("contents: write")
             .And.NotContain("pull_request_target")
             .And.NotContain("secrets.");
+
+        Read("tests", "Css.Tests", "AssemblyInfo.cs")
+            .Should().Contain("DisableTestParallelization = true");
     }
 
     [Fact]

@@ -1,5 +1,13 @@
 # Quality Gates
 
+### 2026-07-22 - First public CI remediation (in progress)
+
+- Pass - Scope/privacy: 22 top-level smoke/helper scripts contain neutral fixture data only; no credentials, real username, machine Marvis path, binary, or signing material is included. Evidence: `rg` privacy/secret scan and public candidate list.
+- Pass - Local behavior: focused repository contracts 4/4; full Debug suite 1048/1048; Release build succeeded. Evidence: local `dotnet build`/`dotnet test` on 2026-07-22.
+- Pass - Source integrity: 378 files strict UTF-8, replacement files 0, 18/18 XAML valid. Evidence: `.omx/verify-source-integrity.ps1`.
+- Fail - Remote reproducibility: initial run `29932623250` failed 31 tests because the first commit omitted tracked test inputs and encoded incomplete CI prerequisites. Remediation exists locally but is not yet pushed or rerun.
+- N/A - Product runtime/destructive authority: no product behavior, installer, signing policy, system setting, file cleanup, migration, uninstall, or privileged execution changed.
+
 ### 2026-07-22 - GitHub personal release foundation
 
 - Pass - Scope/trust: fixed public repository; CI contents read only; actions pinned to commits; local publisher creates drafts only. Evidence: `.github/workflows/ci.yml`, `scripts/prepare-personal-github-release.ps1`.

@@ -1,5 +1,15 @@
 # Current Development State
 
+## In Progress - 2026-07-22 First public CI remediation
+
+- Objective: make the first public `main` build reproducible from tracked files only and obtain a passing GitHub Actions run without weakening signing or runtime safety.
+- Dependencies: top-level `.omx` smoke scripts referenced by tests, LF-normalized checkout, Release binaries required by production-authorization contracts, and deterministic xUnit execution on a shared Windows runner.
+- Risks: publishing machine evidence with the smoke scripts, letting local untracked files mask an incomplete repository, rerunning pipe-sensitive tests in parallel, or changing product behavior while repairing CI.
+- Impact scope: repository tracking rules, line-ending policy, CI order/action pins, test-runner scheduling, focused repository contracts, and development records. Product runtime behavior is unchanged.
+- Acceptance: the public candidate scan remains free of secrets and machine-specific evidence; a fresh tracked-files-only checkout contains every test dependency; focused/full local tests, Release build, source integrity, and the new GitHub Actions run pass.
+- Status: Implementing. The first public push succeeded, but run `29932623250` failed because ignored smoke scripts were absent, CRLF checkout broke source-text contracts, tests ran before required Release output existed, and parallel pipe tests contended on the hosted runner.
+- Exact next action: verify the remediation locally, commit and push it, then inspect the replacement GitHub Actions run to completion.
+
 ## Completed Slice - 2026-07-22 GitHub personal release foundation and read-only update check
 
 - Objective: connect the empty public `plnoble/OMNIX-Entropy` repository to a beginner-safe personal install/update channel while preserving the existing valid-same-signer gate for privileged workers.

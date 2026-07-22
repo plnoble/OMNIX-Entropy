@@ -1,5 +1,13 @@
 # Development Worklog
 
+## 2026-07-22 - First public CI remediation
+
+- Inspected failed GitHub Actions run `29932623250`: 31 failures reduced to missing ignored smoke scripts, CRLF source-text drift, absent pre-test Release output, and hosted-runner pipe contention.
+- Audited all 22 newly public top-level `.omx` smoke/helper scripts; only neutral `Fixture` paths matched the privacy scan and no credential, real username, or installed-Marvis path was found.
+- Added tracked smoke-script allowlisting, LF normalization, current commit-pinned Actions v5 identities, Release-before-test ordering, and deterministic xUnit scheduling.
+- Local verification: repository contracts 4/4; full Debug 1048/1048; Release build succeeded; source integrity 378 files, invalid UTF-8/replacement 0, XAML 18/18.
+- Remaining in this phase: prove the committed tracked-only archive and replacement GitHub Actions run.
+
 ## 2026-07-22 - GitHub personal release foundation and read-only update check
 
 - Confirmed the target `plnoble/OMNIX-Entropy` repository is public and empty, connected it as `origin`, and audited the first-publication candidate set before staging.
