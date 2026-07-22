@@ -1,5 +1,12 @@
 # Reflections
 
+## 2026-07-22 - Public CI remediation
+
+- What worked: reducing the failed run by failure class produced four small infrastructure fixes; the tracked-only archive then reproduced GitHub's real input boundary before another push.
+- What was wasteful: the first publication trusted a green dirty working tree, so 31 failures were discovered remotely instead of by a clean-source gate.
+- Lesson: repository completeness is a property of committed inputs, not the current filesystem. Every release-facing change should include a tracked-only archive or clean-clone verification before push.
+- Next improvement: turn the tracked-only source verification into a reusable repository script so future agents cannot accidentally skip it.
+
 ## 2026-07-22 - GitHub personal release foundation
 
 - What worked: separating Windows reputation warnings from OMNIX's internal privileged-worker trust made it possible to support a free personal signing path without weakening system-modification safety.

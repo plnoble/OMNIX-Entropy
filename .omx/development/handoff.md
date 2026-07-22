@@ -1,13 +1,13 @@
 # Agent Handoff
 
-## Latest Update - 2026-07-22 Public CI remediation in progress
+## Latest Update - 2026-07-22 Public CI remediation completed
 
 - Current objective: make `plnoble/OMNIX-Entropy` reproducible from tracked files and obtain a passing GitHub Actions run after the successful initial push.
 - What changed: top-level `.omx` smoke/helper scripts are now public test inputs; LF checkout policy, Actions v5 pins, Release-before-Debug order, and disabled xUnit collection parallelism are implemented with repository contracts.
-- What is verified: smoke-script privacy scan is clean except neutral `Fixture` paths; focused 4/4; local full 1048/1048; Release build succeeded; integrity 378 files and 18/18 XAML.
-- What is not verified: the committed tracked-only archive and replacement GitHub Actions run are still pending.
+- What is verified: smoke-script privacy scan is clean except neutral `Fixture` paths; focused 4/4; working-tree and tracked-only archive full suites each 1048/1048; both Release builds succeeded; both integrity runs reported 378 files and 18/18 XAML; GitHub Actions run `29933681994` passed 1048/1048 and the same integrity gate.
+- What is not verified: no GitHub installer or Release asset exists yet; package download, same-signer installer verification, D-first replacement, and rollback are not implemented.
 - Known risk: local NuGet vulnerability-index access emitted `NU1900` warnings because the sandbox could not reach nuget.org; compilation and tests still completed.
-- Exact next recommended action: commit the remediation, verify an archive of that commit, push `main`, and watch the new GitHub Actions run to completion before marking this slice done.
+- Exact next recommended action: implement a directory-selectable installer that defaults to `D:\Software\OMNIX-Entropy\Install`, then add explicit user-started download, same-signer/hash verification, replacement, and rollback before publishing a draft GitHub Release.
 
 ## Latest handoff - 2026-07-22 GitHub personal release foundation
 

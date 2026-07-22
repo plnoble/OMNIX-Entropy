@@ -6,7 +6,7 @@
 - Audited all 22 newly public top-level `.omx` smoke/helper scripts; only neutral `Fixture` paths matched the privacy scan and no credential, real username, or installed-Marvis path was found.
 - Added tracked smoke-script allowlisting, LF normalization, current commit-pinned Actions v5 identities, Release-before-test ordering, and deterministic xUnit scheduling.
 - Local verification: repository contracts 4/4; full Debug 1048/1048; Release build succeeded; source integrity 378 files, invalid UTF-8/replacement 0, XAML 18/18.
-- Remaining in this phase: prove the committed tracked-only archive and replacement GitHub Actions run.
+- Committed as `06534d4`; a tracked-only archive independently passed Release build, full 1048/1048, and integrity 378/18. Pushed `main`; replacement GitHub Actions run `29933681994` passed all steps in 2m59s with full 1048/1048 and matching integrity evidence.
 
 ## 2026-07-22 - GitHub personal release foundation and read-only update check
 
