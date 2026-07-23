@@ -1,5 +1,17 @@
 # Quality Gates
 
+## 2026-07-23 - Personal signer and first D-first installer
+
+| Category | Status | Evidence | Residual risk |
+| --- | --- | --- | --- |
+| Scope and consent | Pass | Separate user approvals covered CurrentUser TrustedPeople/TrustedPublisher and exact-thumbprint CurrentUser Root; installer execution and upload were not authorized or performed. | Trust persists until manually removed. |
+| Certificate security | Pass | Independent store query: private key only in CurrentUser My; public copies in authorized CurrentUser stores; zero matching entries in inspected LocalMachine stores; no PFX/private-key export. | Any future binary signed by the same private key is trusted by this CurrentUser. |
+| Signed payload | Pass | `verify-signed-release-candidate.ps1`: 110 files, valid RSA same signer, trusted timestamp, `CanBeginDisposableAcceptance=true`. | Ten-case disposable-machine behavioral acceptance is pending. |
+| Installer | Pass | `verify-personal-installer.ps1`: version 0.1.0, same signer, D-first default, visible directory selection, silent install refused, `CanStageGitHubRelease=true`; SHA-256 `5680C3847F23291784BB38FB1D01FACAFC6013DC47F06B611C170BCDC63955BE`. | Setup has not been launched, installed, or uninstalled. |
+| Build and tests | Pass | Focused 10/10; full 1054/1054; Release build 0 errors; integrity 380 files and 18/18 XAML; three scripts parse. | NU1900 warnings remain because the sandbox could not reach NuGet vulnerability metadata. |
+| Supply chain and privacy | Pass | Inno 6.7.3 compiler signature Valid; pinned official translation tag/hash/notice; 457 public candidates/about 6.3 MB; zero binary/signing-material candidates; CER/setup ignored under `.artifacts`. | Public certificate thumbprint remains intentionally auditable in records. |
+| Release | Warn | Valid local installer exists and can be staged. | No GitHub draft/public Release or disposable acceptance receipt exists; separate approval required. |
+
 ### 2026-07-23 - D-first personal installer foundation
 
 - Pass - Install UX policy: visible directory page, D-first default, Chinese language, optional shortcuts, and silent setup refusal are explicit in `installer/OMNIX-Entropy.iss` and contract tests.

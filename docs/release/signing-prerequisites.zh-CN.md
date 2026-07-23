@@ -80,7 +80,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File scripts\publish-signed-relea
   -SourcePackageDirectory "D:\Agent\Project\OMNIX-Entropy\.artifacts\OMNIX-Entropy-test-20260719-014731" `
   -SignToolPath "C:\Program Files (x86)\Windows Kits\10\bin\<SDK版本>\x64\signtool.exe" `
   -CertificateThumbprint "<你明确确认的40位证书指纹>" `
-  -TimestampUrl "<证书提供方给出的HTTPS RFC3161地址>"
+  -TimestampUrl "http://timestamp.digicert.com"
 ```
 
 脚本会创建新的候选目录，不覆盖源包。它会：

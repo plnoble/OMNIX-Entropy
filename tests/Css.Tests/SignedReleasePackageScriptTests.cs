@@ -41,7 +41,12 @@ public sealed class SignedReleasePackageScriptTests
             .And.Contain("1.2.840.113549.1.1.1")
             .And.Contain("RSA")
             .And.Contain("Code-signing certificate")
-            .And.Contain("Certificate thumbprint must contain exactly 40 hexadecimal characters");
+            .And.Contain("Certificate thumbprint must contain exactly 40 hexadecimal characters")
+            .And.Contain("\"timestamp.digicert.com\"")
+            .And.Contain("$Uri.IsDefaultPort")
+            .And.Contain("$Uri.AbsolutePath -eq \"/\"")
+            .And.Contain("[string]::IsNullOrEmpty($Uri.Query)")
+            .And.Contain("approved official HTTP RFC3161 endpoint");
 
         script.Should().NotContain("Import-PfxCertificate")
             .And.NotContain("New-SelfSignedCertificate")

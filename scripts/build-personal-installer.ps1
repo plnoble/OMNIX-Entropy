@@ -70,6 +70,27 @@ function Resolve-RequiredTool {
     return $resolved
 }
 
+function Test-ApprovedTimestampUri {
+    param([Parameter(Mandatory = $true)][Uri]$Uri)
+
+    if (-not [string]::IsNullOrEmpty($Uri.UserInfo) -or
+        -not [string]::IsNullOrEmpty($Uri.Fragment)) {
+        return $false
+    }
+    if ($Uri.Scheme -eq [Uri]::UriSchemeHttps) {
+        return $true
+    }
+
+    return $Uri.Scheme -eq [Uri]::UriSchemeHttp -and
+        $Uri.IsDefaultPort -and
+        [string]::Equals(
+            $Uri.Host,
+            "timestamp.digicert.com",
+            [StringComparison]::OrdinalIgnoreCase) -and
+        $Uri.AbsolutePath -eq "/" -and
+        [string]::IsNullOrEmpty($Uri.Query)
+}
+
 $PackageDirectory = Resolve-ArtifactDirectory `
     -Path $PackageDirectory `
     -Label "PackageDirectory" `
@@ -120,8 +141,8 @@ if ($certificate.NotBefore -gt $now -or $certificate.NotAfter -le $now) {
 
 $timestampUri = $null
 if (-not [Uri]::TryCreate($TimestampUrl, [UriKind]::Absolute, [ref]$timestampUri) -or
-    $timestampUri.Scheme -ne [Uri]::UriSchemeHttps) {
-    throw "TimestampUrl must be an absolute HTTPS RFC3161 endpoint."
+    -not (Test-ApprovedTimestampUri -Uri $timestampUri)) {
+    throw "TimestampUrl must be an absolute HTTPS endpoint or the approved official HTTP RFC3161 endpoint."
 }
 
 $resolvedCompiler = Resolve-RequiredTool `

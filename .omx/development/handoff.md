@@ -1,5 +1,15 @@
 # Agent Handoff
 
+## Latest Update - 2026-07-23 First valid personal installer completed
+
+- Current objective: preserve the verified personal signing/installer chain and decide separately whether to run disposable acceptance or stage a GitHub draft Release.
+- What changed: guarded two-step personal signer initialization, exact official DigiCert timestamp exception, pinned Inno Simplified Chinese resource/provenance, and completed development records.
+- What is verified: certificate stores are correctly scoped; signed 110-file candidate passed; installer 0.1.0 passed independent verification; focused 10/10; full 1054/1054; Release 0 errors; integrity 380/18; parser and public-candidate audits pass.
+- Local artifact: `.artifacts/OMNIX-Entropy-installer-v0.1.0-roottrusted-2/OMNIX-Entropy-0.1.0-win-x64-setup.exe`, SHA-256 `5680C3847F23291784BB38FB1D01FACAFC6013DC47F06B611C170BCDC63955BE`.
+- What is not verified: setup was not launched/installed/uninstalled; the ten-case disposable Windows receipt is absent; no GitHub draft or public Release was created.
+- Known risks: CurrentUser trust is persistent; private key is non-exportable; SmartScreen public reputation is not provided by personal trust; NU1900 warnings reflect unavailable vulnerability metadata.
+- Exact next recommended action: after source push/CI, obtain a separate user decision for either disposable-machine acceptance or local-only GitHub draft staging. Do not run or publish setup implicitly.
+
 ## Latest Update - 2026-07-23 D-first installer foundation completed
 
 - Current objective: provide a beginner-visible, D-first Windows setup and bind GitHub updates to a verified installer rather than a portable ZIP.

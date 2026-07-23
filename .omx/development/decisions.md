@@ -2246,3 +2246,15 @@ Consequences: 用户现在只能执行低风险临时目录移动到隔离区；
 - Decision: inspect OID `2.5.29.37` as `X509EnhancedKeyUsageExtension` and require code-signing OID `1.3.6.1.5.5.7.3.3` in both prerequisite and signing scripts.
 - Rejected: depend on provider-specific `EnhancedKeyUsageList`, accept certificates with no EKU, or let the inspector and signer apply different eligibility rules.
 - Consequence: Windows PowerShell 5.1 reports ordinary certificates as ineligible rather than treating the certificate store as unreadable, and the final transform rechecks the identical security condition.
+
+## 2026-07-23 - Official HTTP timestamping is an exact provider exception
+
+- Decision: retain HTTPS as the general timestamp transport rule, but permit only `http://timestamp.digicert.com` with the default port, root path, no query, no fragment, and no user information.
+- Rejected: weaken the check to any HTTP URL, use an undocumented HTTPS variant, omit the timestamp, or treat a successful SignTool exit as sufficient without post-sign verification.
+- Consequence: the scripts match DigiCert's supported RFC3161 interface while keeping the network destination bounded and preserving signed timestamp verification.
+
+## 2026-07-23 - Root trust requires separate consent
+
+- Decision: fail the personal release build when the self-signed signer does not form a Windows-trusted Authenticode chain, and require separate explicit consent before adding its public certificate to CurrentUser Root.
+- Rejected: interpret TrustedPeople/TrustedPublisher approval as Root approval, accept `UnknownError` based only on thumbprint, add LocalMachine trust, or publish a signed-but-untrusted package as valid.
+- Consequence: no installer is falsely labeled ready; the persistent trust expansion remains visible and reversible, and production same-signer gates keep requiring Windows `Valid`.

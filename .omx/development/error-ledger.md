@@ -1,5 +1,35 @@
 # Error Ledger
 
+## 2026-07-23 - Inno compiler did not bundle Simplified Chinese
+
+- Symptom: the first setup compile stopped because `compiler:Languages\ChineseSimplified.isl` did not exist, after signing a temporary uninstaller but before producing setup.
+- Wrong assumption: the winget Inno Setup 6.7.3 installation included every language referenced by the installer definition.
+- Root cause: Simplified Chinese is an Inno user-contributed translation stored under the official source repository's `Files/Languages/Unofficial`, not in the installed standard language set.
+- Detection method: real ISCC output named the missing include path and exit code 2.
+- Fix: pinned the translation from official tag `is-6_7_3`, recorded SHA-256 and license/source, switched to a script-relative path, and rebuilt in a fresh output directory.
+- Prevention rule: compile installer definitions against the exact selected tool installation before calling language/tool prerequisites complete; vendor nonstandard build inputs with provenance.
+- Skill candidate: yes.
+
+## 2026-07-23 - Full test command guessed the solution filename
+
+- Symptom: `dotnet test OMNIX-Entropy.sln --no-restore` failed immediately with MSB1009.
+- Wrong assumption: the product name matched the repository solution name.
+- Root cause: the repository uses `ComputerSecuritySoftware.slnx`.
+- Detection method: `rg --files -g "*.sln" -g "*.slnx"` resolved the actual file.
+- Fix: reran the full suite against `ComputerSecuritySoftware.slnx`; 1054/1054 passed.
+- Prevention rule: resolve unobserved solution paths with `rg --files` before invoking required completion checks.
+- Skill candidate: no; this is already a repository search rule.
+
+## 2026-07-23 - Personal publisher trust needed more explicit blast-radius consent
+
+- Symptom: the guarded certificate initializer was rejected before execution even though the user had said to continue after the earlier prerequisite summary.
+- Wrong assumption: general continuation approval was sufficiently explicit for persistent CurrentUser publisher trust.
+- Root cause: TrustedPeople/TrustedPublisher makes any future binary signed by the corresponding private key trusted for that Windows user; this blast radius must be named directly at the approval point.
+- Detection method: approval reviewer rejected process creation before the certificate script ran.
+- Fix: do not retry or work around the refusal; explain exact stores, persistence, scope, and what the trust means, then request an explicit yes/no answer.
+- Prevention rule: certificate-store trust prompts must state that all binaries signed by the key become trusted for the selected scope, even when the key is non-exportable and Root/LocalMachine are untouched.
+- Skill candidate: yes.
+
 ## 2026-07-23 - Combined audit regex broke PowerShell quoting
 
 - Symptom: the final status/privacy audit stopped at a PowerShell parser error before either `rg` search ran.
@@ -3131,4 +3161,24 @@ Use this file to record mistakes that should not be repeated.
 - Detection method: real Windows PowerShell JSON execution first returned `CertificateStoreReadable=false`, then failed at `$eligibleCertificates.Count` after the EKU correction.
 - Fix: separate store enumeration from eligibility filtering, parse the X509 EKU extension directly, wrap the sorted result as an array, and add a child-process JSON test.
 - Prevention rule: distinguish provider access from per-item parsing, use host-independent X509 structures for security decisions, and test empty collections under the oldest supported PowerShell host.
+- Skill candidate: yes.
+
+## 2026-07-23 - Trusted publisher stores did not establish a self-signed Authenticode chain
+
+- Symptom: SignTool successfully signed and RFC3161-timestamped App and worker, but `Get-AuthenticodeSignature` returned `UnknownError` and SignTool verification returned exit 1.
+- Wrong assumption: placing the self-signed end-entity code-signing certificate in CurrentUser TrustedPeople and TrustedPublisher would also make its Authenticode chain valid.
+- Root cause: Windows still requires the self-signed certificate to anchor in Trusted Root; TrustedPublisher expresses publisher trust but does not replace root-chain trust.
+- Detection method: the signed files reported `A certificate chain processed, but terminated in a root certificate which is not trusted by the trust provider`; both carried the expected signer and a valid DigiCert timestamp.
+- Fix: the signed-candidate transform failed closed and no valid manifest was emitted. Await separate explicit CurrentUser Root authorization before changing trust scope or rebuilding.
+- Prevention rule: prove a proposed personal certificate topology with SignTool `/pa` before claiming it can produce `Valid`; name Root-store impact separately from publisher trust.
+- Skill candidate: yes.
+
+## 2026-07-23 - HTTPS-only timestamp validation rejected official SignTool endpoints
+
+- Symptom: the reviewed signing scripts could not accept the official DigiCert RFC3161 URL even though timestamping was a required release gate.
+- Wrong assumption: an RFC3161 endpoint used by SignTool should always be HTTPS.
+- Root cause: DigiCert documents `http://timestamp.digicert.com` as its supported RFC3161 endpoint and specifically warns that HTTPS can fail; the protocol sends a digest and verifies the TSA-signed response.
+- Detection method: official DigiCert documentation review before the first signing invocation.
+- Fix: allow arbitrary absolute HTTPS endpoints plus only the exact default-port/path/query-free DigiCert HTTP host; retain rejection for all other HTTP URLs and add source contracts.
+- Prevention rule: validate release-service transport assumptions against the provider's current primary documentation, then narrowly allowlist any protocol exception.
 - Skill candidate: yes.

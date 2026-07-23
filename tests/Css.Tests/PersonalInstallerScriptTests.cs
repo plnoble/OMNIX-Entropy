@@ -15,10 +15,27 @@ public sealed class PersonalInstallerScriptTests
             .And.Contain("Result := not WizardSilent")
             .And.Contain("SignedUninstaller=yes")
             .And.Contain("SignTool=omnix")
+            .And.Contain("MessagesFile: \"Languages\\ChineseSimplified.isl\"")
             .And.Contain("ChangesAssociations=no")
             .And.Contain("ChangesEnvironment=no")
             .And.Contain("Source: \"{#SourcePackage}\\*\"")
             .And.Contain("Uninstallable=yes");
+    }
+
+    [Fact]
+    public void Installer_carries_the_version_matched_simplified_Chinese_translation()
+    {
+        var translation = Read("installer", "Languages", "ChineseSimplified.isl");
+        var notice = Read("installer", "THIRD-PARTY-NOTICES.md");
+
+        translation.Should().Contain("Inno Setup version 6.5.0+ Chinese Simplified messages")
+            .And.Contain("LanguageID=$0804")
+            .And.Contain("LanguageName=");
+        notice.Should().Contain("jrsoftware/issrc")
+            .And.Contain("is-6_7_3")
+            .And.Contain("7D544B9BB1D142CFA11F2E5D3CC8ABE2E55F8E066C5124E3772675AA236E1278")
+            .And.Contain("75EC648A9C1B547B1C35113B06BC85CEDE51C1C1D7D089AF8FD974331F930570")
+            .And.Contain("Inno Setup License");
     }
 
     [Fact]
@@ -32,7 +49,11 @@ public sealed class PersonalInstallerScriptTests
             .And.Contain("ISCC.exe")
             .And.Contain("signtool.exe")
             .And.Contain("Cert:\\CurrentUser\\My")
-            .And.Contain("TimestampUrl must be an absolute HTTPS RFC3161 endpoint")
+            .And.Contain("TimestampUrl must be an absolute HTTPS endpoint or the approved official HTTP RFC3161 endpoint")
+            .And.Contain("\"timestamp.digicert.com\"")
+            .And.Contain("$Uri.IsDefaultPort")
+            .And.Contain("$Uri.AbsolutePath -eq \"/\"")
+            .And.Contain("[string]::IsNullOrEmpty($Uri.Query)")
             .And.Contain("/Somnix=$signCommand")
             .And.Contain("'$q'")
             .And.Contain("cannot be a reparse point")

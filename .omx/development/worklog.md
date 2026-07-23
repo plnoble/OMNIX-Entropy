@@ -1,5 +1,20 @@
 # Development Worklog
 
+## 2026-07-23 - First valid personal installer completed
+
+- After separate explicit consent, imported only public certificate `5688958FEA0056861558E8DCF9D2381AF46074B2` into CurrentUser Root. Independent inspection found the private key only in CurrentUser My, public copies in the three authorized CurrentUser trust stores, and zero matches in inspected LocalMachine stores.
+- A fresh 110-file App/worker candidate passed independent hash, Authenticode, timestamp, RSA, production-surface, and same-signer verification.
+- The first installer compile exposed that standard Inno 6.7.3 omits the unofficial Simplified Chinese translation. Pinned the official `jrsoftware/issrc` `is-6_7_3` file in the repository with source/hash notice, then rebuilt from a new output.
+- Final `OMNIX-Entropy-0.1.0-win-x64-setup.exe` is 14,812,824 bytes, SHA-256 `5680C3847F23291784BB38FB1D01FACAFC6013DC47F06B611C170BCDC63955BE`, valid same-signer, timestamped, D-first, directory-selectable, and silent-install-disabled. The installer was not launched or uploaded.
+- Made signer initialization reproducible as two explicit approvals: publisher trust first, then an optional thumbprint-bound CurrentUser Root attestation. Runtime rerun was idempotent (`Created=False`, `RootStoreModified=False`, `RootTrusted=True`).
+- Verification: focused 10/10; full 1054/1054; Release 0 errors; integrity 380/18; script parser pass; 457 public candidates/about 6.3 MB with zero binary or signing-material candidates.
+
+## 2026-07-23 - Inno installed; signer trust awaiting explicit approval
+
+- Winget verified and installed `JRSoftware.InnoSetup` 6.7.3 to `D:\Development\Inno Setup 6`; the selected `ISCC.exe` has valid Authenticode. An older 6.7.1 registration was observed and left untouched.
+- Added a guarded CurrentUser-only personal signer initializer: exact attestation, RSA 3072, non-exportable private key, public CER evidence under ignored artifacts, no PFX/Root/LocalMachine/remove authority. Focused parser/contracts passed 5/5.
+- Initial execution was rejected before any certificate was created because TrustedPeople/TrustedPublisher blast-radius consent was not explicit enough. No retry or workaround was attempted.
+
 ## 2026-07-23 - D-first personal installer foundation
 
 - Added an Inno Setup definition with a visible directory page, default `D:\Software\OMNIX-Entropy\Install`, lowest-privilege per-user setup, x64-compatible architecture, signed uninstaller, and explicit silent-mode refusal.
@@ -2923,3 +2938,11 @@
 - Result remained unchanged: `signtool.exe` absent, CurrentUser certificate store readable, zero eligible code-signing certificates, and `CanCreateSignedCandidate=false`.
 - The same signing/disposable-environment condition has now repeated across at least three consecutive goal turns. No local code change can truthfully create production trust, approve a signer, or produce disposable-machine behavioral evidence.
 - Recorded the goal as blocked rather than adding unrelated scope, creating a self-signed certificate, weakening trust, or running mutation fixtures on the primary machine.
+
+## 2026-07-23 - Personal publisher created; signed candidate correctly failed on missing root trust
+
+- Installed reviewed Inno Setup 6.7.3 to `D:\Development\Inno Setup 6`; its compiler Authenticode status is Valid.
+- Added a guarded, idempotent personal signer initializer and contracts. After exact user consent, created non-exportable RSA code-signing certificate `5688958FEA0056861558E8DCF9D2381AF46074B2` for the interactive CurrentUser account.
+- Independent store inspection found the private key only in CurrentUser My, public copies only in CurrentUser TrustedPeople/TrustedPublisher, and no matching entry in CurrentUser Root or inspected LocalMachine stores.
+- Corrected the timestamp URL policy using DigiCert's official RFC3161 documentation: exact `http://timestamp.digicert.com` is narrowly allowed while other HTTP endpoints remain refused. Focused signer/installer/release contracts passed 9/9 and all three scripts parsed.
+- Built `.artifacts/OMNIX-Entropy-test-20260723-225606`. Signing and timestamping App/worker succeeded, but Windows chain verification rejected the self-signed certificate because it is not in Trusted Root. The transform failed closed before manifest/ZIP completion; no installer was compiled or launched.

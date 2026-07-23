@@ -1,5 +1,13 @@
 # Reflections
 
+## 2026-07-23 - Personal signer and first valid installer
+
+- What worked: every boundary failed closed. Missing Root trust prevented a false valid candidate; missing Chinese resources prevented a partial setup; independent verifiers, not builder output, decided readiness.
+- What caught real risk: testing against the real Windows trust provider showed that TrustedPublisher does not establish a self-signed chain. Binding the second attestation to the actual thumbprint makes the persistent Root decision explicit and reproducible.
+- Waste: assuming an installer language existed and guessing the solution filename both caused avoidable failed commands. Resolve tool payloads and repository paths before required gates.
+- Reusable lesson: personal Windows signing needs four distinct truths: protected private key, explicit publisher trust, explicit root-chain trust for self-signed certificates, and independent post-sign verification. None implies the others.
+- Remaining risk: local cryptographic/install-policy verification is complete, but behavioral acceptance in a disposable Windows environment and any GitHub Release publication remain separate gates.
+
 ## 2026-07-23 - D-first installer foundation
 
 - What worked: separating installer definition, signed build, read-only transfer verification, and GitHub staging made each trust transition independently testable.
