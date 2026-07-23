@@ -8,6 +8,7 @@
 - Final `OMNIX-Entropy-0.1.0-win-x64-setup.exe` is 14,812,824 bytes, SHA-256 `5680C3847F23291784BB38FB1D01FACAFC6013DC47F06B611C170BCDC63955BE`, valid same-signer, timestamped, D-first, directory-selectable, and silent-install-disabled. The installer was not launched or uploaded.
 - Made signer initialization reproducible as two explicit approvals: publisher trust first, then an optional thumbprint-bound CurrentUser Root attestation. Runtime rerun was idempotent (`Created=False`, `RootStoreModified=False`, `RootTrusted=True`).
 - Verification: focused 10/10; full 1054/1054; Release 0 errors; integrity 380/18; script parser pass; 457 public candidates/about 6.3 MB with zero binary or signing-material candidates.
+- Pushed source commit `4aba92d`; GitHub CI run `30019958502` passed restore, production build, full suite, and source integrity in 2m52s.
 
 ## 2026-07-23 - Inno installed; signer trust awaiting explicit approval
 
