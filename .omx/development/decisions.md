@@ -1,5 +1,11 @@
 # Decision Log
 
+## 2026-07-23 - Use Inno Setup for visible D-first personal installation
+
+- Decision: use an authored Inno Setup definition and the official compiler instead of a custom privileged bootstrapper. Always expose the directory page, default to D, reject silent setup, and use one explicit Authenticode signer for App, worker, setup, and uninstaller.
+- Rejected: Velopack because its normal Windows ownership defaults to `%LocalAppData%` on C; MSIX because install-drive choice is not controlled in the required beginner flow; a hand-written installer because it would add avoidable privileged file-replacement authority.
+- Consequence: repository policy and release staging are complete, but producing a real setup requires the external Inno compiler and an explicitly approved personal signer.
+
 ## 2026-07-22 - Public CI must reproduce from tracked files with deterministic scheduling
 
 - Decision: version the top-level `.omx` PowerShell smoke contracts that tests consume, enforce LF through `.gitattributes`, build required Release outputs before Debug tests, and disable xUnit collection parallelization for this Windows integration-heavy suite.

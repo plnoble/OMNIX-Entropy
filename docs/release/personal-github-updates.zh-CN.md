@@ -21,7 +21,7 @@
 
    ```powershell
    powershell -NoProfile -ExecutionPolicy Bypass -File scripts\prepare-personal-github-release.ps1 `
-     -PackageDirectory .artifacts\OMNIX-Entropy-release-YYYYMMDD-HHMMSS `
+     -InstallerDirectory .artifacts\OMNIX-Entropy-installer-v0.1.0 `
      -Version 0.1.0
    ```
 

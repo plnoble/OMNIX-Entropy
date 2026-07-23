@@ -1,6 +1,6 @@
 param(
     [Parameter(Mandatory = $true)]
-    [string]$PackageDirectory,
+    [string]$InstallerDirectory,
     [Parameter(Mandatory = $true)]
     [ValidatePattern("^[0-9]+\.[0-9]+\.[0-9]+$")]
     [string]$Version,
@@ -30,10 +30,10 @@ function Resolve-ArtifactDirectory {
     if (-not $resolved.StartsWith(
         $artifactPrefix,
         [StringComparison]::OrdinalIgnoreCase)) {
-        throw "PackageDirectory must be under: $artifactRoot"
+        throw "InstallerDirectory must be under: $artifactRoot"
     }
     if (-not (Test-Path -LiteralPath $resolved -PathType Container)) {
-        throw "PackageDirectory does not exist: $resolved"
+        throw "InstallerDirectory does not exist: $resolved"
     }
     return $resolved
 }
@@ -51,35 +51,37 @@ function Assert-SafeReleaseNotesPath {
     return $resolved
 }
 
-$PackageDirectory = Resolve-ArtifactDirectory -Path $PackageDirectory
-$packageManifestPath = Join-Path $PackageDirectory "package-manifest.json"
-if (-not (Test-Path -LiteralPath $packageManifestPath -PathType Leaf)) {
-    throw "Signed package manifest is missing."
+$InstallerDirectory = Resolve-ArtifactDirectory -Path $InstallerDirectory
+$installerManifestPath = Join-Path $InstallerDirectory "installer-manifest.json"
+if (-not (Test-Path -LiteralPath $installerManifestPath -PathType Leaf)) {
+    throw "Installer manifest is missing."
 }
 
-$verifier = Join-Path $PSScriptRoot "verify-signed-release-candidate.ps1"
+$verifier = Join-Path $PSScriptRoot "verify-personal-installer.ps1"
 & powershell -NoProfile -ExecutionPolicy Bypass -File $verifier `
-    -PackageDirectory $PackageDirectory
+    -InstallerDirectory $InstallerDirectory
 if ($LASTEXITCODE -ne 0) {
-    throw "Signed package verification failed."
+    throw "Personal installer verification failed."
 }
 
-$packageManifest = Get-Content -LiteralPath $packageManifestPath -Raw |
+$installerManifest = Get-Content -LiteralPath $installerManifestPath -Raw |
     ConvertFrom-Json
-if ($packageManifest.PackageKind -ne "SignedReleaseCandidate" -or
-    $packageManifest.ValidSameSigner -ne $true -or
-    $packageManifest.App.SignatureStatus -ne "Valid" -or
-    $packageManifest.Worker.SignatureStatus -ne "Valid" -or
+if ($installerManifest.PackageKind -ne "PersonalWindowsInstaller" -or
+    [string]$installerManifest.Version -ne $Version -or
+    $installerManifest.DirectorySelectionVisible -ne $true -or
+    $installerManifest.SilentInstallAllowed -ne $false -or
+    $installerManifest.Installer.SignatureStatus -ne "Valid" -or
     -not [string]::Equals(
-        [string]$packageManifest.App.SignerThumbprint,
-        [string]$packageManifest.Worker.SignerThumbprint,
+        [string]$installerManifest.Installer.SignerThumbprint,
+        [string]$installerManifest.SourcePackageSignerThumbprint,
         [StringComparison]::OrdinalIgnoreCase)) {
-    throw "Package is not a valid same-signer release candidate."
+    throw "Installer is not a valid same-signer D-first release candidate."
 }
 
-$sourceZipPath = "$PackageDirectory.zip"
-if (-not (Test-Path -LiteralPath $sourceZipPath -PathType Leaf)) {
-    throw "Signed package ZIP is missing: $sourceZipPath"
+$sourceInstallerName = [string]$installerManifest.Installer.File
+$sourceInstallerPath = Join-Path $InstallerDirectory $sourceInstallerName
+if (-not (Test-Path -LiteralPath $sourceInstallerPath -PathType Leaf)) {
+    throw "Verified installer is missing: $sourceInstallerPath"
 }
 
 $tag = "v$Version"
@@ -89,13 +91,22 @@ if (Test-Path -LiteralPath $releaseDirectory) {
 }
 New-Item -ItemType Directory -Path $releaseDirectory | Out-Null
 
-$packageAssetName = "OMNIX-Entropy-$Version-win-x64.zip"
+$packageAssetName = "OMNIX-Entropy-$Version-win-x64-setup.exe"
 $packageAssetPath = Join-Path $releaseDirectory $packageAssetName
-Copy-Item -LiteralPath $sourceZipPath -Destination $packageAssetPath
+Copy-Item -LiteralPath $sourceInstallerPath -Destination $packageAssetPath
+$releaseInstallerManifestPath = Join-Path $releaseDirectory "installer-manifest.json"
+Copy-Item -LiteralPath $installerManifestPath -Destination $releaseInstallerManifestPath
 $packageHash = Get-FileHash -LiteralPath $packageAssetPath -Algorithm SHA256
 $packageFile = Get-Item -LiteralPath $packageAssetPath
-$packageManifestHash = Get-FileHash `
-    -LiteralPath $packageManifestPath `
+if ($packageFile.Length -ne [long]$installerManifest.Installer.Length -or
+    -not [string]::Equals(
+        $packageHash.Hash,
+        [string]$installerManifest.Installer.SHA256,
+        [StringComparison]::OrdinalIgnoreCase)) {
+    throw "Installer copy hash verification failed."
+}
+$installerManifestHash = Get-FileHash `
+    -LiteralPath $releaseInstallerManifestPath `
     -Algorithm SHA256
 $commitSha = (& git -C $repoRoot rev-parse HEAD 2>$null)
 if ($LASTEXITCODE -ne 0 -or $commitSha -notmatch "^[0-9a-fA-F]{40}$") {
@@ -115,8 +126,8 @@ $channel = [ordered]@{
         DownloadUrl = "https://github.com/$Repository/releases/download/$tag/$packageAssetName"
         Length = $packageFile.Length
         SHA256 = $packageHash.Hash
-        PackageManifestSHA256 = $packageManifestHash.Hash
-        SignerThumbprint = ([string]$packageManifest.App.SignerThumbprint).ToUpperInvariant()
+        InstallerManifestSHA256 = $installerManifestHash.Hash
+        SignerThumbprint = ([string]$installerManifest.Installer.SignerThumbprint).ToUpperInvariant()
         ValidSameSigner = $true
     }
 }
@@ -128,6 +139,7 @@ $channelPath = Join-Path $releaseDirectory "omnix-release.json"
 $sumsPath = Join-Path $releaseDirectory "SHA256SUMS.txt"
 $sums = @(
     "$($packageHash.Hash.ToLowerInvariant())  $packageAssetName",
+    "$($installerManifestHash.Hash.ToLowerInvariant())  installer-manifest.json",
     "$((Get-FileHash -LiteralPath $channelPath -Algorithm SHA256).Hash.ToLowerInvariant())  omnix-release.json"
 ) -join [Environment]::NewLine
 [IO.File]::WriteAllText($sumsPath, $sums + [Environment]::NewLine, $utf8WithoutBom)
@@ -167,6 +179,7 @@ if ($PublishDraft) {
         "--notes-file", $notes,
         "--draft",
         $packageAssetPath,
+        $releaseInstallerManifestPath,
         $channelPath,
         $sumsPath
     )
@@ -182,7 +195,8 @@ if ($PublishDraft) {
     Tag = $tag
     CommitSHA = $commitSha
     StagingDirectory = $releaseDirectory
-    PackageAsset = $packageAssetPath
+    InstallerAsset = $packageAssetPath
+    InstallerManifest = $releaseInstallerManifestPath
     ChannelManifest = $channelPath
     Checksums = $sumsPath
     DraftPublished = [bool]$PublishDraft

@@ -1,5 +1,13 @@
 # Development Worklog
 
+## 2026-07-23 - D-first personal installer foundation
+
+- Added an Inno Setup definition with a visible directory page, default `D:\Software\OMNIX-Entropy\Install`, lowest-privilege per-user setup, x64-compatible architecture, signed uninstaller, and explicit silent-mode refusal.
+- Added a bounded local builder that first runs the signed-candidate verifier, requires explicit ISCC/SignTool/certificate/timestamp inputs, enforces the App/worker signer, and emits a signed setup plus installer manifest.
+- Added a separate read-only installer verifier for fixed local path, reparse/extra-file refusal, D-first/silent policy, length/hash, Authenticode, timestamp, and source-package signer matching.
+- Changed personal GitHub release staging and channel metadata from portable ZIP to verified setup EXE plus installer manifest; staging rechecks the copied installer hash before any draft operation.
+- Verification: focused 19/19; full 1051/1051; Release build 0 errors; integrity 379 files and 18/18 XAML; PowerShell parser pass. Read-only machine check found SignTool but no Inno compiler and no eligible signer, so no installer was compiled or published.
+
 ## 2026-07-22 - First public CI remediation
 
 - Inspected failed GitHub Actions run `29932623250`: 31 failures reduced to missing ignored smoke scripts, CRLF source-text drift, absent pre-test Release output, and hosted-runner pipe contention.

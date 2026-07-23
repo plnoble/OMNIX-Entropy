@@ -1,5 +1,12 @@
 # Reflections
 
+## 2026-07-23 - D-first installer foundation
+
+- What worked: separating installer definition, signed build, read-only transfer verification, and GitHub staging made each trust transition independently testable.
+- What was deliberately deferred: installing Inno and creating a certificate are machine-level choices; source completion must not be used as consent for either.
+- Lesson: a beginner-friendly setup can still be fail-closed. Visible path choice and human confirmation belong in the installer definition, while signer/hash evidence belongs outside it in immutable manifests.
+- Next improvement: add bounded application-side download and verification that stops before execution, then design explicit install confirmation and rollback around a real verified setup artifact.
+
 ## 2026-07-22 - Public CI remediation
 
 - What worked: reducing the failed run by failure class produced four small infrastructure fixes; the tracked-only archive then reproduced GitHub's real input boundary before another push.

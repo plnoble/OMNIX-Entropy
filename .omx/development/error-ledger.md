@@ -1,5 +1,15 @@
 # Error Ledger
 
+## 2026-07-23 - Combined audit regex broke PowerShell quoting
+
+- Symptom: the final status/privacy audit stopped at a PowerShell parser error before either `rg` search ran.
+- Wrong assumption: a double-quoted command could safely contain a regex character class with an unescaped double quote alongside another quoted regex.
+- Root cause: the inner quote terminated the outer PowerShell command string.
+- Detection method: parser reported a missing string terminator and invalid pipeline expression; no audit output was produced.
+- Fix: split the audit into simple single-quoted searches without embedded quote characters.
+- Prevention rule: keep final audit regexes single-quoted and run structurally different searches as separate commands.
+- Skill candidate: no.
+
 ## 2026-07-22 - Local green suite masked an incomplete public checkout
 
 - Symptom: the first GitHub Actions run failed 31 tests even though the same 1048-test suite passed locally before publication.

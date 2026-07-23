@@ -1,5 +1,7 @@
 # OMNIX-Entropy 发布流程
 
+生成 Windows setup 前先阅读 [D 盘优先的个人安装器](personal-installer.zh-CN.md)。安装器构建和 GitHub 草稿发布是签名候选包之后的独立步骤。
+
 自用 GitHub 分发请先阅读 [GitHub 自用安装与更新通道](personal-github-updates.zh-CN.md)。该通道可以使用本机个人签名，但不会取消 App 与 Elevated Worker 的同签名校验。
 
 正式发布按下面的顺序进行。每一步都必须成功，不能把“代码测试通过”当成“软件已经可以发布”。

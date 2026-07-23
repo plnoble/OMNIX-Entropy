@@ -1,5 +1,14 @@
 # Agent Handoff
 
+## Latest Update - 2026-07-23 D-first installer foundation completed
+
+- Current objective: provide a beginner-visible, D-first Windows setup and bind GitHub updates to a verified installer rather than a portable ZIP.
+- What changed: `installer/OMNIX-Entropy.iss`, builder/verifier scripts, setup-based release manifest contract, focused tests, and Chinese operator documentation.
+- What is verified: focused 19/19; full 1051/1051; Release 0 errors; integrity 379/18; script parsers valid; fixed setup asset and same-signer checks are covered.
+- What is not verified: no real setup was compiled, signed, launched, installed, uninstalled, or uploaded.
+- Known risks/blockers: Inno compiler is absent; SignTool exists; eligible CurrentUser RSA code-signing certificates are 0. Local builds emitted NU1900 warnings because the sandbox could not reach the NuGet vulnerability index, but compilation/tests completed.
+- Exact next recommended action: obtain explicit approval before installing Inno or creating/selecting any personal certificate. In parallel, application-side download and verification may be implemented, but installer execution must remain disabled until a real verified setup exists.
+
 ## Latest Update - 2026-07-22 Public CI remediation completed
 
 - Current objective: make `plnoble/OMNIX-Entropy` reproducible from tracked files and obtain a passing GitHub Actions run after the successful initial push.

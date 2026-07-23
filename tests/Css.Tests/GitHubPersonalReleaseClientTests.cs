@@ -99,11 +99,11 @@ public sealed class GitHubPersonalReleaseClientTests
         GeneratedAtUtc = DateTimeOffset.Parse("2026-07-22T00:00:00Z"),
         Package = new PersonalReleasePackage
         {
-            AssetName = "OMNIX-Entropy-0.2.0-win-x64.zip",
-            DownloadUrl = "https://github.com/plnoble/OMNIX-Entropy/releases/download/v0.2.0/OMNIX-Entropy-0.2.0-win-x64.zip",
+            AssetName = "OMNIX-Entropy-0.2.0-win-x64-setup.exe",
+            DownloadUrl = "https://github.com/plnoble/OMNIX-Entropy/releases/download/v0.2.0/OMNIX-Entropy-0.2.0-win-x64-setup.exe",
             Length = 1024,
             SHA256 = new string('B', 64),
-            PackageManifestSHA256 = new string('C', 64),
+            InstallerManifestSHA256 = new string('C', 64),
             SignerThumbprint = new string('D', 40),
             ValidSameSigner = true
         }

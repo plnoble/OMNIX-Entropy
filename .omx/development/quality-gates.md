@@ -1,5 +1,15 @@
 # Quality Gates
 
+### 2026-07-23 - D-first personal installer foundation
+
+- Pass - Install UX policy: visible directory page, D-first default, Chinese language, optional shortcuts, and silent setup refusal are explicit in `installer/OMNIX-Entropy.iss` and contract tests.
+- Pass - Trust boundary: builder verifies the signed payload first and requires one explicit signer for App/worker/setup/uninstaller; release staging independently verifies setup and copied hash. Evidence: builder/verifier/release scripts and 19/19 focused tests.
+- Pass - Read-only transfer verification: fixed local path, reparse/extra-file, length/hash, manifest, Authenticode, timestamp, and signer checks have no write/launch authority. Evidence: `verify-personal-installer.ps1` source contract.
+- Pass - Regression/integrity: full 1051/1051; Release build 0 errors; 379 strict UTF-8 source files, replacement 0, and 18/18 XAML valid.
+- Warn - Build warnings: local .NET commands emitted NU1900 because the restricted environment could not reach the NuGet vulnerability index; no package restore/build/test failed.
+- Warn - Real artifact: SignTool is present, but Inno compiler and eligible code-signing certificate are absent. No setup, signature evidence, install/uninstall run, or GitHub Release exists.
+- Pass - Side effects: no installer/certificate generation or installation, trust change, UAC, setup launch, system file write, antivirus interaction, or GitHub release publication occurred.
+
 ### 2026-07-22 - First public CI remediation
 
 - Pass - Scope/privacy: 22 top-level smoke/helper scripts contain neutral fixture data only; no credentials, real username, machine Marvis path, binary, or signing material is included. Evidence: `rg` privacy/secret scan and public candidate list.

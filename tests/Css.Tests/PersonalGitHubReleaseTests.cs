@@ -45,15 +45,19 @@ public sealed class PersonalGitHubReleaseTests
     }
 
     [Fact]
-    public void Personal_release_requires_verified_same_signer_package_and_only_publishes_drafts()
+    public void Personal_release_requires_verified_same_signer_installer_and_only_publishes_drafts()
     {
         var script = Read("scripts", "prepare-personal-github-release.ps1");
 
-        script.Should().Contain("verify-signed-release-candidate.ps1")
-            .And.Contain("SignedReleaseCandidate")
-            .And.Contain("ValidSameSigner")
+        script.Should().Contain("verify-personal-installer.ps1")
+            .And.Contain("PersonalWindowsInstaller")
+            .And.Contain("DirectorySelectionVisible")
+            .And.Contain("SilentInstallAllowed")
+            .And.Contain("installer-manifest.json")
+            .And.Contain("win-x64-setup.exe")
             .And.Contain("SignerThumbprint")
             .And.Contain("Get-FileHash -LiteralPath $packageAssetPath -Algorithm SHA256")
+            .And.Contain("Installer copy hash verification failed")
             .And.Contain("plnoble/OMNIX-Entropy")
             .And.Contain("--draft")
             .And.Contain("PublishDraft")

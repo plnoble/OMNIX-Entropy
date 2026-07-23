@@ -1,5 +1,17 @@
 # Current Development State
 
+## Completed Slice - 2026-07-23 D-first personal installer foundation
+
+- Objective: turn the verified signed payload into a directory-selectable Windows installer that defaults to `D:\Software\OMNIX-Entropy\Install`, then make GitHub release staging accept only that independently verified installer.
+- Dependencies: Inno Setup compiler, existing signed-candidate verifier, Windows SDK SignTool, an explicitly selected RSA code-signing certificate, fixed GitHub release identity, and immutable SHA-256/manifests.
+- Risks: silently installing, defaulting back to C, compiling from an unverified payload, signing installer and payload with different publishers, overwriting an existing release artifact, leaking certificate material, or claiming an installable release without a compiler/certificate run.
+- Impact scope: installer definition, local build and read-only verifier scripts, personal release staging/channel asset contract, focused tests, release documentation, and development records. No application download, installer launch, UAC automation, certificate generation/import, trust-store change, or system installation is authorized in this slice.
+- Acceptance: visible installer always exposes directory choice and defaults to D; silent setup is refused; only a verified same-signer payload can compile; output installer is valid Authenticode from the same signer and has a bounded manifest; release staging re-verifies it and emits the fixed setup asset; focused/full/build/integrity gates pass; missing external tools fail before publication.
+- Status: Completed at source, policy, and refusal level. The Inno definition is visible and D-first, rejects silent setup, signs Setup/uninstaller, and copies only the verified payload. The builder requires explicit tools/certificate and same signer; the independent verifier is read-only; GitHub staging now accepts only a verified setup EXE plus installer manifest.
+- Verification: focused installer/release/update/guide contracts 19/19; full Debug 1051/1051; Release build 0 errors; source integrity 379 files, invalid UTF-8/replacement 0, and 18/18 XAML; all three changed PowerShell scripts parse successfully. Official Inno documentation confirms the selected `x64compatible`, `SignTool`, and `SignedUninstaller` behavior.
+- External readiness: read-only inspection at `2026-07-23T00:37:12Z` found SignTool at `D:\Windows Kits\10\bin\10.0.26100.0\x64\signtool.exe`, no Inno compiler, and zero eligible CurrentUser RSA code-signing certificates. No setup EXE or GitHub Release was created.
+- Exact next action: after explicit user approval to install Inno Setup and create/select a personal code-signing certificate, build and independently verify the first setup; otherwise continue with application-side bounded download/verification without enabling installer execution.
+
 ## Completed Slice - 2026-07-22 First public CI remediation
 
 - Objective: make the first public `main` build reproducible from tracked files only and obtain a passing GitHub Actions run without weakening signing or runtime safety.

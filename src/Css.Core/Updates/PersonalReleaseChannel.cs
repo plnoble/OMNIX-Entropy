@@ -9,7 +9,7 @@ public sealed record PersonalReleasePackage
     public string DownloadUrl { get; init; } = string.Empty;
     public long Length { get; init; }
     public string SHA256 { get; init; } = string.Empty;
-    public string PackageManifestSHA256 { get; init; } = string.Empty;
+    public string InstallerManifestSHA256 { get; init; } = string.Empty;
     public string SignerThumbprint { get; init; } = string.Empty;
     public bool ValidSameSigner { get; init; }
 }
@@ -76,7 +76,7 @@ public static partial class PersonalReleaseChannelPolicy
         }
 
         var package = channel.Package;
-        var expectedAsset = $"OMNIX-Entropy-{channel.Version}-win-x64.zip";
+        var expectedAsset = $"OMNIX-Entropy-{channel.Version}-win-x64-setup.exe";
         var expectedUrl =
             $"https://github.com/{Repository}/releases/download/{channel.Tag}/{expectedAsset}";
         if (package.AssetName != expectedAsset
@@ -84,7 +84,7 @@ public static partial class PersonalReleaseChannelPolicy
             || package.Length <= 0
             || package.Length > MaximumPackageBytes
             || !Sha256Regex().IsMatch(package.SHA256)
-            || !Sha256Regex().IsMatch(package.PackageManifestSHA256)
+            || !Sha256Regex().IsMatch(package.InstallerManifestSHA256)
             || !Sha40Regex().IsMatch(package.SignerThumbprint)
             || !package.ValidSameSigner)
         {
@@ -114,6 +114,9 @@ public static partial class PersonalReleaseChannelPolicy
 
     public static bool IsExpectedChannelAssetUrl(string url, string tag) =>
         url == $"https://github.com/{Repository}/releases/download/{tag}/omnix-release.json";
+
+    public static bool IsExpectedInstallerManifestUrl(string url, string tag) =>
+        url == $"https://github.com/{Repository}/releases/download/{tag}/installer-manifest.json";
 
     private static bool TryParseVersion(string value, out Version version)
     {

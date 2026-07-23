@@ -40,8 +40,9 @@ public sealed class PersonalReleaseChannelTests
         var baseline = CreateChannel();
         var variants = new[]
         {
-            baseline with { Package = baseline.Package with { DownloadUrl = "https://example.com/update.zip" } },
+            baseline with { Package = baseline.Package with { DownloadUrl = "https://example.com/update.exe" } },
             baseline with { Package = baseline.Package with { SHA256 = "ABC" } },
+            baseline with { Package = baseline.Package with { InstallerManifestSHA256 = "ABC" } },
             baseline with { Package = baseline.Package with { SignerThumbprint = "ABC" } },
             baseline with { Package = baseline.Package with { ValidSameSigner = false } },
             baseline with { Package = baseline.Package with { Length = PersonalReleaseChannelPolicy.MaximumPackageBytes + 1 } }
@@ -66,6 +67,9 @@ public sealed class PersonalReleaseChannelTests
         PersonalReleaseChannelPolicy.IsExpectedChannelAssetUrl(
             "https://github.com/plnoble/OMNIX-Entropy/releases/download/v0.2.0/omnix-release.json",
             "v0.2.0").Should().BeTrue();
+        PersonalReleaseChannelPolicy.IsExpectedInstallerManifestUrl(
+            "https://github.com/plnoble/OMNIX-Entropy/releases/download/v0.2.0/installer-manifest.json",
+            "v0.2.0").Should().BeTrue();
     }
 
     private static string CreateJson() => JsonSerializer.Serialize(CreateChannel());
@@ -81,11 +85,11 @@ public sealed class PersonalReleaseChannelTests
         GeneratedAtUtc = DateTimeOffset.Parse("2026-07-22T00:00:00Z"),
         Package = new PersonalReleasePackage
         {
-            AssetName = "OMNIX-Entropy-0.2.0-win-x64.zip",
-            DownloadUrl = "https://github.com/plnoble/OMNIX-Entropy/releases/download/v0.2.0/OMNIX-Entropy-0.2.0-win-x64.zip",
+            AssetName = "OMNIX-Entropy-0.2.0-win-x64-setup.exe",
+            DownloadUrl = "https://github.com/plnoble/OMNIX-Entropy/releases/download/v0.2.0/OMNIX-Entropy-0.2.0-win-x64-setup.exe",
             Length = 1024,
             SHA256 = new string('B', 64),
-            PackageManifestSHA256 = new string('C', 64),
+            InstallerManifestSHA256 = new string('C', 64),
             SignerThumbprint = new string('D', 40),
             ValidSameSigner = true
         }
