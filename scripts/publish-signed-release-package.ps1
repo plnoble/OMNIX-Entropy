@@ -168,6 +168,29 @@ function Test-ApprovedTimestampUri {
     return $isDigiCert -or $isGlobalSign
 }
 
+function Invoke-SignWithRetry {
+    param(
+        [Parameter(Mandatory = $true)][string]$ToolPath,
+        [Parameter(Mandatory = $true)][string]$Thumbprint,
+        [Parameter(Mandatory = $true)][string]$TimestampUrl,
+        [Parameter(Mandatory = $true)][string]$FilePath
+    )
+
+    $maxAttempts = 3
+    for ($attempt = 1; $attempt -le $maxAttempts; $attempt++) {
+        & $ToolPath sign /s My /sha1 $Thumbprint /fd SHA256 `
+            /tr $TimestampUrl /td SHA256 $FilePath
+        $signExitCode = $LASTEXITCODE
+        if ($signExitCode -eq 0) {
+            return
+        }
+        if ($attempt -eq $maxAttempts) {
+            throw "Signing $FilePath failed after $maxAttempts attempts with exit code $signExitCode."
+        }
+        Start-Sleep -Seconds 10
+    }
+}
+
 function Assert-SourceManifestEntry {
     param(
         [Parameter(Mandatory = $true)]$Entry,
@@ -355,16 +378,16 @@ foreach ($sourceItem in Get-ChildItem -LiteralPath $SourcePackageDirectory -Recu
 
 $appPath = Join-Path $OutputDirectory "Css.App.exe"
 $workerPath = Join-Path $OutputDirectory "Css.Elevated.exe"
-& $resolvedSignTool sign /s My /sha1 $normalizedThumbprint /fd SHA256 `
-    /tr $TimestampUrl /td SHA256 $appPath
-if ($LASTEXITCODE -ne 0) {
-    throw "Signing Css.App.exe failed with exit code $LASTEXITCODE."
-}
-& $resolvedSignTool sign /s My /sha1 $normalizedThumbprint /fd SHA256 `
-    /tr $TimestampUrl /td SHA256 $workerPath
-if ($LASTEXITCODE -ne 0) {
-    throw "Signing Css.Elevated.exe failed with exit code $LASTEXITCODE."
-}
+Invoke-SignWithRetry `
+    -ToolPath $resolvedSignTool `
+    -Thumbprint $normalizedThumbprint `
+    -TimestampUrl $TimestampUrl `
+    -FilePath $appPath
+Invoke-SignWithRetry `
+    -ToolPath $resolvedSignTool `
+    -Thumbprint $normalizedThumbprint `
+    -TimestampUrl $TimestampUrl `
+    -FilePath $workerPath
 
 $appSignature = Get-AuthenticodeSignature -LiteralPath $appPath
 $workerSignature = Get-AuthenticodeSignature -LiteralPath $workerPath

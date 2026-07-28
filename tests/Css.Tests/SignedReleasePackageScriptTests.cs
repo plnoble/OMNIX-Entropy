@@ -65,7 +65,9 @@ public sealed class SignedReleasePackageScriptTests
         var script = Read("scripts", "publish-signed-release-package.ps1");
 
         script.Should().Contain("signtool.exe")
-            .And.Contain("& $resolvedSignTool sign")
+            .And.Contain("Invoke-SignWithRetry")
+            .And.Contain("$maxAttempts = 3")
+            .And.Contain("Start-Sleep -Seconds 10")
             .And.Contain("/sha1")
             .And.Contain("/fd SHA256")
             .And.Contain("/tr $TimestampUrl")
@@ -75,8 +77,8 @@ public sealed class SignedReleasePackageScriptTests
             .And.Contain("Signature verification failed")
             .And.Contain("Signer thumbprint does not match the requested certificate");
 
-        Count(script, "& $resolvedSignTool sign").Should().Be(2);
-        var signing = script.IndexOf("& $resolvedSignTool sign", StringComparison.Ordinal);
+        Count(script, "Invoke-SignWithRetry `").Should().Be(2);
+        var signing = script.IndexOf("Invoke-SignWithRetry `", StringComparison.Ordinal);
         var packageFiles = script.IndexOf("$packageFiles =", StringComparison.Ordinal);
         var manifest = script.IndexOf("$manifest =", StringComparison.Ordinal);
         signing.Should().BeGreaterThan(-1);

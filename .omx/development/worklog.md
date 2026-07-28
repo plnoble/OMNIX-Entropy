@@ -12,6 +12,9 @@
 - Fix commit `6053d7b` was pushed and GitHub CI `30333783060` passed in 2m59s.
 - Final payload signing failed closed on transient DigiCert timestamp responses. An inferred DigiCert HTTPS variant was invalid, so it was abandoned. GlobalSign's current official R45 SignTool URL succeeded on an isolated copy with a valid TSA certificate; both scripts now add only that exact HTTP host/path. Timestamp policy contracts went red 2/8 then green 8/8.
 - Timestamp fallback completion gates: full 1060/1060; Release build 0 errors; integrity 383/18; three release scripts parse; diff check clean.
+- GlobalSign fallback commit `ba1df22` was pushed and GitHub CI `30334445147` passed in 3m8s.
+- A fresh final candidate again signed App successfully but hit a transient timestamp failure on Worker. Added a shared three-attempt/ten-second SignTool retry while retaining mandatory signature/timestamp verification. Retry contract went red 1/4 then green 4/4.
+- Bounded retry completion gates: full 1060/1060; Release 0 errors; integrity 383/18; parser 0; diff check clean.
 - Installer execution has not occurred.
 
 ## 2026-07-28 - RogueCleaner-inspired system-footprint diagnosis

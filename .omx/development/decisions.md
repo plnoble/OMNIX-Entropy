@@ -1,5 +1,11 @@
 # Decision Log
 
+## 2026-07-28 - Retry timestamp transport, never timestamp validation
+
+- Decision: payload signing gets at most three SignTool attempts per executable, with ten seconds between failures; final Authenticode, thumbprint, and timestamp checks remain unchanged.
+- Rejected: unbounded retry, publishing a signature without a timestamp, retrying into a reused candidate after the script exits, or weakening post-sign verification.
+- Consequence: short TSA outages no longer force manual whole-chain retries as often, while a persistent outage still fails the candidate closed.
+
 ## 2026-07-28 - Add exact GlobalSign R45 timestamp fallback
 
 - Decision: allow the exact official HTTP endpoint `timestamp.globalsign.com/tsa/r45standard` in both payload and installer signing scripts, alongside the existing exact DigiCert endpoint and the existing HTTPS policy.

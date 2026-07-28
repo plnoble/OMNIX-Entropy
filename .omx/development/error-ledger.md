@@ -1,5 +1,15 @@
 # Error Ledger
 
+## 2026-07-28 - Payload signer had no bounded timestamp retry
+
+- Symptom: both DigiCert and GlobalSign could sign one payload executable, then transiently fail the timestamp request for the second executable, invalidating the whole fresh candidate.
+- Wrong assumption: one SignTool invocation per file was sufficient because timestamp availability had already been proven.
+- Root cause: RFC3161 is an external network dependency and can fail transiently between adjacent files; the payload signer lacked the bounded retry behavior already provided by Inno Setup.
+- Detection method: real fresh-candidate signing logs showed first-file success followed by second-file timestamp transport failure for two independent TSAs.
+- Fix: add one shared SignTool helper with at most three attempts and ten seconds between attempts; every file still requires exit-code success and post-sign Authenticode/timestamp verification.
+- Prevention rule: release-only network operations should use small bounded retries, fresh outputs, and independent final verification; retries must never turn a missing timestamp into success.
+- Skill candidate: yes.
+
 ## 2026-07-28 - DigiCert timestamp fallback was not a valid HTTPS substitution
 
 - Symptom: the final payload signing failed on transient DigiCert HTTP timestamp responses; substituting `https://timestamp.digicert.com` then failed immediately as an invalid timestamp URL.
