@@ -1,15 +1,15 @@
 # Current Development State
 
-## Active Slice - 2026-07-28 Public 0.1.1 release
+## Completed Slice - 2026-07-28 Public 0.1.1 release
 
 - Objective: publish OMNIX-Entropy 0.1.1 from the current reviewed source, including the completed read-only system-footprint diagnosis, through the existing signed D-first GitHub update channel.
-- Dependencies: a committed clean release revision, passing local and GitHub source gates, the existing non-exportable CurrentUser personal publisher certificate, the pinned Inno compiler, Windows SDK SignTool, the approved DigiCert timestamp service, and the guarded installer/release scripts.
+- Dependencies: a committed clean release revision, passing local and GitHub source gates, the existing non-exportable CurrentUser personal publisher certificate, the pinned Inno compiler, Windows SDK SignTool, the approved exact DigiCert/GlobalSign RFC3161 services, and the guarded installer/release scripts.
 - Risks: publishing from a dirty or mismatched revision, creating assets with the wrong version, signing payload and setup with different identities, losing timestamp evidence, exposing local secrets or machine evidence, publishing before verification, or accidentally running the installer on the development machine.
 - Impact scope: application/package version, release notes, source and release records, signed App/worker payload, signed D-first setup, fixed GitHub release manifests, tag `v0.1.1`, and public GitHub Release assets. No installer execution, product installation, trust-store mutation, private-key export, antivirus change, or LocalMachine certificate action is authorized.
 - Acceptance: version reports 0.1.1; focused/full/build/source-integrity and public-candidate gates pass; the source revision is pushed and CI passes; payload and setup are signed by thumbprint `5688958FEA0056861558E8DCF9D2381AF46074B2` with a timestamp; independent installer verification reports `CanStageGitHubRelease=true`; the public `v0.1.1` Release contains the setup, installer manifest, channel manifest, and checksums; the latest-release endpoint reports 0.1.1; the installer is not run.
 - Approval state: the user explicitly requested `发布 0.1.1`, authorizing public publication of this version. Existing certificate trust authorization remains CurrentUser-only; no additional system mutation is authorized.
-- Status: in progress. Exact GlobalSign fallback commit `ba1df22` passed GitHub CI `30334445147`. A fresh final candidate still observed a transient second-file timestamp failure, proving that endpoint fallback alone was insufficient. The payload signer now retries SignTool at most three times per file with a ten-second delay and preserves mandatory post-sign verification. TDD retry contract is red 1/4 then green 4/4; full 1060/1060, Release 0 errors, integrity 383/18, parser 0, and diff check pass.
-- Exact next action: commit/push the bounded retry, wait for CI, then rebuild and verify the final payload/setup.
+- Status: completed. Release source commit `63fbb5e868bbf2231ac8236b2b5d577e816ddfce` passed GitHub CI `30334942521`; the final payload and installer passed independent signer, timestamp, hash, D-first, visible-directory, and no-silent-install checks. GitHub Release `v0.1.1` is public at `https://github.com/plnoble/OMNIX-Entropy/releases/tag/v0.1.1`; the public latest endpoint reports 0.1.1 with four assets. The installer is 14,823,256 bytes with SHA-256 `F581F89A93E36145E8C6952E5C7D4B0F9E32C7A6EDC4F76C13E9E1B2F6ADACBB`, and downloaded assets were rehashed against their local release inputs.
+- Exact next action: extend the official-uninstall post-scan to carry `SystemFootprints` as read-only residue evidence. Keep removal unavailable until exact current-state evidence, rollback material, explicit confirmation, and `OperationPipeline` coverage exist.
 
 ## Completed Slice - 2026-07-28 RogueCleaner-inspired system-footprint diagnosis
 

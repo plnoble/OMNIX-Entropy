@@ -1,5 +1,13 @@
 # Reflections
 
+## 2026-07-28 - Public 0.1.1 release
+
+- What worked: source CI, same-signer policy, independent installer verification, draft-only staging, and download-back hashing kept each publication boundary separately checkable.
+- What caught real risk: Windows PowerShell promoted an expected native CLI miss into a terminating error, and two timestamp providers showed transient failures between adjacent files. Both stopped publication before incomplete assets escaped.
+- Waste: endpoint behavior and retry needs were discovered during final packaging, causing extra commit, CI, and rebuild rounds. Exact TSA probing and bounded retry simulation belong in release preflight.
+- Reusable lesson: a Windows release is not complete when upload succeeds. Re-download every public asset, compare immutable hashes, rerun the independent installer verifier, and only then publish the draft.
+- Next improvement: consolidate signer-context check, exact-TSA probe, bounded signing, draft staging, download-back verification, and public latest-endpoint inspection into one fail-closed release orchestration receipt.
+
 ## 2026-07-28 - External cleaner ideas as evidence, not authority
 
 - What worked: comparing capability categories first showed that OMNIX already owned most background evidence and needed only four integration surfaces. That kept the implementation small and compatible with the existing profile/drawer architecture.

@@ -15,6 +15,10 @@
 - GlobalSign fallback commit `ba1df22` was pushed and GitHub CI `30334445147` passed in 3m8s.
 - A fresh final candidate again signed App successfully but hit a transient timestamp failure on Worker. Added a shared three-attempt/ten-second SignTool retry while retaining mandatory signature/timestamp verification. Retry contract went red 1/4 then green 4/4.
 - Bounded retry completion gates: full 1060/1060; Release 0 errors; integrity 383/18; parser 0; diff check clean.
+- Bounded-retry commit `63fbb5e` was pushed and GitHub CI `30334942521` passed in 3m1s.
+- The final 110-file payload completed bounded timestamp retries and passed independent same-signer/timestamp verification. The final setup independently returned `CanStageGitHubRelease=true`, is 14,823,256 bytes, and has SHA-256 `F581F89A93E36145E8C6952E5C7D4B0F9E32C7A6EDC4F76C13E9E1B2F6ADACBB`.
+- Created the guarded draft, downloaded all four remote assets back, and matched every remote SHA-256 to its local release input. The downloaded installer and manifest passed the independent verifier again.
+- Published `v0.1.1` at `https://github.com/plnoble/OMNIX-Entropy/releases/tag/v0.1.1`. The unauthenticated public latest endpoint reports tag 0.1.1, non-draft, non-prerelease, and four assets.
 - Installer execution has not occurred.
 
 ## 2026-07-28 - RogueCleaner-inspired system-footprint diagnosis

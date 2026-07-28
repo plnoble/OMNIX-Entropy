@@ -1,5 +1,15 @@
 # Agent Handoff
 
+## Latest Update - 2026-07-28 Public 0.1.1 released
+
+- Current objective: preserve the published 0.1.1 release evidence and resume product work from the read-only system-footprint slice.
+- What changed: version/release notes, expected-missing-release handling, exact GlobalSign timestamp fallback, bounded SignTool retries, final signed payload/setup, four release assets, public `v0.1.1`, and completion records.
+- What is verified: release source `63fbb5e868bbf2231ac8236b2b5d577e816ddfce`; CI `30334942521` passed; full local suite 1060/1060; Release 0 errors; integrity 383/18; final installer independently returned `CanStageGitHubRelease=true`; downloaded remote assets matched local hashes; public latest metadata reports 0.1.1 and four assets.
+- Public artifact: `https://github.com/plnoble/OMNIX-Entropy/releases/tag/v0.1.1`; setup SHA-256 `F581F89A93E36145E8C6952E5C7D4B0F9E32C7A6EDC4F76C13E9E1B2F6ADACBB`; signer `5688958FEA0056861558E8DCF9D2381AF46074B2`.
+- What is not verified: setup was not launched, installed, or uninstalled; the ten-case disposable Windows acceptance receipt is absent; SmartScreen public reputation is not provided by the personal certificate.
+- Known risks: timestamp and GitHub availability are external; CurrentUser trust remains persistent; future binaries signed by the same private key are trusted for this user; local builds can emit environmental NU1900 warnings.
+- Exact next recommended action: carry `SystemFootprints` into the official-uninstall pre/post evidence and explain remaining integrations read-only. Do not add removal until exact targets, rollback evidence, explicit confirmation, and `OperationPipeline` coverage exist.
+
 ## Latest Update - 2026-07-28 RogueCleaner-inspired system-footprint diagnosis
 
 - Current objective: preserve the completed read-only system-footprint slice and next extend official-uninstall post-scan evidence without adding removal authority.

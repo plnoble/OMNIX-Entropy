@@ -537,3 +537,9 @@ Use this file to collect lessons that may become future global skills, project r
 - Workflow: inspect an explicit tool path or bounded SDK locations; read CurrentUser certificate metadata; parse EKU from host-independent X509 extensions; list all eligible candidates; keep explicit signer selection in the separate signing command; emit JSON missing requirements; runtime-test the oldest supported PowerShell host with zero candidates.
 - Evidence: OMNIX static tests missed provider-specific EKU and empty-pipeline behavior; a real Windows PowerShell child test exposed both and now keeps no-certificate readiness stable.
 - Reuse: desktop signing, update systems, enterprise packaging, CI handoff, and any local release flow where discovery must remain separate from credential authorization.
+# Candidate - Fail-closed personal Windows release orchestration
+
+- Trigger: a personally signed Windows desktop release depends on CurrentUser certificate visibility, external RFC3161 timestamp services, a guarded draft release, and public asset verification.
+- Workflow: inspect the signer in the same host context used by SignTool; probe only exact vendor-documented TSA URLs on a disposable artifact; use bounded retries without weakening final Authenticode/timestamp checks; create a draft; download every asset back; compare immutable hashes; rerun the independent installer verifier; then publish and verify the unauthenticated latest endpoint.
+- Evidence: OMNIX 0.1.1 caught a restricted certificate-store false negative, expected native CLI stderr promoted to a terminating PowerShell error, invalid inferred TSA substitution, and transient timestamp failures before publication.
+- Reuse: personal Windows utilities, internal desktop tools, and other low-volume signed releases that need strong evidence without a commercial public-reputation certificate.
