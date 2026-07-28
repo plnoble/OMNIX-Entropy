@@ -4,14 +4,14 @@
 
 | Category | Status | Evidence | Residual risk |
 | --- | --- | --- | --- |
-| Scope and consent | Pass | User reported that check-only behavior is insufficient; implementation adds user-started download and confirmed interactive setup only. | Public 0.1.2 publication still requires the release chain; no installer has run. |
+| Scope and consent | Pass | User reported that check-only behavior is insufficient; implementation adds user-started download and confirmed interactive setup only. | No installer has run; installation remains a visible user action. |
 | Source and transport identity | Pass | Fixed repository/channel policy remains; exact package URL, declared length, SHA-256, expected signer, and current running App signer are all required. | GitHub availability remains external. |
 | D-first storage | Pass | `WindowsPersonalUpdatePathPolicy` derives `Updates\v<version>\<random>` beside a managed `OMNIX-Entropy\Install` on a fixed non-system drive and rejects reparse paths. | Verified packages remain on D until a later retention policy removes them. |
 | Destructive-operation safety | Pass | Final launch descriptor is High/destructive/confirmed; `SafetyOperationPipeline` gates a handler bound to the real current executable; handler revalidates path/length/hash/both signatures and passes zero arguments to the interactive launcher. | Installer behavior remains separately visible and user-controlled; automatic downgrade is absent. |
 | Failure and cancellation | Pass | Tests cover length/hash mismatch, signer mismatch, final-move recheck cleanup, post-download mutation, alternate-current-executable substitution, missing confirmation, and cancellation. | Same-user filesystem races are reduced by random staging and repeated verification but cannot be eliminated before process creation. |
 | Beginner UX and accessibility | Warn | Stable `DownloadAndInstallUpdateButton`; clear download/verified/failure copy; release-page fallback; XAML parses and static UX contract passes. | Computer Use app approval timed out before launch, so no current screenshot is claimed. |
 | Tests and build | Pass | Focused update/UX 8/8; full Debug 1067/1067; Release 0 errors; integrity 385 files/18 XAML; diff check clean. | Release build has 18 environmental NU1900 warnings because NuGet vulnerability metadata is unreachable. |
-| Release | Warn | App version and notes are 0.1.2; 0.1.0/0.1.1 bootstrap limitation is documented. | 0.1.2 source is not committed/pushed; no CI, signed payload, installer, draft, public release, or remote re-download evidence yet. |
+| Release | Pass | Source `4a3e30c3feacdeaf8fcc1df6543ba14f1ddc6125` passed CI `30339140502`; signed payload/setup verification passed; all four draft assets were downloaded back and matched; downloaded setup verification returned `CanStageGitHubRelease=true`; public latest metadata reports non-draft/non-prerelease `v0.1.2`; setup SHA-256 `C5D861160E3A38367B38F8FA9473FA6EB7D06485EF5202B1D4A5E7A3E76912C1`. | 0.1.0/0.1.1 still require one manual bootstrap install; setup was not launched on the development machine. |
 
 ## 2026-07-28 - 0.1.1 public release preparation
 

@@ -2008,3 +2008,12 @@ Use this file at the end of meaningful tasks. Keep entries short and focused on 
 - Persistence does not mean inventing local work after the product, safety pipeline, package transform, verifier, fixture, and acceptance protocol are ready. At that point, unrelated changes reduce confidence instead of moving the actual objective.
 - A self-signed certificate or primary-machine mutation run would make the final claim less true. Blocking with exact machine-readable prerequisites is the correct engineering outcome until the external state changes.
 - Resumption is deterministic: rerun the inspector, create the signed candidate with an explicitly approved thumbprint, independently verify transfer, then complete the ten evidence-bound cases on a resettable Windows environment.
+
+## 2026-07-28 - In-app update completion
+
+- An updater cannot retrofit itself into an already installed older binary. Naming the one-time manual bootstrap early is part of correctness, not an implementation caveat to hide.
+- Release metadata is only routing evidence. The safe launch decision still needs exact bytes, bounded length, SHA-256, the current running App identity, the expected channel signer, the downloaded package signer, explicit confirmation, and a local operation gate.
+- Download verification and launch verification are separate trust moments. Rechecking after final placement and immediately before process creation materially narrows replacement races.
+- A successful upload is not release evidence. Downloading all assets back, comparing every hash, and independently verifying the returned setup caught transport as a separate auditable boundary.
+- Restricted shells can report a valid self-signed personal publisher as untrusted when they cannot see the authorized CurrentUser Root store. Conflicting signature results must be resolved in the real user trust context without weakening the verifier.
+- GitHub API EOF failures did not justify bypassing draft verification. Keeping the release as a draft until all evidence passed made the browser publication fallback safe and recoverable.

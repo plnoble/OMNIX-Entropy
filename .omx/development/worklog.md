@@ -2986,3 +2986,15 @@
 - Independent store inspection found the private key only in CurrentUser My, public copies only in CurrentUser TrustedPeople/TrustedPublisher, and no matching entry in CurrentUser Root or inspected LocalMachine stores.
 - Corrected the timestamp URL policy using DigiCert's official RFC3161 documentation: exact `http://timestamp.digicert.com` is narrowly allowed while other HTTP endpoints remain refused. Focused signer/installer/release contracts passed 9/9 and all three scripts parsed.
 - Built `.artifacts/OMNIX-Entropy-test-20260723-225606`. Signing and timestamping App/worker succeeded, but Windows chain verification rejected the self-signed certificate because it is not in Trusted Root. The transform failed closed before manifest/ZIP completion; no installer was compiled or launched.
+
+## 2026-07-28 - Verified in-app updater and public 0.1.2 release completed
+
+- Replaced the check-only update outcome with a beginner-visible `Download and install` path while retaining the release-page fallback.
+- Added bounded D-first staging, exact length/SHA-256 verification, current-App/channel/package signer continuity, repeated prelaunch validation, cancellation cleanup, and a High-risk confirmed `SafetyOperationPipeline` launch with no silent arguments.
+- Documented the unavoidable bootstrap boundary: installed 0.1.0/0.1.1 code cannot self-acquire this new behavior and must manually install 0.1.2 once.
+- Source commit `4a3e30c3feacdeaf8fcc1df6543ba14f1ddc6125` was pushed; GitHub CI `30339140502` passed.
+- The final payload and setup were signed by CurrentUser personal publisher thumbprint `5688958FEA0056861558E8DCF9D2381AF46074B2` with a valid GlobalSign timestamp. Installer verification passed with D-first default, visible directory selection, silent install disabled, and `CanStageGitHubRelease=true`.
+- Created a four-asset GitHub draft, downloaded every asset back to a new directory, matched all SHA-256 values, and independently reverified the downloaded setup before publication.
+- GitHub API transiently returned EOF during publication; the draft stayed intact. Published through the authenticated GitHub release page only after the existing explicit publication approval and verified the final public page plus public latest metadata.
+- Public `v0.1.2`: `https://github.com/plnoble/OMNIX-Entropy/releases/tag/v0.1.2`. Setup length 14,832,504 bytes; SHA-256 `C5D861160E3A38367B38F8FA9473FA6EB7D06485EF5202B1D4A5E7A3E76912C1`.
+- No installer, product update, UAC flow, trust-store change, certificate export, antivirus change, or LocalMachine action ran.

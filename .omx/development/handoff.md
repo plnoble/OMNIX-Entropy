@@ -1,5 +1,15 @@
 # Agent Handoff
 
+## Latest Update - 2026-07-28 Public 0.1.2 released
+
+- Current objective: preserve the completed verified in-app update chain and guide the one-time bootstrap from installed 0.1.0/0.1.1 to 0.1.2.
+- What changed: user-visible `DownloadAndInstallUpdateButton`; bounded D-first package download; length/SHA-256/current-App signer/channel signer checks; repeated prelaunch verification; explicit High-risk confirmation through `SafetyOperationPipeline`; interactive zero-argument installer launch; cancellation and failure cleanup; 0.1.2 release notes and version.
+- What is verified: focused 8/8; full Debug 1067/1067; Release 0 errors with 18 environmental NU1900 warnings; integrity 385 files/18 XAML; source commit `4a3e30c3feacdeaf8fcc1df6543ba14f1ddc6125`; CI `30339140502` passed; signed payload/setup same-signer verification passed; all four GitHub assets were downloaded back and matched; the downloaded setup independently returned `CanStageGitHubRelease=true`; public latest metadata reports `v0.1.2`, non-draft, non-prerelease, four assets.
+- Public artifact: `https://github.com/plnoble/OMNIX-Entropy/releases/tag/v0.1.2`; setup length 14,832,504 bytes; SHA-256 `C5D861160E3A38367B38F8FA9473FA6EB7D06485EF5202B1D4A5E7A3E76912C1`; signer `5688958FEA0056861558E8DCF9D2381AF46074B2`.
+- What is not verified: no installer was launched, installed, or uninstalled on the development machine; Computer Use approval timed out before current UI launch; the first true self-update can only be tested by a version newer than 0.1.2 after 0.1.2 is installed.
+- Known risks: 0.1.0/0.1.1 cannot acquire the new updater code and require one manual GitHub install; GitHub/timestamp availability is external; SmartScreen public reputation is not provided by the personal certificate; CurrentUser publisher trust remains persistent.
+- Exact next recommended action: manually install 0.1.2 once from the public release page, leaving the directory visible and user-confirmed. For the next release, test the full in-app update path before expanding unrelated product scope.
+
 ## Latest Update - 2026-07-28 Public 0.1.1 released
 
 - Current objective: preserve the published 0.1.1 release evidence and resume product work from the read-only system-footprint slice.
