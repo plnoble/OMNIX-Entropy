@@ -38,6 +38,7 @@ public sealed class AppDrawerViewModel
     public required string InstallLocationSummary { get; init; }
     public required string SizeSummary { get; init; }
     public required string ResidencySummary { get; init; }
+    public required string SystemFootprintSummary { get; init; }
     public required AgentRecommendation AgentAdvice { get; init; }
     public required IReadOnlyList<AppActionViewModel> AvailableActions { get; init; }
     public required AppResidueReviewAvailabilityViewModel UninstallResidueReview { get; init; }
@@ -337,6 +338,7 @@ public static class AppPresentationBuilder
             InstallLocationSummary = LocationSummary(profile),
             SizeSummary = SizeSummary(profile),
             ResidencySummary = ResidencySummary(profile),
+            SystemFootprintSummary = CreateSystemFootprintSummary(profile),
             AgentAdvice = CreateAgentAdvice(profile),
             AvailableActions = CreateActions(profile),
             UninstallResidueReview = CreateUninstallResidueReviewAvailability(profile),
@@ -627,6 +629,18 @@ public static class AppPresentationBuilder
             };
         }
 
+        if (profile.SystemFootprints.Count > 0)
+        {
+            return new AgentRecommendation
+            {
+                Text = "这个应用还在 Windows 界面或浏览器里添加了入口。先确认这些入口是否有用，不要因为数量多就直接卸载。",
+                Reason = $"本次只读扫描把 {profile.SystemFootprints.Count} 个系统入口关联到这个应用；入口存在不等于恶意。",
+                Risk = RiskLevel.Low,
+                RequiresUserConfirmation = false,
+                Action = RecommendationAction.Observe
+            };
+        }
+
         return new AgentRecommendation
         {
             Text = "\u76ee\u524d\u6b63\u5e38\uff0c\u4e0d\u9700\u8981\u5904\u7406\u3002",
@@ -865,8 +879,40 @@ public static class AppPresentationBuilder
             details.AddRange(profile.ScheduledTasks.Select(value => "Scheduled task name hint: " + value));
         }
         details.AddRange(profile.CDriveWritePaths.Select(value => "C drive path: " + value));
+        details.AddRange(profile.SystemFootprints
+            .Take(24)
+            .Select(FormatSystemFootprint));
         return details;
     }
+
+    private static string CreateSystemFootprintSummary(SoftwareProfile profile)
+    {
+        if (profile.SystemFootprints.Count == 0)
+        {
+            return "本次扫描没有把右键菜单、资源管理器入口、浏览器连接或文件打开方式关联到这个应用。";
+        }
+
+        var parts = profile.SystemFootprints
+            .GroupBy(item => item.Kind)
+            .OrderBy(group => group.Key)
+            .Select(group => FootprintKindLabel(group.Key) + " " + group.Count() + " 处")
+            .ToList();
+        return "发现它还出现在：" + string.Join("、", parts)
+            + "。这些入口不等于病毒，OMNIX 不会自动删除。";
+    }
+
+    private static string FormatSystemFootprint(SoftwareSystemFootprintObservation observation) =>
+        $"System footprint: {observation.Kind}; {observation.DisplayName}; source {observation.SourceLocator}; evidence {observation.Evidence}";
+
+    private static string FootprintKindLabel(SoftwareSystemFootprintKind kind) =>
+        kind switch
+        {
+            SoftwareSystemFootprintKind.ContextMenu => "右键菜单",
+            SoftwareSystemFootprintKind.ExplorerEntry => "资源管理器",
+            SoftwareSystemFootprintKind.BrowserIntegration => "浏览器连接",
+            SoftwareSystemFootprintKind.FileAssociation => "文件打开方式",
+            _ => "其它入口"
+        };
 
     private static string FormatBackgroundComponent(BackgroundComponentObservation observation)
     {

@@ -1,5 +1,28 @@
 # Quality Gates
 
+## 2026-07-28 - 0.1.1 public release preparation
+
+| Category | Status | Evidence | Residual risk |
+| --- | --- | --- | --- |
+| Scope and consent | Pass | User explicitly requested public release 0.1.1; current scope excludes installer execution, product installation, trust changes, private-key export, antivirus changes, and LocalMachine actions. | Public publication remains irreversible in practice even if a release is later deleted. |
+| Version and source | Pass | `Css.App.csproj` reports 0.1.1; release notes cover the current system-footprint slice; diff check is clean. | Final tag and channel manifest do not exist until GitHub staging. |
+| Tests and build | Pass | Focused 183/183; full Debug 1060/1060; Release build 0 errors; source integrity 383/18; five release scripts parse. | Release build emitted 18 NU1900 warnings because NuGet vulnerability metadata was unreachable. |
+| Signing identity | Pass | Approved host-session read-only query found thumbprint `5688958FEA0056861558E8DCF9D2381AF46074B2` with private key only in CurrentUser My and public copies in the three authorized CurrentUser stores. | Restricted commands cannot see the host signer; final signing must run in the approved host context. |
+| Supply chain and privacy | Pass | Fixed repository and explicit tool paths rechecked; secret/material audit found only test assertions for ignored PFX/P12 patterns, not signing material. | Final package inventory and hashes remain pending. |
+| Source publication | Warn | Local source gates pass. | Commit, push, and GitHub CI are pending. |
+| Installer and Release | Warn | Existing scripts enforce same signer, timestamp, D-first visible directory selection, no silent setup, independent verification, and draft-first staging. | Fresh 0.1.1 payload/setup, independent verification, public Release, and latest-endpoint verification are pending. |
+
+## 2026-07-28 - RogueCleaner-inspired system-footprint diagnosis
+
+| Category | Status | Evidence | Residual risk |
+| --- | --- | --- | --- |
+| External source and license | Pass | Reviewed upstream README/source at `e498db3` and MIT license; `docs/research/roguecleaner-reference.zh-CN.md` records adopted and rejected ideas. | Upstream rules and behavior may change; no automatic synchronization exists. |
+| Data and ownership | Pass | Builder tests prove install-path/full-name correlation and unrelated evidence refusal; uncorrelated entries are not assigned to an app. | Conservative matching can miss integrations that expose neither app path nor full name. |
+| Destructive-operation safety | Pass | New scanner contains no registry writes/deletes, process launch, service/task commands, operation descriptors, or handler registration; UI states that entries are not automatically deleted. | A future removal feature would require a separate risk review and rollback-capable pipeline. |
+| Beginner UX and accessibility | Pass | Stable `DrawerSystemFootprintTextBlock` AutomationId, static order test, path-free summary, collapsed technical evidence, and inspected `.omx/qa-app-system-footprint.png`. | Dense drawers still depend on scrolling at smaller heights. |
+| Testing and build | Pass | Focused 6/6; full Debug 1060/1060; Release build 0 errors; integrity 383 files/18 XAML; new smoke script parser pass. | Release emitted 18 NU1900 warnings because NuGet vulnerability metadata was unreachable. |
+| Runtime scope | Pass | Isolated fixture GUI smoke displayed right-click/browser counts and Observe-only Agent advice; fixture/data were removed afterward. | Real-machine entry coverage was not used as correctness proof; protected registry areas can make scans partial. |
+
 ## 2026-07-23 - Personal signer and first D-first installer
 
 | Category | Status | Evidence | Residual risk |

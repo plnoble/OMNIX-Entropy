@@ -8,6 +8,7 @@ public sealed class AppDrawerEmptyStateViewModel
     public required string InstallLocationSummary { get; init; }
     public required string SizeSummary { get; init; }
     public required string ResidencySummary { get; init; }
+    public required string SystemFootprintSummary { get; init; }
     public required string AgentAdviceText { get; init; }
     public required string DisabledActionReason { get; init; }
 }
@@ -23,6 +24,7 @@ public static class AppDrawerEmptyStatePresenter
             InstallLocationSummary = "-",
             SizeSummary = "-",
             ResidencySummary = "-",
+            SystemFootprintSummary = "-",
             AgentAdviceText = "当前没有应用可供分析。",
             DisabledActionReason = "请先选择应用，再查看可用方案。"
         };

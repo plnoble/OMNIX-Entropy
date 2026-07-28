@@ -1,5 +1,13 @@
 # Reflections
 
+## 2026-07-28 - External cleaner ideas as evidence, not authority
+
+- What worked: comparing capability categories first showed that OMNIX already owned most background evidence and needed only four integration surfaces. That kept the implementation small and compatible with the existing profile/drawer architecture.
+- Product lesson: “software added a right-click item” is useful evidence but not a risk verdict. Beginner wording must explain presence without turning normal integrations into a scare label.
+- Safety lesson: open-source permission and execution permission are unrelated. Even MIT-licensed deletion code should not enter OMNIX without exact ownership, rollback, confirmation, and pipeline review.
+- Waste: one missing namespace import, one guessed solution filename, and one unparsed PowerShell continuation caused avoidable failures. Narrow builds and parser gates caught all three before product-side effects.
+- Next improvement: include system footprints in the official-uninstall post-scan so the Agent can say which visible integrations remain, still read-only.
+
 ## 2026-07-23 - Personal signer and first valid installer
 
 - What worked: every boundary failed closed. Missing Root trust prevented a false valid candidate; missing Chinese resources prevented a partial setup; independent verifiers, not builder output, decided readiness.

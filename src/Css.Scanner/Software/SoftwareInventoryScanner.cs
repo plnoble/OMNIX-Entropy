@@ -25,6 +25,7 @@ public sealed class SoftwareInventoryScanner
         var services = ReadServices();
         var scheduledTasks = ReadScheduledTasks();
         var processes = ReadRunningProcesses();
+        var systemFootprints = new WindowsSoftwareSystemFootprintScanner().Scan();
         var observedAtUtc = DateTimeOffset.UtcNow;
         return Task.FromResult(SoftwareInventoryBuilder.Build(
             installed,
@@ -37,7 +38,8 @@ public sealed class SoftwareInventoryScanner
             userDataRoots: GetUserDataRoots(),
             pathExists: Directory.Exists,
             cacheSizeResolver: EstimateDirectorySize,
-            observedAtUtc: observedAtUtc));
+            observedAtUtc: observedAtUtc,
+            systemFootprints: systemFootprints));
     }
 
     private static IReadOnlyList<string> GetUserDataRoots()

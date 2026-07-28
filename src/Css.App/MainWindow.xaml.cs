@@ -2788,6 +2788,7 @@ public partial class MainWindow : Window
         DrawerLocationTextBlock.Text = drawer.InstallLocationSummary;
         DrawerSizeTextBlock.Text = drawer.SizeSummary;
         DrawerResidencyTextBlock.Text = drawer.ResidencySummary;
+        DrawerSystemFootprintTextBlock.Text = drawer.SystemFootprintSummary;
         DrawerAdviceTextBlock.Text = migrationState.AdviceText;
         ApplyDrawerActionHost(AppDrawerActionHostPresenter.Collapsed());
         DrawerTechnicalListBox.ItemsSource = drawer.TechnicalDetails.Count == 0
@@ -2887,6 +2888,7 @@ public partial class MainWindow : Window
         DrawerLocationTextBlock.Text = empty.InstallLocationSummary;
         DrawerSizeTextBlock.Text = empty.SizeSummary;
         DrawerResidencyTextBlock.Text = empty.ResidencySummary;
+        DrawerSystemFootprintTextBlock.Text = empty.SystemFootprintSummary;
         DrawerAdviceTextBlock.Text = empty.AgentAdviceText;
         ApplyDrawerActionHost(AppDrawerActionHostPresenter.Collapsed());
         DrawerTechnicalListBox.ItemsSource = Array.Empty<string>();

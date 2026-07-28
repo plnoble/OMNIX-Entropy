@@ -1,5 +1,14 @@
 # Agent Handoff
 
+## Latest Update - 2026-07-28 RogueCleaner-inspired system-footprint diagnosis
+
+- Current objective: preserve the completed read-only system-footprint slice and next extend official-uninstall post-scan evidence without adding removal authority.
+- What changed: bounded scans for context menus, Explorer namespace entries, browser Native Messaging hosts, and common file associations; conservative app correlation; profile/enrichment propagation; path-free drawer summary; Observe-only Agent advice; hidden technical details; isolated GUI smoke.
+- What is verified: focused 6/6; full 1060/1060; Release 0 errors; integrity 383 files and 18/18 XAML; PowerShell parser pass; inspected screenshot `.omx/qa-app-system-footprint.png`.
+- What is not verified: no real registry entry was removed or disabled; no footprint cleanup plan/handler exists; protected/unreadable registry views can make a scan partial; post-uninstall scanning does not yet include the new footprint type.
+- Known risks: install-path/full-name matching is deliberately conservative and may miss integrations; future vendor rules must never become execution authority by themselves; NU1900 warnings remain environmental.
+- Exact next recommended action: carry `SystemFootprints` into the official-uninstall evidence snapshot and fresh post-scan comparison, then present remaining entry counts to the Agent. Keep it read-only until exact targets, rollback evidence, confirmation, and `OperationPipeline` coverage exist.
+
 ## Latest Update - 2026-07-23 First valid personal installer completed
 
 - Current objective: preserve the verified personal signing/installer chain and decide separately whether to run disposable acceptance or stage a GitHub draft Release.

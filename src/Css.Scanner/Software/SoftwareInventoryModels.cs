@@ -222,3 +222,9 @@ public sealed record ServiceEntry(
 public sealed record ScheduledTaskEntry(string Name, string ActionPath, bool? IsEnabled = null);
 
 public sealed record ProcessEntry(string Name, string? Path);
+
+public sealed record SoftwareSystemFootprintEntry(
+    SoftwareSystemFootprintKind Kind,
+    string DisplayName,
+    string SourceLocator,
+    string Evidence);

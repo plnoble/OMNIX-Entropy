@@ -1,5 +1,13 @@
 # Skill Candidates
 
+### 2026-07-28 - Parse Windows PowerShell smoke scripts before GUI launch
+
+- Trigger: a newly authored `.ps1` will start a desktop app, request elevation, or touch any system-facing test boundary.
+- Reusable lesson: run the Windows PowerShell parser first, then execute. PowerShell 7-compatible multiline syntax can fail under 5.1 before the intended smoke begins.
+- Evidence: the first system-footprint GUI smoke was stopped by line-leading `-and`; a parser gate caught the corrected script before the successful retry.
+- Proposed form: a small cross-project `verify-powershell-scripts.ps1` helper that parses selected files and reports deterministic errors.
+- Promotion threshold: implement when the next repository adds or changes a Windows PowerShell smoke script.
+
 ### 2026-07-22 - Discover SDK tools from installer-owned roots
 
 - Trigger: a Windows tool is absent from PATH/default Program Files but the product supports custom install drives.

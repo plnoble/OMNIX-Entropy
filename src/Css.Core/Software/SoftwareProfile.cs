@@ -74,4 +74,5 @@ public sealed class SoftwareProfile
     public IReadOnlyList<string> Services { get; init; } = [];
     public IReadOnlyList<string> ScheduledTasks { get; init; } = [];
     public IReadOnlyList<BackgroundComponentObservation> BackgroundComponents { get; init; } = [];
+    public IReadOnlyList<SoftwareSystemFootprintObservation> SystemFootprints { get; init; } = [];
 }

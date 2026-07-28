@@ -1,5 +1,25 @@
 # Error Ledger
 
+## 2026-07-28 - Restricted certificate view was mistaken for host certificate loss
+
+- Symptom: the sandboxed CurrentUser certificate query returned only a localhost certificate and the release inspector reported zero eligible code-signing certificates.
+- Wrong assumption: the restricted command environment exposed the same CurrentUser certificate-store view as the host Windows user session.
+- Root cause: certificate-store visibility differs across the restricted and approved host execution contexts.
+- Detection method: an approved read-only host-session query found the original thumbprint in CurrentUser My, TrustedPeople, TrustedPublisher, and Root, with the private key still only in My.
+- Fix: retain sandbox checks for source work, but perform the final signer preflight and signing commands in the approved host context; do not create a replacement certificate based on a restricted-view miss.
+- Prevention rule: before declaring a CurrentUser signing identity missing, repeat the exact read-only store query in the same host context that will run SignTool.
+- Skill candidate: yes.
+
+## 2026-07-28 - Release script parser loop used an ambiguous variable reference
+
+- Symptom: the combined read-only parser check failed before inspecting any release script and reported `InvalidVariableReferenceWithDrive`.
+- Wrong assumption: PowerShell would parse `"$file: ..."` as the variable `file` followed by a literal colon.
+- Root cause: a colon immediately after a variable name inside an interpolated string is parsed as part of a scoped variable reference.
+- Detection method: the PowerShell parser pointed at `$file:` in the check command.
+- Fix: delimit the name as `"${file}: ..."` and rerun the same read-only parser check.
+- Prevention rule: use `${name}` whenever punctuation immediately follows an interpolated PowerShell variable.
+- Skill candidate: no.
+
 ## 2026-07-23 - Inno compiler did not bundle Simplified Chinese
 
 - Symptom: the first setup compile stopped because `compiler:Languages\ChineseSimplified.isl` did not exist, after signing a temporary uninstaller but before producing setup.
@@ -3182,3 +3202,32 @@ Use this file to record mistakes that should not be repeated.
 - Fix: allow arbitrary absolute HTTPS endpoints plus only the exact default-port/path/query-free DigiCert HTTP host; retain rejection for all other HTTP URLs and add source contracts.
 - Prevention rule: validate release-service transport assumptions against the provider's current primary documentation, then narrowly allowlist any protocol exception.
 - Skill candidate: yes.
+# 2026-07-28 - New WPF smoke script was not parsed before launch
+
+- Symptom: the first system-footprint GUI smoke attempt stopped at parse time because Windows PowerShell 5.1 rejected line-leading `-and` operators inside an `if`.
+- Wrong assumption: the multiline boolean style accepted by newer PowerShell syntax would parse unchanged under the repository's Windows PowerShell 5.1 smoke runner.
+- Root cause: the conjunction operators were placed at the beginning of continuation lines.
+- Detection method: `powershell -NoProfile -ExecutionPolicy Bypass -File .omx\gui-app-system-footprint-smoke.ps1` failed before starting the app.
+- Fix: put conjunction operators at the end of continued expressions and run the parser gate before retrying GUI launch.
+- Prevention rule: parse every newly created `.ps1` with the Windows PowerShell parser before any GUI or system-facing invocation.
+- Skill candidate: yes.
+
+# 2026-07-28 - Guessed the Release solution filename
+
+- Symptom: `dotnet build OMNIX-Entropy.sln -c Release --no-restore` failed with MSB1009 because the file does not exist.
+- Wrong assumption: the product name was also the solution filename.
+- Root cause: the repository solution is `ComputerSecuritySoftware.slnx`.
+- Detection method: the build refusal followed by `rg --files -g "*.sln" -g "*.slnx"`.
+- Fix: use the observed `.slnx` path for the Release gate.
+- Prevention rule: resolve solution/project paths with `rg --files` before required build commands when the path has not been observed in the current task.
+- Skill candidate: no.
+
+# 2026-07-28 - New footprint scanner missed Core namespace import
+
+- Symptom: the first narrow `Css.Scanner` build failed with CS0246 for `SoftwareSystemFootprintKind`.
+- Wrong assumption: the new scanner file would inherit the Core namespace import used by the adjacent inventory model file.
+- Root cause: C# using directives are file-scoped; `WindowsSoftwareSystemFootprintScanner.cs` referenced the Core enum without `using Css.Core.Software`.
+- Detection method: immediate `dotnet build src\Css.Scanner\Css.Scanner.csproj --no-restore`.
+- Fix: add the exact Core namespace import to the scanner file.
+- Prevention rule: after introducing a cross-project model, build the narrow consumer project before adding UI wiring.
+- Skill candidate: no.

@@ -102,7 +102,8 @@ public static class SoftwareGrowthProfileEnricher
             StartupEntries = source.StartupEntries,
             Services = source.Services,
             ScheduledTasks = source.ScheduledTasks,
-            BackgroundComponents = source.BackgroundComponents
+            BackgroundComponents = source.BackgroundComponents,
+            SystemFootprints = source.SystemFootprints
         };
 
     private static bool TryCanonicalPath(string? path, out string canonical)

@@ -50,12 +50,14 @@ public static class SoftwareInventoryBuilder
         IEnumerable<string>? userDataRoots = null,
         Func<string, bool>? pathExists = null,
         Func<string, long>? cacheSizeResolver = null,
-        DateTimeOffset? observedAtUtc = null)
+        DateTimeOffset? observedAtUtc = null,
+        IEnumerable<SoftwareSystemFootprintEntry>? systemFootprints = null)
     {
         var startups = startupEntries.ToList();
         var serviceList = services.ToList();
         var taskList = scheduledTasks.ToList();
         var processList = (runningProcesses ?? []).ToList();
+        var footprintList = (systemFootprints ?? []).ToList();
         var dataRoots = (userDataRoots ?? [])
             .Where(root => !string.IsNullOrWhiteSpace(root))
             .Distinct(StringComparer.OrdinalIgnoreCase)
@@ -72,6 +74,7 @@ public static class SoftwareInventoryBuilder
                 serviceList,
                 taskList,
                 processList,
+                footprintList,
                 signatureResolver,
                 installSizeResolver,
                 dataRoots,
@@ -88,6 +91,7 @@ public static class SoftwareInventoryBuilder
         IReadOnlyList<ServiceEntry> services,
         IReadOnlyList<ScheduledTaskEntry> tasks,
         IReadOnlyList<ProcessEntry> processes,
+        IReadOnlyList<SoftwareSystemFootprintEntry> systemFootprints,
         Func<string, string?>? signatureResolver,
         Func<string, long>? installSizeResolver,
         IReadOnlyList<string> userDataRoots,
@@ -128,6 +132,20 @@ public static class SoftwareInventoryBuilder
             .Where(p => IsRelated(record.DisplayName, installPath, p.Path ?? p.Name) || IsNameRelated(record.DisplayName, p.Name))
             .Select(p => p.Name)
             .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+        var relatedSystemFootprints = systemFootprints
+            .Where(item => IsRelated(record.DisplayName, installPath, item.Evidence))
+            .Select(item => new SoftwareSystemFootprintObservation
+            {
+                Kind = item.Kind,
+                DisplayName = item.DisplayName,
+                SourceLocator = item.SourceLocator,
+                Evidence = item.Evidence
+            })
+            .GroupBy(
+                item => item.Kind + "|" + item.SourceLocator,
+                StringComparer.OrdinalIgnoreCase)
+            .Select(group => group.First())
             .ToList();
         var backgroundComponents = relatedStartupRecords
             .Select(item => BackgroundComponentObservationFactory.Startup(
@@ -194,7 +212,8 @@ public static class SoftwareInventoryBuilder
             StartupEntries = relatedStartups,
             Services = relatedServices,
             ScheduledTasks = relatedTasks,
-            BackgroundComponents = backgroundComponents
+            BackgroundComponents = backgroundComponents,
+            SystemFootprints = relatedSystemFootprints
         };
     }
 

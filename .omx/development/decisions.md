@@ -1,5 +1,12 @@
 # Decision Log
 
+## 2026-07-28 - Borrow RogueCleaner evidence categories, not its verdicts or cleaner
+
+- Decision: add right-click, Explorer, browser-host, and file-association presence as read-only `SoftwareProfile` evidence, correlated only by install path or full application-name evidence.
+- Decision: present these as “where the app also appears,” explicitly state that presence is not malware, and keep source locators behind technical details.
+- Rejected: copying upstream source/vendor lists, assigning risk from brand keywords, bulk-selecting entries, or adding direct registry/service/task cleanup. MIT permission does not replace product safety review or provenance requirements.
+- Consequence: OMNIX gains a useful RogueCleaner-style diagnostic layer without broadening mutation authority. Post-uninstall footprint rescan is the next safe extension; entry removal remains separately gated.
+
 ## 2026-07-23 - Use Inno Setup for visible D-first personal installation
 
 - Decision: use an authored Inno Setup definition and the official compiler instead of a custom privileged bootstrapper. Always expose the directory page, default to D, reject silent setup, and use one explicit Authenticode signer for App, worker, setup, and uninstaller.

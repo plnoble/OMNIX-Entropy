@@ -1,5 +1,21 @@
 # Development Worklog
 
+## 2026-07-28 - 0.1.1 public release preparation
+
+- Recorded the user's explicit request to publish 0.1.1, changed the App package version from 0.1.0 to 0.1.1, and added beginner-facing Chinese release notes.
+- Rechecked the fixed GitHub repository, installer/release script contracts, D-first setup policy, tool paths, and the previously approved signer thumbprint.
+- Verification so far: release/installer/system-footprint focused 183/183; full Debug 1060/1060; Release build 0 errors with 18 environmental NU1900 warnings; source integrity 383 files and 18/18 XAML; five release scripts parse; diff check clean.
+- A restricted certificate query falsely appeared to show that the signer was missing. An approved host-session read-only query confirmed the original private key remains in CurrentUser My and public copies remain in CurrentUser TrustedPeople, TrustedPublisher, and Root. No certificate was created, imported, exported, or changed.
+- GitHub publication, signing, setup creation, and installer execution have not occurred yet.
+
+## 2026-07-28 - RogueCleaner-inspired system-footprint diagnosis
+
+- Reviewed `aakk007/RogueCleaner` at commit `e498db3`, including README, MIT license, single-file scanner, cleanup/verification, recovery, and validation design. No upstream code, rule list, branding, or asset was copied.
+- Compared its coverage with OMNIX and found OMNIX already had structured startup, service, scheduled-task, process, uninstall, rollback, and Agent layers. The useful missing evidence was UI/system integration surfaces.
+- Added bounded read-only scans for context menus, Explorer namespace entries, browser Native Messaging hosts, and common file associations. Application ownership requires install-path or complete compact-name evidence; unknown entries remain unassigned.
+- Added the beginner drawer line `还会出现在哪`, hidden technical evidence, an Observe-only Agent recommendation, stable AutomationId, static order contract, and an isolated real WPF smoke/screenshot.
+- Verification: focused 6/6; full 1060/1060; Release 0 errors; integrity 383/18; smoke parser and GUI receipt passed. No registry/service/task/file mutation or real application operation ran.
+
 ## 2026-07-23 - First valid personal installer completed
 
 - After separate explicit consent, imported only public certificate `5688958FEA0056861558E8DCF9D2381AF46074B2` into CurrentUser Root. Independent inspection found the private key only in CurrentUser My, public copies in the three authorized CurrentUser trust stores, and zero matches in inspected LocalMachine stores.
