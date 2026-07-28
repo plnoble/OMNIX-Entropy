@@ -1,5 +1,12 @@
 # Decision Log
 
+## 2026-07-28 - Add exact GlobalSign R45 timestamp fallback
+
+- Decision: allow the exact official HTTP endpoint `timestamp.globalsign.com/tsa/r45standard` in both payload and installer signing scripts, alongside the existing exact DigiCert endpoint and the existing HTTPS policy.
+- Evidence: GlobalSign's current SignTool guide documents the R45 URL; a real isolated probe returned a Valid Authenticode signature with a `GlobalSign R45 TSA for CodeSign 202510` timestamp certificate.
+- Rejected: changing the DigiCert scheme by guess, accepting arbitrary HTTP timestamp hosts/paths, publishing without a timestamp, or reusing any partially signed output directory.
+- Consequence: 0.1.1 can use a verified independent TSA during DigiCert instability without weakening the HTTP allowlist.
+
 ## 2026-07-28 - Borrow RogueCleaner evidence categories, not its verdicts or cleaner
 
 - Decision: add right-click, Explorer, browser-host, and file-association presence as read-only `SoftwareProfile` evidence, correlated only by install path or full application-name evidence.

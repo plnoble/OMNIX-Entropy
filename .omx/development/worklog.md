@@ -9,6 +9,9 @@
 - Source commit `46374e9` was pushed and GitHub CI `30333084515` passed in 3m12s. A fresh 110-file payload and setup were signed and independently verified; the first two setup timestamp attempts failed transiently and Inno's third built-in retry succeeded.
 - Draft creation then stopped safely before upload because Windows PowerShell promoted the expected missing-release stderr from `gh release view` to a terminating error. Added a regression contract and scoped native error handling; no GitHub Release was created.
 - Release-script fix verification: red 1/4 before implementation; green 4/4 after implementation; full 1060/1060; Release build 0 errors; integrity 383/18; parser 0 errors; diff check clean.
+- Fix commit `6053d7b` was pushed and GitHub CI `30333783060` passed in 2m59s.
+- Final payload signing failed closed on transient DigiCert timestamp responses. An inferred DigiCert HTTPS variant was invalid, so it was abandoned. GlobalSign's current official R45 SignTool URL succeeded on an isolated copy with a valid TSA certificate; both scripts now add only that exact HTTP host/path. Timestamp policy contracts went red 2/8 then green 8/8.
+- Timestamp fallback completion gates: full 1060/1060; Release build 0 errors; integrity 383/18; three release scripts parse; diff check clean.
 - Installer execution has not occurred.
 
 ## 2026-07-28 - RogueCleaner-inspired system-footprint diagnosis

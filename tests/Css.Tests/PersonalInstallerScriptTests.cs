@@ -51,6 +51,8 @@ public sealed class PersonalInstallerScriptTests
             .And.Contain("Cert:\\CurrentUser\\My")
             .And.Contain("TimestampUrl must be an absolute HTTPS endpoint or the approved official HTTP RFC3161 endpoint")
             .And.Contain("\"timestamp.digicert.com\"")
+            .And.Contain("\"timestamp.globalsign.com\"")
+            .And.Contain("\"/tsa/r45standard\"")
             .And.Contain("$Uri.IsDefaultPort")
             .And.Contain("$Uri.AbsolutePath -eq \"/\"")
             .And.Contain("[string]::IsNullOrEmpty($Uri.Query)")

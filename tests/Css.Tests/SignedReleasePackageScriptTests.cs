@@ -43,6 +43,8 @@ public sealed class SignedReleasePackageScriptTests
             .And.Contain("Code-signing certificate")
             .And.Contain("Certificate thumbprint must contain exactly 40 hexadecimal characters")
             .And.Contain("\"timestamp.digicert.com\"")
+            .And.Contain("\"timestamp.globalsign.com\"")
+            .And.Contain("\"/tsa/r45standard\"")
             .And.Contain("$Uri.IsDefaultPort")
             .And.Contain("$Uri.AbsolutePath -eq \"/\"")
             .And.Contain("[string]::IsNullOrEmpty($Uri.Query)")

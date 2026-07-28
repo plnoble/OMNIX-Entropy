@@ -51,8 +51,13 @@ powershell -NoProfile -ExecutionPolicy Bypass -File scripts\build-personal-insta
   -InnoCompilerPath "D:\Development\Inno Setup 7\ISCC.exe" `
   -SignToolPath "D:\Windows Kits\10\bin\10.0.26100.0\x64\signtool.exe" `
   -CertificateThumbprint "40_HEX_CHARACTER_THUMBPRINT" `
-  -TimestampUrl "http://timestamp.digicert.com"
+  -TimestampUrl "http://timestamp.globalsign.com/tsa/r45standard"
 ```
+
+[GlobalSign 官方 SignTool 指南](https://support.globalsign.com/code-signing/code-signing/code-signing-windows-7-8-and-10)
+列出了上述 RFC3161 地址。脚本也保留对
+`http://timestamp.digicert.com` 的精确支持；除任意 HTTPS 地址外，不接受其它 HTTP
+主机或路径。
 
 成功后输出目录只包含：
 

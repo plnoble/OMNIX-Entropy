@@ -80,8 +80,13 @@ powershell -NoProfile -ExecutionPolicy Bypass -File scripts\publish-signed-relea
   -SourcePackageDirectory "D:\Agent\Project\OMNIX-Entropy\.artifacts\OMNIX-Entropy-test-20260719-014731" `
   -SignToolPath "C:\Program Files (x86)\Windows Kits\10\bin\<SDK版本>\x64\signtool.exe" `
   -CertificateThumbprint "<你明确确认的40位证书指纹>" `
-  -TimestampUrl "http://timestamp.digicert.com"
+  -TimestampUrl "http://timestamp.globalsign.com/tsa/r45standard"
 ```
+
+[GlobalSign 官方 SignTool 指南](https://support.globalsign.com/code-signing/code-signing/code-signing-windows-7-8-and-10)
+列出了上述 RFC3161 地址。脚本也保留对
+`http://timestamp.digicert.com` 的精确支持；除任意 HTTPS 地址外，不接受其它 HTTP
+主机或路径。
 
 脚本会创建新的候选目录，不覆盖源包。它会：
 

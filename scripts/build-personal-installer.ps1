@@ -81,14 +81,23 @@ function Test-ApprovedTimestampUri {
         return $true
     }
 
-    return $Uri.Scheme -eq [Uri]::UriSchemeHttp -and
-        $Uri.IsDefaultPort -and
-        [string]::Equals(
+    if ($Uri.Scheme -ne [Uri]::UriSchemeHttp -or
+        -not $Uri.IsDefaultPort -or
+        -not [string]::IsNullOrEmpty($Uri.Query)) {
+        return $false
+    }
+
+    $isDigiCert = [string]::Equals(
             $Uri.Host,
             "timestamp.digicert.com",
             [StringComparison]::OrdinalIgnoreCase) -and
-        $Uri.AbsolutePath -eq "/" -and
-        [string]::IsNullOrEmpty($Uri.Query)
+        $Uri.AbsolutePath -eq "/"
+    $isGlobalSign = [string]::Equals(
+            $Uri.Host,
+            "timestamp.globalsign.com",
+            [StringComparison]::OrdinalIgnoreCase) -and
+        $Uri.AbsolutePath -eq "/tsa/r45standard"
+    return $isDigiCert -or $isGlobalSign
 }
 
 $PackageDirectory = Resolve-ArtifactDirectory `

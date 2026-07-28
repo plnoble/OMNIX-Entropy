@@ -1,5 +1,15 @@
 # Error Ledger
 
+## 2026-07-28 - DigiCert timestamp fallback was not a valid HTTPS substitution
+
+- Symptom: the final payload signing failed on transient DigiCert HTTP timestamp responses; substituting `https://timestamp.digicert.com` then failed immediately as an invalid timestamp URL.
+- Wrong assumption: changing only the scheme of the documented DigiCert endpoint would produce an equivalent SignTool RFC3161 service.
+- Root cause: the approved URL contract and the actual TSA endpoint are path/scheme specific; endpoint reachability must be proven with SignTool rather than inferred from HTTPS availability.
+- Detection method: SignTool rejected the HTTPS URL, repeated HTTP attempts failed closed, and no failed output directory passed package verification.
+- Fix: verify GlobalSign's currently documented `http://timestamp.globalsign.com/tsa/r45standard` against an isolated EXE copy, confirm a valid R45 TSA timestamp, then allowlist only that exact official HTTP host/path in both signing scripts while retaining the exact DigiCert fallback.
+- Prevention rule: before changing a timestamp endpoint, use the vendor's current official SignTool guidance and validate the exact URL on a disposable artifact copy; never infer a timestamp URL by changing schemes.
+- Skill candidate: yes.
+
 ## 2026-07-28 - Missing GitHub release was promoted to a terminating PowerShell error
 
 - Symptom: verified 0.1.1 assets were staged locally, but draft creation stopped when `gh release view v0.1.1` correctly reported that the release did not exist.
