@@ -6,31 +6,35 @@
 
 - GitHub Releases 负责保存版本、安装包、更新清单和哈希。
 - GitHub Actions 只执行还原、测试和源完整性检查，不接触证书私钥。
-- App、Elevated Worker 和后续安装程序必须由同一个本机个人代码签名证书签署。
-- 个人证书的私钥只保存在作者电脑，不能提交到 Git、GitHub Secrets、日志或截图。
-- Windows SmartScreen 可能继续提示；用户可以手动确认，但程序不能关闭或绕过 Windows 安全功能。
-- GitHub 下载成功不等于可信。更新前仍须核对固定仓库、文件长度、SHA-256 和实际 Authenticode 签名者。
+- App、Elevated Worker、安装程序和卸载程序必须由同一个本地个人代码签名证书签署。
+- 个人证书私钥只保存在作者电脑，不能提交到 Git、GitHub Secrets、日志或截图。
+- Windows SmartScreen 可能继续提示；程序不能关闭或绕过 Windows 安全功能。
+- GitHub 下载成功不等于可信。运行前必须核对固定仓库、文件长度、SHA-256、实际 Authenticode 签名者，以及与当前 App 的签名连续性。
+
+## 应用内更新顺序
+
+1. 用户点击“检查更新”，客户端只读取固定仓库的公开版本和 `omnix-release.json`。
+2. 只有版本、标签、发布页、资产地址、长度、SHA-256 和同签名字段满足固定规则，才显示“下载并安装”。
+3. 用户点击后，安装包下载到当前 D 盘 OMNIX 目录旁边的 `Updates\v<版本>\<随机会话>`。
+4. 下载器限制实际字节数，核对 SHA-256，并用 Windows 验证安装包签名。
+5. 安装包签名必须同时匹配清单记录的指纹和当前正在运行的 OMNIX 指纹。
+6. 用户再次确认后，操作通过 `SafetyOperationPipeline`；处理器立即复核路径、长度、哈希和双方签名。
+7. 只允许无参数打开可见的交互式安装程序。成功打开后当前 App 退出；安装位置和安装按钮仍由用户确认。
 
 ## 发布顺序
 
 1. 提交并推送通过测试的源代码。
-2. 运行 `.github/workflows/ci.yml`，确认 Release 测试和源完整性检查通过。
+2. 运行 `.github/workflows/ci.yml`，确认 Release 构建、测试和源完整性检查通过。
 3. 在本机生成 portable package，再使用已有签名脚本签署 App 和 Elevated Worker。
-4. 使用已有只读验证器检查签名候选包。
-5. 运行下面的命令生成 GitHub 发布资产：
-
-   ```powershell
-   powershell -NoProfile -ExecutionPolicy Bypass -File scripts\prepare-personal-github-release.ps1 `
-     -InstallerDirectory .artifacts\OMNIX-Entropy-installer-v0.1.0 `
-     -Version 0.1.0
-   ```
-
-6. 检查新目录中的 ZIP、`omnix-release.json` 和 `SHA256SUMS.txt`。
-7. 只有确认内容正确后，才增加 `-PublishDraft`。脚本只创建草稿 Release，不会直接公开发布。
-8. 在 GitHub 页面再次检查资产和说明，然后由用户手动发布草稿。
+4. 使用只读验证器检查签名候选包。
+5. 编译并独立验证 D 盘优先的交互式安装程序。
+6. 运行 `scripts\prepare-personal-github-release.ps1` 生成四个固定发布资产。
+7. 先创建草稿 Release，回下载全部资产并复核哈希与安装器证据。
+8. 草稿内容全部通过后才公开发布，并再次检查公开 latest endpoint。
 
 ## 当前限制
 
-- 当前脚本不会生成、导入或信任个人证书。
-- 当前应用内更新客户端尚未取得安装权限；Release 通道完成后再接入下载、验证、明确确认和回退。
-- 没有有效同签名包时，高权限清理、迁移和卸载仍必须保持阻止状态。
+- 0.1.0 和 0.1.1 没有下载和启动更新包的代码，需要手动安装一次 0.1.2。
+- 更新器不会静默安装，不会自动接受 UAC，也不会替用户点击安装界面的按钮。
+- 更新器没有商业 SmartScreen 信誉，不会更改 Windows 或安全软件设置。
+- 当前版本不提供自动降级；需要降级时应从受信任发布页重新取得旧版安装包并人工确认。

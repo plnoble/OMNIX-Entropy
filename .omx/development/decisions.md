@@ -2278,3 +2278,9 @@ Consequences: 用户现在只能执行低风险临时目录移动到隔离区；
 - Decision: fail the personal release build when the self-signed signer does not form a Windows-trusted Authenticode chain, and require separate explicit consent before adding its public certificate to CurrentUser Root.
 - Rejected: interpret TrustedPeople/TrustedPublisher approval as Root approval, accept `UnknownError` based only on thumbprint, add LocalMachine trust, or publish a signed-but-untrusted package as valid.
 - Consequence: no installer is falsely labeled ready; the persistent trust expansion remains visible and reversible, and production same-signer gates keep requiring Windows `Valid`.
+# 2026-07-28 - Verified interactive updates require one manual bootstrap
+
+- Decision: release the first complete in-app updater as 0.1.2 and state plainly that 0.1.0/0.1.1 must install it once from the GitHub release page.
+- Chosen flow: user-started check -> user-started D-drive download -> exact length/SHA-256/current-App same-signer verification -> final confirmation -> `SafetyOperationPipeline` -> no-argument interactive installer -> App exit after successful launch.
+- Rejected: pretending check-only 0.1.0 can self-acquire new code; replacing the already-public 0.1.1 asset; downloading to C; silent setup arguments; trusting GitHub metadata without anchoring to the running signer; launching directly from the WPF handler.
+- Consequence: the first upgrade remains manual, but every later compatible release can use the same audited local flow without weakening Windows or OMNIX trust checks.

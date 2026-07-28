@@ -1,5 +1,15 @@
 # Development Worklog
 
+## 2026-07-28 - In-app verified update installation
+
+- User runtime evidence proved 0.1.0 can detect public 0.1.1 but can only open the release page. The current source deliberately contains no package download or install-launch path, so this is a missing product capability rather than a failed update check.
+- Chosen boundary: download only after a user click, stage beside the D-first installation, verify exact length/SHA-256 and trusted signer continuity with the running App, require final confirmation, and launch only the interactive setup through `SafetyOperationPipeline`. No silent update or trust bypass.
+- Added `PersonalReleasePackageDownloader`, a managed non-system-drive staging policy, same-signer continuity against the running executable, final-move revalidation/cleanup, cancellation, and a launch handler bound to the real current executable.
+- Reworked the update window with `DownloadAndInstallUpdateButton`, clear download/verified/failure states, final MessageBox confirmation, pipeline-only launch, and App shutdown only after the interactive setup successfully starts. The release page remains a fallback.
+- Added 0.1.2 version/release documentation and the truthful bootstrap limit: 0.1.0/0.1.1 require one manual install of 0.1.2 because they do not contain the new updater code.
+- Verification so far: TDD compile red; focused update/UX 8/8; related update/release 18/18 before the last two hardening tests; full 1066/1066 before the final path-binding test; Release 0 errors; integrity 385/18. Computer Use app approval timed out before launch, so no visual click or screenshot is claimed.
+- Final local gates after cancellation and running-executable binding: focused 8/8; full Debug 1067/1067; Release build 0 errors with 18 NU1900 warnings from unavailable NuGet vulnerability metadata; source integrity 385 files/18 XAML; diff check clean.
+
 ## 2026-07-28 - 0.1.1 public release preparation
 
 - Recorded the user's explicit request to publish 0.1.1, changed the App package version from 0.1.0 to 0.1.1, and added beginner-facing Chinese release notes.

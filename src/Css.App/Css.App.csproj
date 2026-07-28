@@ -30,7 +30,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
-    <Version>0.1.1</Version>
+    <Version>0.1.2</Version>
     <ElevatedWorkerProject>$(MSBuildProjectDirectory)\..\Css.Elevated\Css.Elevated.csproj</ElevatedWorkerProject>
     <ElevatedWorkerOutput>$(MSBuildProjectDirectory)\..\Css.Elevated\bin\$(Configuration)\net8.0-windows</ElevatedWorkerOutput>
   </PropertyGroup>

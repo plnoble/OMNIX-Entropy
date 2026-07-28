@@ -1,5 +1,15 @@
 # Current Development State
 
+## Active Slice - 2026-07-28 In-app verified update installation
+
+- Objective: replace the current check-only update window with a beginner-safe flow that downloads the fixed GitHub release package to D, verifies length/SHA-256/trusted same-signer continuity, asks for final confirmation, and launches only the interactive installer through `OperationPipeline`.
+- Dependencies: validated `PersonalReleaseChannel`, fixed GitHub asset URL, current App Authenticode identity, `WindowsAuthenticodeSignatureVerifier`, a non-system-drive update staging directory, `SafetyOperationPipeline`, and an interactive non-silent process launcher.
+- Risks: treating metadata as package trust, downloading to C, accepting a substituted signer, launching before verification, bypassing `OperationPipeline`, silently installing, overwriting the running application without user review, or claiming that 0.1.0 can acquire new updater code without one manual bootstrap install.
+- Impact scope: update domain/client, D-first staging, package verification, explicit launch operation, update window UX, tests, version/release records, and a future signed release. No automatic install, silent arguments, trust-store change, certificate export, antivirus change, or unconfirmed process launch is authorized.
+- Acceptance: update availability exposes a clear install action; download is bounded and D-first; package length/hash/trusted signer match the validated channel and the running App; failed evidence cannot expose launch; final launch has explicit confirmation and passes through `SafetyOperationPipeline`; installer remains interactive; focused/full/build/integrity gates pass; the bootstrap limitation is explained truthfully.
+- Status: implementation and local gates complete; source publication pending. Version is 0.1.2. The update window now exposes a verified install action; the downloader is length-bounded, D-first, SHA-256 checked, and anchored to the running App signer; final launch revalidates evidence and uses `SafetyOperationPipeline` with no silent arguments. Focused update/UX tests pass 8/8; full suite 1067/1067; Release build 0 errors with 18 environmental NU1900 warnings; integrity 385 files/18 XAML; diff check passes. Computer Use approval timed out before app launch, so current visual evidence is Warn and no UI action occurred.
+- Exact next action: commit/push 0.1.2 source, wait for CI, then build/sign/independently verify a new installer before creating and re-verifying any public release.
+
 ## Completed Slice - 2026-07-28 Public 0.1.1 release
 
 - Objective: publish OMNIX-Entropy 0.1.1 from the current reviewed source, including the completed read-only system-footprint diagnosis, through the existing signed D-first GitHub update channel.

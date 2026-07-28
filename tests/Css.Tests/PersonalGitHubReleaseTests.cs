@@ -76,7 +76,7 @@ public sealed class PersonalGitHubReleaseTests
     }
 
     [Fact]
-    public void Update_ui_is_user_started_and_only_exposes_a_validated_release_page()
+    public void Update_ui_exposes_verified_install_and_keeps_release_page_as_fallback()
     {
         var main = Read("src", "Css.App", "MainWindow.xaml");
         var window = Read("src", "Css.App", "UpdateWindow.xaml");
@@ -86,11 +86,17 @@ public sealed class PersonalGitHubReleaseTests
             .And.Contain("Click=\"OpenUpdate_Click\"");
         window.Should().Contain("AutomationProperties.AutomationId=\"CheckForUpdatesButton\"")
             .And.Contain("AutomationProperties.AutomationId=\"OpenReleasePageButton\"")
+            .And.Contain("AutomationProperties.AutomationId=\"DownloadAndInstallUpdateButton\"")
+            .And.Contain("Click=\"DownloadAndInstallUpdate_Click\"")
             .And.Contain("Visibility=\"Collapsed\"");
         code.Should().Contain("PersonalReleaseChannelPolicy.IsExpectedReleasePage")
             .And.Contain("PersonalReleaseCheckStatus.UpdateAvailable")
+            .And.Contain("PersonalReleasePackageDownloader")
+            .And.Contain("PersonalUpdateLaunchOperationHandler")
+            .And.Contain("SafetyOperationPipeline")
+            .And.Contain("PersonalUpdateLaunchOperationPlanner.Confirm")
             .And.Contain("UseShellExecute = true")
-            .And.NotContain("DownloadFile")
+            .And.NotContain("ProcessStartInfo\n            {\n                FileName = _verifiedPackage")
             .And.NotContain("ProcessStartInfo(\"powershell")
             .And.NotContain("runas");
     }

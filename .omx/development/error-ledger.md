@@ -1,5 +1,15 @@
 # Error Ledger
 
+## 2026-07-28 - Path-binding hardening patch missed one method brace
+
+- Symptom: the focused updater test build reported CS1513/CS1022 at the end of `PersonalUpdateInstallation.cs`.
+- Wrong assumption: the small tail patch inserted a helper after a complete expression-bodied method block.
+- Root cause: `TryReadLong` was a block-bodied method and its closing brace was omitted before `PathsEqual`; one extra file-level brace remained.
+- Detection method: immediate focused compile after the security hardening patch.
+- Fix: close `TryReadLong` before the new helper and remove the extra final brace; rerun the same focused tests.
+- Prevention rule: after manually inserting a helper near a file tail, run the narrow compile before adding more edits and inspect the numbered tail on any parser error.
+- Skill candidate: no.
+
 ## 2026-07-28 - Payload signer had no bounded timestamp retry
 
 - Symptom: both DigiCert and GlobalSign could sign one payload executable, then transiently fail the timestamp request for the second executable, invalidating the whole fresh candidate.
