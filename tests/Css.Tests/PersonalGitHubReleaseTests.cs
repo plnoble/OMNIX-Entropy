@@ -62,7 +62,10 @@ public sealed class PersonalGitHubReleaseTests
             .And.Contain("--draft")
             .And.Contain("PublishDraft")
             .And.Contain("A committed source revision is required")
-            .And.Contain("Release tag already exists");
+            .And.Contain("Release tag already exists")
+            .And.Contain("$releaseViewExitCode = $LASTEXITCODE")
+            .And.Contain("$ErrorActionPreference = \"SilentlyContinue\"")
+            .And.Contain("if ($releaseViewExitCode -ne 1)");
         script.Should().NotContain("New-SelfSignedCertificate")
             .And.NotContain("Import-PfxCertificate")
             .And.NotContain("TrustedPublisher")

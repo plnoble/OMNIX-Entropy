@@ -154,9 +154,20 @@ if ($PublishDraft) {
     if ($LASTEXITCODE -ne 0) {
         throw "GitHub CLI authentication is required to create a draft release."
     }
-    & gh release view $tag --repo $Repository *> $null
-    if ($LASTEXITCODE -eq 0) {
+    $previousErrorActionPreference = $ErrorActionPreference
+    try {
+        $ErrorActionPreference = "SilentlyContinue"
+        & gh release view $tag --repo $Repository *> $null
+        $releaseViewExitCode = $LASTEXITCODE
+    }
+    finally {
+        $ErrorActionPreference = $previousErrorActionPreference
+    }
+    if ($releaseViewExitCode -eq 0) {
         throw "Release tag already exists on GitHub: $tag"
+    }
+    if ($releaseViewExitCode -ne 1) {
+        throw "GitHub release lookup failed with exit code $releaseViewExitCode."
     }
 
     $notes = if ([string]::IsNullOrWhiteSpace($ReleaseNotesPath)) {

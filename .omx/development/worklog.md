@@ -6,7 +6,10 @@
 - Rechecked the fixed GitHub repository, installer/release script contracts, D-first setup policy, tool paths, and the previously approved signer thumbprint.
 - Verification so far: release/installer/system-footprint focused 183/183; full Debug 1060/1060; Release build 0 errors with 18 environmental NU1900 warnings; source integrity 383 files and 18/18 XAML; five release scripts parse; diff check clean.
 - A restricted certificate query falsely appeared to show that the signer was missing. An approved host-session read-only query confirmed the original private key remains in CurrentUser My and public copies remain in CurrentUser TrustedPeople, TrustedPublisher, and Root. No certificate was created, imported, exported, or changed.
-- GitHub publication, signing, setup creation, and installer execution have not occurred yet.
+- Source commit `46374e9` was pushed and GitHub CI `30333084515` passed in 3m12s. A fresh 110-file payload and setup were signed and independently verified; the first two setup timestamp attempts failed transiently and Inno's third built-in retry succeeded.
+- Draft creation then stopped safely before upload because Windows PowerShell promoted the expected missing-release stderr from `gh release view` to a terminating error. Added a regression contract and scoped native error handling; no GitHub Release was created.
+- Release-script fix verification: red 1/4 before implementation; green 4/4 after implementation; full 1060/1060; Release build 0 errors; integrity 383/18; parser 0 errors; diff check clean.
+- Installer execution has not occurred.
 
 ## 2026-07-28 - RogueCleaner-inspired system-footprint diagnosis
 

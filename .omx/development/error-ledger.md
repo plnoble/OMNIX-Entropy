@@ -1,5 +1,15 @@
 # Error Ledger
 
+## 2026-07-28 - Missing GitHub release was promoted to a terminating PowerShell error
+
+- Symptom: verified 0.1.1 assets were staged locally, but draft creation stopped when `gh release view v0.1.1` correctly reported that the release did not exist.
+- Wrong assumption: redirecting all native command output to `$null` under Windows PowerShell 5.1 would still allow the script's `$LASTEXITCODE` branch to handle the expected exit code.
+- Root cause: with `$ErrorActionPreference = "Stop"`, the native stderr record became a terminating `NativeCommandError` before the exit-code check ran.
+- Detection method: the real draft-stage execution failed at the release lookup and no remote release was created.
+- Fix: scope the expected lookup to `SilentlyContinue`, capture its exit code, restore the original preference in `finally`, treat 0 as an existing-tag refusal, accept only 1 as not found, and reject all other exit codes.
+- Prevention rule: native CLI probes that use a nonzero exit code for an expected negative result must explicitly suppress the PowerShell error record and validate the captured exit code.
+- Skill candidate: yes.
+
 ## 2026-07-28 - Restricted certificate view was mistaken for host certificate loss
 
 - Symptom: the sandboxed CurrentUser certificate query returned only a localhost certificate and the release inspector reported zero eligible code-signing certificates.

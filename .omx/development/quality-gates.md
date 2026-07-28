@@ -9,8 +9,9 @@
 | Tests and build | Pass | Focused 183/183; full Debug 1060/1060; Release build 0 errors; source integrity 383/18; five release scripts parse. | Release build emitted 18 NU1900 warnings because NuGet vulnerability metadata was unreachable. |
 | Signing identity | Pass | Approved host-session read-only query found thumbprint `5688958FEA0056861558E8DCF9D2381AF46074B2` with private key only in CurrentUser My and public copies in the three authorized CurrentUser stores. | Restricted commands cannot see the host signer; final signing must run in the approved host context. |
 | Supply chain and privacy | Pass | Fixed repository and explicit tool paths rechecked; secret/material audit found only test assertions for ignored PFX/P12 patterns, not signing material. | Final package inventory and hashes remain pending. |
-| Source publication | Warn | Local source gates pass. | Commit, push, and GitHub CI are pending. |
-| Installer and Release | Warn | Existing scripts enforce same signer, timestamp, D-first visible directory selection, no silent setup, independent verification, and draft-first staging. | Fresh 0.1.1 payload/setup, independent verification, public Release, and latest-endpoint verification are pending. |
+| Source publication | Pass | Commit `46374e9` was pushed; GitHub CI `30333084515` passed Release build, full suite, and source integrity in 3m12s. | A release-script fix now needs its own commit/push/CI before final packaging. |
+| Installer | Pass | Fresh 110-file payload and 0.1.1 setup passed same-signer, timestamp, hash, D-first, visible-directory, no-silent-install, and independent verification gates. | These pre-fix artifacts intentionally will not be published; final assets must be rebuilt from the release-fix commit. |
+| Release | Warn | The real draft attempt failed closed before upload on an expected missing-tag probe; red 1/4 then green 4/4 proves explicit exit-code handling; full 1060/1060, Release 0 errors, integrity 383/18, parser 0, and diff check pass. | Fix commit/CI, rebuilt assets, draft review, public Release, and latest-endpoint verification are pending. |
 
 ## 2026-07-28 - RogueCleaner-inspired system-footprint diagnosis
 
