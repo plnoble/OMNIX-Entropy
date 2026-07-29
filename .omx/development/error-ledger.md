@@ -1,5 +1,15 @@
 # Error Ledger
 
+## 2026-07-29 - First GitHub CI attempt aborted the testhost without a failing test
+
+- Symptom: GitHub CI `30424760666` built successfully, then the testhost crashed after reporting 429 passed, zero failed, and `Test Run Aborted`; source integrity did not run.
+- Wrong assumption: a pushed commit that passes the same local build/test sequence will necessarily produce a decisive first hosted-run result.
+- Root cause: undetermined hosted runner or testhost failure. The log contained no failed assertion or named failing test, and the same commit completed all 1068 tests on a fresh runner.
+- Detection method: read the complete failed job log instead of treating the workflow conclusion as a code assertion failure.
+- Fix: stop publication, perform one bounded rerun of only the failed job, and require the fresh runner to pass build, full suite, and integrity before resuming. The retry passed.
+- Prevention rule: one assertion-free testhost abort may receive one clean failed-job retry after log inspection; a repeated abort is a reproducible blocker that requires test-level isolation, not further retries.
+- Skill candidate: no.
+
 ## 2026-07-29 - Archive verification guessed a directory layout that did not exist
 
 - Symptom: the first archive-content comparison emitted 15 `path does not exist` failures, then a second ad hoc text comparison reported false mismatches for files whose Git diff showed only a trailing blank line.

@@ -8,6 +8,11 @@
 - Added the Inno directive and an internal typed layout exception. `DownloadAndVerifyAsync` maps only that type to beginner guidance; the strict layout check and all other failure classes are unchanged. Focused green is 16/16.
 - Mechanically removed only trailing blank lines from the 15 new archive files reported by `git diff --check`; no record body was rewritten.
 - Completed local gates: full Debug 1068/1068; Release build 0 warnings/errors; source integrity 385 files, zero invalid UTF-8/replacement files, 18/18 XAML; `git diff --check` clean. Git's ignore-blank-lines comparison against `fe2e012` confirms the archive edits contain no nonblank content changes.
+- Committed `d052ae1` on top of Claude's reviewed `fe2e012` and pushed both to `main`. GitHub CI `30424760666` first aborted its testhost after 429 passing tests with no failed assertion; a single failed-job retry on a fresh runner passed build, all 1068 tests, and source integrity.
+- Built a fresh 110-file candidate from `d052ae1`, signed App and Worker with CurrentUser publisher `5688958FEA0056861558E8DCF9D2381AF46074B2` and a GlobalSign R45 timestamp, and independently verified same-signer readiness.
+- Built and signed the 0.1.3 Inno setup. Independent verification confirmed version 0.1.3, the expected signer, D-first default, visible directory selection, no silent install, and `CanStageGitHubRelease=true`.
+- Created a draft release, downloaded all four assets into a fresh directory, matched every SHA-256 to its local input, and independently reverified the downloaded setup. Published `v0.1.3`; the unauthenticated latest endpoint reports non-draft/non-prerelease, four assets, commit `d052ae1`, and the expected channel identity.
+- Public setup: 14,833,040 bytes; SHA-256 `33C332A658B6B5CF08304AE67A0E2A7A5AAE3CC23A357E5407913E305F05C73A`.
 - No installer, product process, update, UAC flow, certificate/trust, registry write, antivirus action, or system mutation ran.
 
 ## 2026-07-29 - Released-state review and record readability

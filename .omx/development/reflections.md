@@ -3,6 +3,14 @@
 Add an entry at the top of this file before declaring a meaningful task finished.
 Keep entries short and focused on reusable learning.
 
+## 2026-07-29 - The installer and updater must share one directory contract
+
+- What worked: verifying the user's actual reinstall rather than assuming install success meant update readiness. The doubled `Install` was a product contract mismatch, and keeping the updater strict while fixing the installer preserved the security boundary.
+- What caught real risk: TDD used the real Windows path policy and proved malformed layout refusal happens before any HTTP request. The release draft, download-back hash comparison, and independent verification kept publication separate from build trust.
+- CI lesson: an assertion-free hosted testhost abort is inconclusive, not green and not automatically a code defect. One bounded clean retry produced decisive evidence; a second abort would have stopped release for isolation work.
+- Waste: the archive verification guessed filenames and then compared reconstructed shell text. Resolve paths first and use Git's own diff semantics for repository content.
+- Next improvement: add an installer-layout acceptance receipt that records the directory shown after using Browse, so `AppendDefaultDirName` behavior is covered by a real disposable installer run as well as source contracts.
+
 ## 2026-07-29 - Reviewing a record is not reading it
 
 - What worked: re-deriving every claim instead of reading it. Integrity, build, suite, and all five public-release hashes matched exactly, which is a real result — it means the release-era records can be trusted, and that conclusion is only worth something because it was tested rather than assumed.

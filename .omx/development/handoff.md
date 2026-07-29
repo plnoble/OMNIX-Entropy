@@ -1,14 +1,15 @@
 # Agent Handoff
 
-## Latest Update - 2026-07-29 Managed install layout corrected
+## Latest Update - 2026-07-29 Public 0.1.3 released
 
-- Current objective: finish and publish the source-side layout closure, then use the correctly installed 0.1.2 for the first true 0.1.3 in-app update.
+- Current objective: use the correctly installed 0.1.2 for the first true 0.1.3 in-app update and preserve its runtime receipt.
 - What changed on the machine: the user reinstalled 0.1.2 into `D:\Software\OMNIX-Entropy\Install`. Read-only host verification found the correct exe, valid expected signer and GlobalSign timestamp, fixed D drive, non-reparse product/install directories, matching uninstall-registry location, and no doubled executable.
 - What changed in source: `AppendDefaultDirName=no`; typed doubled-layout refusal with exact reinstall guidance and no network request; release-page launch fallback contract; archive EOF whitespace repair. The strict managed-layout guard remains unchanged.
-- What is verified: pre-change related 15/15; TDD red failed only the two absent layout behaviors; focused green 16/16; full Debug 1068/1068; Release build 0 warnings/errors; source integrity 385 files/18 XAML; diff check clean; archive edits contain no nonblank change against `fe2e012`.
-- What is not verified: no installer or product update ran; no 0.1.3 exists yet; the first true in-app download/verify/confirm/launch remains untested.
-- Known risks: local `fe2e012` and the follow-up work are not pushed; GitHub and timestamp services remain external; the current 0.1.2 binary cannot show the improved malformed-layout copy because that source first ships in 0.1.3.
-- Exact next recommended action: commit and push the reviewed commits, wait for CI, then build/sign/re-download/reverify 0.1.3 before publication. Do not run the installer.
+- What is verified: focused 16/16; full Debug 1068/1068; Release build 0 warnings/errors; source integrity 385 files/18 XAML; source `d052ae1` pushed; CI `30424760666` passed on a bounded clean retry; signed payload/setup passed independent verification; four draft assets matched after download-back; downloaded setup returned `CanStageGitHubRelease=true`; public latest reports non-draft/non-prerelease `v0.1.3` with four assets.
+- Public artifact: `https://github.com/plnoble/OMNIX-Entropy/releases/tag/v0.1.3`; setup length 14,833,040 bytes; SHA-256 `33C332A658B6B5CF08304AE67A0E2A7A5AAE3CC23A357E5407913E305F05C73A`; signer `5688958FEA0056861558E8DCF9D2381AF46074B2`.
+- What is not verified: no installer or product update ran; the first true in-app download/verify/confirm/launch from installed 0.1.2 remains a user-run acceptance step.
+- Known risks: GitHub/timestamp availability remains external; personal signing does not create public SmartScreen reputation; the first CI attempt's hosted testhost aborted after 429 passing tests, although the clean retry completed.
+- Exact next recommended action: ask the user to open the installed 0.1.2 update window, check for 0.1.3, use the visible download/install action, and report the outcome. Preserve final confirmation and resulting installed path/version evidence; do not automate the installer.
 
 ## Latest Update - 2026-07-28 Public 0.1.2 released
 
