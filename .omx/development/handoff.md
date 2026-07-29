@@ -1,5 +1,15 @@
 # Agent Handoff
 
+## Latest Update - 2026-07-29 Managed install layout corrected
+
+- Current objective: finish and publish the source-side layout closure, then use the correctly installed 0.1.2 for the first true 0.1.3 in-app update.
+- What changed on the machine: the user reinstalled 0.1.2 into `D:\Software\OMNIX-Entropy\Install`. Read-only host verification found the correct exe, valid expected signer and GlobalSign timestamp, fixed D drive, non-reparse product/install directories, matching uninstall-registry location, and no doubled executable.
+- What changed in source: `AppendDefaultDirName=no`; typed doubled-layout refusal with exact reinstall guidance and no network request; release-page launch fallback contract; archive EOF whitespace repair. The strict managed-layout guard remains unchanged.
+- What is verified: pre-change related 15/15; TDD red failed only the two absent layout behaviors; focused green 16/16; full Debug 1068/1068; Release build 0 warnings/errors; source integrity 385 files/18 XAML; diff check clean; archive edits contain no nonblank change against `fe2e012`.
+- What is not verified: no installer or product update ran; no 0.1.3 exists yet; the first true in-app download/verify/confirm/launch remains untested.
+- Known risks: local `fe2e012` and the follow-up work are not pushed; GitHub and timestamp services remain external; the current 0.1.2 binary cannot show the improved malformed-layout copy because that source first ships in 0.1.3.
+- Exact next recommended action: commit and push the reviewed commits, wait for CI, then build/sign/re-download/reverify 0.1.3 before publication. Do not run the installer.
+
 ## Latest Update - 2026-07-28 Public 0.1.2 released
 
 - Current objective: preserve the completed verified in-app update chain and guide the one-time bootstrap from installed 0.1.0/0.1.1 to 0.1.2.
@@ -92,16 +102,18 @@ The 2026-07-22 signing blocker is resolved and must not be reintroduced into thi
 
 - The installed 0.1.2 has not been launched by an agent, and no product process was started during the review. Installation itself was performed by the user, not by an agent.
 - No current screenshot exists. Computer Use approval timed out before app launch in the previous slice and was not retried here; visual evidence remains Warn.
-- The first true self-update is still untested, and on the current installation it cannot succeed at all — see the blocker below.
+- The first true self-update is still untested. The corrected current installation now satisfies the observed layout, drive, reparse, version, and signer prerequisites.
 - The ten-case disposable Windows behavioral receipt is still absent.
 
 ## Bootstrap Install State - 2026-07-29
 
 The user completed the manual 0.1.2 bootstrap. A read-only uninstall-registry query confirms `OMNIX-Entropy 版本 0.1.2`, publisher `plnoble`, InstallDate `20260728`.
 
-However the install landed at `D:\Software\OMNIX-Entropy\Install\Install\Css.App.exe`, one level deeper than the managed layout. `WindowsPersonalUpdatePathPolicy.ResolveProductRoot` requires the executable's parent to be `Install` and its grandparent to be `OMNIX-Entropy`; here the grandparent is `Install`, so it throws and `DownloadAndVerifyAsync` returns a generic preparation failure. **The in-app update path is unavailable on this installation**, and the message the user would see does not explain why.
+The first install landed at `D:\Software\OMNIX-Entropy\Install\Install\Css.App.exe`, one level deeper than the managed layout. `WindowsPersonalUpdatePathPolicy.ResolveProductRoot` correctly refused it, while the generic downloader message failed to explain recovery.
 
 Cause: `installer/OMNIX-Entropy.iss` leaves `AppendDefaultDirName` at its default of yes, so Inno's Browse dialog appends the last component of `DefaultDirName` to the selected folder. Confirming the pre-filled default through Browse produces the doubled path. The installer default itself is correct; only the Browse route produces this.
+
+The user then reinstalled 0.1.2 into `D:\Software\OMNIX-Entropy\Install`. Host verification confirms the current executable, registry location, signer/timestamp, fixed drive, and non-reparse chain are correct; the doubled executable is absent. Machine remediation is complete. Source prevention and recovery copy are implemented in the current active slice and await broader gates/release.
 
 ## Known Risks Or Blockers
 
@@ -126,7 +138,7 @@ The bootstrap install is done, so the next work is closing the layout defect it 
 
 Do not relax the layout check itself; it is a deliberate guard and the installer is what should guarantee the layout.
 
-Re-pointing the existing installation needs a user-run reinstall into `D:\Software\OMNIX-Entropy\Install` (type or paste the path rather than confirming it through Browse). That is a human step: do not launch, install, or uninstall the setup on the user's behalf.
+The user-run reinstall into `D:\Software\OMNIX-Entropy\Install` is complete. Do not launch, install, or uninstall another setup on the user's behalf.
 
 Only after that can a release newer than 0.1.2 prove the in-app download/verify/confirm/launch path end to end. Prefer also consolidating the release preflight into one fail-closed receipt, as `reflections.md` recommends.
 

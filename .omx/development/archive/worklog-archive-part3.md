@@ -25,4 +25,3 @@ Historical entries moved out of `.omx/development/worklog.md` so the live record
 - Verification: fixture 22/22, fixture package 4/4, disposable protocol 6/6, related product/release 434/434, full 1026/1026, Release build 0 warnings/errors, source integrity 367 files and 17/17 XAML.
 - Final fixture package/ZIP: `.artifacts/OMNIX-Acceptance-Fixtures-20260719-014314`; five payload files; manifest SHA-256 `07C033F1B445DCF1E171ABC18E8FAC3AD9ECDA1ADFDECC0603C22FB712FA4FA3`. No fixture mutation ran on the current machine.
 - Republished product package/ZIP `.artifacts/OMNIX-Entropy-test-20260719-014731`; manifest contains 110 files, the artifact contains zero fixture payloads, the Release command surface is ProductionOnly, and unsigned mutation remains blocked.
-

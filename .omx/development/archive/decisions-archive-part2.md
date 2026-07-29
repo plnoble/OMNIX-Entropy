@@ -483,4 +483,3 @@ Historical entries moved out of `.omx/development/decisions.md` so the live reco
 - Decision: use exact `C:\Temp` for the disposable cleanup case only when it does not already exist, then mark and own it for the session.
 - Rejected: place cleanup data under a nested user-temp/session directory that scanners can see but the current recommendation builder cannot authorize, or merge fixture data into an existing `C:\Temp`.
 - Consequence: the real C-drive rule/recommendation pipeline emits the intended low-risk reversible operation, while collision refusal prevents touching preexisting machine data.
-

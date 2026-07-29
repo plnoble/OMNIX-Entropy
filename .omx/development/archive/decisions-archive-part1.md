@@ -1705,4 +1705,3 @@ Consequences:
 - Rejected: allow unsigned builds to mutate disposable fixtures through production worker modes. Even with path constraints, that would create a second privileged policy surface and make a developer switch capable of authorizing real mutation.
 - Rejected: wait until after recovery preparation and final confirmation to show trust refusal. It wastes beginner effort and makes a disabled development build look executable until the last step.
 - Consequence: unsigned DEBUG builds remain useful for read-only plans and fake lifecycle transport tests, but cannot create final uninstall/migration execution evidence or request elevation. Signed same-publisher packages retain the existing full path.
-

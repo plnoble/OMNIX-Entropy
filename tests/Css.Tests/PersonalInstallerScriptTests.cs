@@ -10,6 +10,7 @@ public sealed class PersonalInstallerScriptTests
         var script = Read("installer", "OMNIX-Entropy.iss");
 
         script.Should().Contain("DefaultDirName=D:\\Software\\OMNIX-Entropy\\Install")
+            .And.Contain("AppendDefaultDirName=no")
             .And.Contain("DisableDirPage=no")
             .And.Contain("PrivilegesRequired=lowest")
             .And.Contain("Result := not WizardSilent")

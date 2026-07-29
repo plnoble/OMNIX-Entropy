@@ -1,5 +1,12 @@
 # Decision Log
 
+## 2026-07-29 - Installer guarantees the managed layout; updater keeps refusing malformed layouts
+
+- Choice: set `AppendDefaultDirName=no` so Inno's Browse dialog cannot append a second `Install`, while preserving the exact `OMNIX-Entropy\Install` updater layout check.
+- Choice: classify the layout mismatch with an internal typed exception and map only that type to beginner-visible reinstall guidance.
+- Rejected: relaxing `ResolveProductRoot`, accepting arbitrary product roots, matching the English exception message, or treating every staging failure as an installation-layout problem.
+- Consequence: a future installer cannot reproduce the observed doubled path; old or manually moved malformed installations still fail closed with a useful recovery action; unrelated failures retain the generic boundary.
+
 ## 2026-07-29 - Split records by date, never by position
 
 - Choice: select archived entries by the date in each heading, keep undated structural sections in the live file, and write archives chunked to stay under the read limit.

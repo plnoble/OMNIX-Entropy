@@ -1,5 +1,18 @@
 # Quality Gates
 
+## 2026-07-29 - Managed install-layout closure
+
+| Category | Status | Evidence | Residual risk |
+| --- | --- | --- | --- |
+| Scope and consent | Pass | User asked Codex to implement the source and release work; machine inspection was read-only and installer execution remains a user action. | 0.1.3 publication is pending. |
+| Current installation | Pass | Host evidence: correct 0.1.2 exe/registry location, valid expected signer and GlobalSign timestamp, fixed D drive, non-reparse directories, no doubled executable. | A future release is still needed to exercise self-update. |
+| Installer layout | Pass | `AppendDefaultDirName=no` plus focused source contract; doubled-layout test uses the real Windows path policy. | Real compiled 0.1.3 setup has not yet been inspected. |
+| Failure classification | Pass | Internal typed layout exception; downloader returns exact reinstall guidance and performs zero HTTP requests for the malformed layout. | Current 0.1.2 binary still has the old generic copy; this lands in 0.1.3. |
+| Security boundary | Pass | Exact managed layout, D-first fixed-drive, reparse, hash, signer, confirmation, and pipeline checks are not relaxed. | First real end-to-end update remains pending. |
+| Tests and build | Pass | TDD red was specific; focused installer/update/release-page contracts pass 16/16; full Debug 1068/1068; Release build 0 warnings/errors; source integrity 385 files/18 XAML; diff check clean. | GitHub CI is pending. |
+| Records and handoff | Pass | Corrected machine state recorded; 15 archive EOF whitespace findings fixed mechanically; ignoring pure blank-line changes leaves no archive diff against `fe2e012`. | Final release evidence still needs a completion update. |
+| Release | Warn | Version is 0.1.3 and beginner-facing release notes are present; source and local gates are ready for publication workflow. | Push/CI, package signing, download-back verification, and publication are pending. |
+
 ## 2026-07-29 - Released-state review and record readability
 
 | Category | Status | Evidence | Residual risk |

@@ -1469,4 +1469,3 @@ Historical entries moved out of `.omx/development/worklog.md` so the live record
 - Added a DEBUG-only consent-to-result flow and GUI smoke. The real window began disabled, enabled only after all checks, and opened the existing fake post-scan result.
 - Inspected qa-uninstall-final-consent.png and qa-uninstall-final-consent-result.png; both are clean and beginner-readable.
 - The visual fixture is not the backend transport and invokes no handler, launcher, scanner, installer, or uninstaller.
-

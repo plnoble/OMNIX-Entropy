@@ -1,5 +1,15 @@
 # Error Ledger
 
+## 2026-07-29 - Archive verification guessed a directory layout that did not exist
+
+- Symptom: the first archive-content comparison emitted 15 `path does not exist` failures, then a second ad hoc text comparison reported false mismatches for files whose Git diff showed only a trailing blank line.
+- Wrong assumption: archive files followed a nested `archive/<record>/part-N.md` convention and PowerShell line-array reconstruction was a trustworthy content comparison.
+- Root cause: the real files use flat names such as `archive/current-archive-part1.md`; the guessed paths were not resolved with `rg --files` first, and reconstructing Git output through PowerShell introduced comparison ambiguity.
+- Detection method: `rg --files .omx\development\archive`, followed by a direct `git diff --word-diff` on one reported mismatch.
+- Fix: use the repository's real paths and let Git perform the intended semantic check: `git diff --ignore-blank-lines --exit-code fe2e012 -- .omx/development/archive`, which passed.
+- Prevention rule: resolve archive paths before a required batch, and use Git's diff engine for repository-content equivalence instead of rebuilding blobs through shell text decoding.
+- Skill candidate: no.
+
 ## 2026-07-29 - The 0.1.2 bootstrap install landed in a layout the updater refuses
 
 - Symptom: 0.1.2 is installed and registered (`OMNIX-Entropy 版本 0.1.2`, publisher `plnoble`, InstallDate `20260728`), but its `InstallLocation` is `D:\Software\OMNIX-Entropy\Install\Install\` and the executable is at `D:\Software\OMNIX-Entropy\Install\Install\Css.App.exe`. The expected managed layout is `D:\Software\OMNIX-Entropy\Install\Css.App.exe`.
@@ -7,9 +17,19 @@
 - Wrong assumption: that completing the manual bootstrap install was sufficient to enable the in-app update path. Installation success and updatable layout are separate facts, and only the first was checked.
 - Root cause: `installer/OMNIX-Entropy.iss` sets `DefaultDirName=D:\Software\OMNIX-Entropy\Install` and leaves `AppendDefaultDirName` at its default of yes. Inno's Browse dialog then appends the last component of `DefaultDirName` to whatever folder is selected, so confirming the pre-filled path through Browse yields `...\Install\Install`. Nothing in the installer or the app detects the resulting layout.
 - Detection method: read-only uninstall-registry query plus a bounded filesystem check after the user reported the install; the doubled segment was visible in `InstallLocation`.
-- Fix: not yet applied. Two separate changes are needed — set `AppendDefaultDirName=no` (or otherwise make the directory page non-doubling) so the layout cannot be produced, and give the layout refusal a distinct beginner-visible message naming the install location instead of a generic preparation failure. Re-pointing the existing installation requires a user-run reinstall, which is not an agent action.
+- Fix: the user reinstalled 0.1.2 into the correct managed directory and host verification confirmed the doubled executable is absent. Source prevention now sets `AppendDefaultDirName=no`; the real path policy keeps rejecting doubled layouts through a typed exception; the downloader returns exact reinstall guidance and makes no HTTP request. Focused contracts pass; broader gates and release are pending.
 - Prevention rule: a path policy that encodes a required directory layout needs a matching installer guarantee and a distinct refusal message. Do not treat a successful install as proof that the layout the product depends on was produced.
 - Skill candidate: yes.
+
+## 2026-07-29 - Read-only installation check used an invalid pipeline after foreach
+
+- Symptom: the first two PowerShell installation-inspection commands stopped at parse time with `EmptyPipeElement`.
+- Wrong assumption: an inline `foreach (...) { ... } | Format-List` statement could be piped directly in Windows PowerShell.
+- Root cause: the loop statement was not grouped or assigned before the pipeline.
+- Detection method: immediate parser failure before any filesystem or registry access.
+- Fix: collect loop results into an array and pipe the completed array to formatting; the corrected read-only checks then succeeded.
+- Prevention rule: assign statement output before piping when a Windows PowerShell command starts with `foreach`.
+- Skill candidate: no.
 
 ## 2026-07-29 - Development records grew past the tooling read limit
 

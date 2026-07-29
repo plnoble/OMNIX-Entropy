@@ -45,6 +45,9 @@ public interface IPersonalUpdatePathPolicy
         string packagePath);
 }
 
+internal sealed class PersonalUpdateInstallLayoutException(string message)
+    : InvalidOperationException(message);
+
 public sealed class WindowsPersonalUpdatePathPolicy : IPersonalUpdatePathPolicy
 {
     public string CreateStagingDirectory(
@@ -110,7 +113,7 @@ public sealed class WindowsPersonalUpdatePathPolicy : IPersonalUpdatePathPolicy
                 PersonalReleaseChannelPolicy.Product,
                 StringComparison.OrdinalIgnoreCase))
         {
-            throw new InvalidOperationException(
+            throw new PersonalUpdateInstallLayoutException(
                 "In-app update requires the managed OMNIX installation layout.");
         }
 
@@ -288,6 +291,13 @@ public sealed class PersonalReleasePackageDownloader
         catch (InvalidDataException)
         {
             return Refused("更新包大小与发布记录不一致，已停止更新。");
+        }
+        catch (PersonalUpdateInstallLayoutException)
+        {
+            return Refused(
+                "OMNIX 的安装位置不正确，无法安全更新。请重新安装到 "
+                + @"D:\Software\OMNIX-Entropy\Install"
+                + " 后再检查更新；没有下载或启动安装程序。");
         }
         catch (Exception)
         {

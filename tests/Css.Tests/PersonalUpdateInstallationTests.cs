@@ -269,6 +269,40 @@ public sealed class PersonalUpdateInstallationTests : IDisposable
         }
     }
 
+    [Fact]
+    public async Task Doubled_install_layout_is_refused_with_reinstall_guidance()
+    {
+        var packageBytes = "signed package"u8.ToArray();
+        var currentExecutable = Path.Combine(
+            _root,
+            "OMNIX-Entropy",
+            "Install",
+            "Install",
+            "Css.App.exe");
+        Directory.CreateDirectory(Path.GetDirectoryName(currentExecutable)!);
+        File.WriteAllText(currentExecutable, "current signed app");
+        var http = new RecordingHandler(new HttpResponseMessage(HttpStatusCode.OK)
+        {
+            Content = new ByteArrayContent(packageBytes)
+        });
+        var downloader = new PersonalReleasePackageDownloader(
+            new HttpClient(http),
+            new TestSignatureVerifier(currentExecutable, SignerThumbprint),
+            new WindowsPersonalUpdatePathPolicy());
+
+        var result = await downloader.DownloadAndVerifyAsync(
+            CreateChannel(packageBytes),
+            currentExecutable);
+
+        result.Status.Should().Be(PersonalUpdateDownloadStatus.Refused);
+        result.Package.Should().BeNull();
+        result.Message.Should().Contain("安装位置不正确")
+            .And.Contain("重新安装")
+            .And.Contain(@"D:\Software\OMNIX-Entropy\Install")
+            .And.Contain("没有下载或启动安装程序");
+        http.Requests.Should().BeEmpty();
+    }
+
     public void Dispose()
     {
         if (Directory.Exists(_root))

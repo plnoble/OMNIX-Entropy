@@ -1,5 +1,15 @@
 # Development Worklog
 
+## 2026-07-29 - Managed install-layout closure
+
+- Verified the user's corrected 0.1.2 installation in the host CurrentUser context: exact managed exe and registry path, version 0.1.2, valid expected signer and GlobalSign timestamp, fixed D drive, non-reparse directories, and no doubled executable.
+- Reviewed local unpushed commit `fe2e012`. Its guarded release-page launch and single cleanup authority are sound, but it did not implement the installer-layout prevention or distinct recovery message. Existing focused contracts passed 15/15.
+- TDD red added three protections: `AppendDefaultDirName=no`, doubled-layout refusal with exact reinstall guidance/no HTTP request, and guarded release-page failure copy. Red failed only the first two missing behaviors; the Claude launch guard was already green.
+- Added the Inno directive and an internal typed layout exception. `DownloadAndVerifyAsync` maps only that type to beginner guidance; the strict layout check and all other failure classes are unchanged. Focused green is 16/16.
+- Mechanically removed only trailing blank lines from the 15 new archive files reported by `git diff --check`; no record body was rewritten.
+- Completed local gates: full Debug 1068/1068; Release build 0 warnings/errors; source integrity 385 files, zero invalid UTF-8/replacement files, 18/18 XAML; `git diff --check` clean. Git's ignore-blank-lines comparison against `fe2e012` confirms the archive edits contain no nonblank content changes.
+- No installer, product process, update, UAC flow, certificate/trust, registry write, antivirus action, or system mutation ran.
+
 ## 2026-07-29 - Released-state review and record readability
 
 - Reviewed released `main` (`e4f0cf0`) by re-deriving evidence instead of reading it. Source integrity returned 385 files and 18/18 XAML; Release build 0 errors and 0 warnings; full Debug 1067/1067. Every number in the records matched, and the Release build was cleaner than recorded because the NuGet vulnerability index was reachable this time, so the 18 NU1900 warnings did not reappear.

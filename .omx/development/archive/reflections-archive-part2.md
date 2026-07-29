@@ -202,4 +202,3 @@ Use this file at the end of meaningful tasks. Keep entries short and focused on 
 - Compensation must begin before the first mutation, not after an ownership marker succeeds. Fault injection at every boundary is the practical way to prove that promise.
 - Keeping the harness outside the product package lets acceptance become more realistic without creating a hidden production command surface.
 - The fixture package and product candidate are separate evidence objects. Binding both hashes into one session makes substitution detectable while preserving independent signing and packaging rules.
-

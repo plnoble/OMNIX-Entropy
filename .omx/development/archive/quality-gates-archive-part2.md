@@ -1254,4 +1254,3 @@ Statuses:
 | Frontend, accessibility, and UX | Pass | Stable primary/close AutomationIds, deterministic initialized button text, first-view visibility test, and manually inspected `.omx/qa-uninstall-post-scan-action.png`. | Clean state hides the redundant primary action. |
 | Testing and verification | Pass | Focused 9/9; related 361/361; full 948/948; build 0 warnings/errors; 341 strict UTF-8 C#/XAML files with zero replacement characters. | Static tests use balanced method extraction. |
 | Operations, dependencies, and release | Warn | Updated antivirus definitions allow normal build/test/render verification. | Signed package plus disposable-machine real uninstall acceptance remains required before release. |
-

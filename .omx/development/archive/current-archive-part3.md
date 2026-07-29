@@ -741,4 +741,3 @@ Historical entries moved out of `.omx/development/current.md` so the live record
 - Last verification: focused 3/3; related uninstall/readiness/product 397/397; full 983/983; Release build 0 warnings/errors; 357 strict UTF-8 C#/XAML files; 17/17 XAML parse; final package `.artifacts/OMNIX-Entropy-test-20260719-000736`. Computer Use captured the final uninstall first view and still-installed residue refusal; unavailable preparation controls and residue-mutation actions were absent. No mutation ran.
 - Blockers: none.
 - Exact next action: continue the visible Application workflow audit with cache-cleanup and startup-management decision outcomes; keep valid same-signer disposable real mutation acceptance as a separate release gate.
-

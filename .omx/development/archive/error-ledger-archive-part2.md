@@ -1008,4 +1008,3 @@ Historical entries moved out of `.omx/development/error-ledger.md` so the live r
 - Fix: rerun with `D:\Agent\Project\OMNIX-Entropy\.artifacts\OMNIX-Acceptance-Fixtures-20260719-014314`; verification passed.
 - Prevention rule: use absolute local paths for all release/acceptance verifier inputs and keep their refusal behavior unchanged.
 - Skill candidate: no.
-

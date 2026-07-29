@@ -1993,4 +1993,3 @@ Use this file to record mistakes that should not be repeated.
 - Fix: navigate to the list, increase its stable height, and require both fixture list items to have `IsOffscreen=false` before capture.
 - Prevention rule: for beginner conclusion panels, assert stable item AutomationIds, item-level onscreen state, and a screenshot of the actual content, not only the section container.
 - Skill candidate: yes
-

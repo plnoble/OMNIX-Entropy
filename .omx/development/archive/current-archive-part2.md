@@ -862,4 +862,3 @@ Historical entries moved out of `.omx/development/current.md` so the live record
 - Last verification: focused health/inventory gate tests passed 14/14; related scan/Agent/product tests passed 226/226; full regression passed 722/722; solution build passed with 0 warnings/errors. Static gates passed for 284 strict UTF-8 C#/XAML files, 16 parsed XAML files, 120 resolved event bindings, zero duplicate literal AutomationIds, zero Agent mutation-authority hits, and zero scanner exception-detail leaks.
 - Blockers: no source/test blocker; real WPF visual proof retains the existing Computer Use availability Warn.
 - Exact next action: make Undo Center's existing first-entry load deduplicated and truthful, retain explicit refresh after operations, and remove exception-detail leakage.
-

@@ -1404,4 +1404,3 @@ Open issues:
 | Testing and verification | Pass | TDD red observed for missing models/rules/UI/smoke and both automation fixes. Full suite passed 217/217; solution build passed with 0 warnings/errors. | Fresh commands used the final workspace state. |
 | Frontend, accessibility, and UX | Pass | `InstallDiffEligibleActionsListBox` has stable AutomationId, is non-selectable, is inside the default-collapsed review, and contains no buttons. Clean `.omx/qa-install-diff-eligible-actions.png` was visually inspected. | The screenshot shows candidate reasons, evidence, missing evidence, and safety copy. |
 | Operations, dependencies, and release | Warn | Smoke retains one additional QA PNG and now uses bounded focus/viewport logic. No process or temporary fixture/data path remained. | End-user packaging still needs an exclusion rule for `.omx` QA assets. |
-

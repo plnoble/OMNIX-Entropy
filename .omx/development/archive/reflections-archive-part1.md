@@ -1717,4 +1717,3 @@ Historical entries moved out of `.omx/development/reflections.md` so the live re
 - What worked: a resident-app ownership total plus separate signal-type counts explains one app with multiple background mechanisms without inflating the apparent app count.
 - Waste avoided: four ownership breakdowns would make the compact summary unreadable; one raw total would hide why the Agent refuses protected actions.
 - Remaining risk: the next useful work is no longer another wording audit. Critical cleanup execution, timeline, and restore boundaries need an end-to-end readiness trace.
-

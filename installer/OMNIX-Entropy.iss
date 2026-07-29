@@ -17,6 +17,7 @@ AppPublisherURL=https://github.com/plnoble/OMNIX-Entropy
 AppSupportURL=https://github.com/plnoble/OMNIX-Entropy/issues
 AppUpdatesURL=https://github.com/plnoble/OMNIX-Entropy/releases
 DefaultDirName=D:\Software\OMNIX-Entropy\Install
+AppendDefaultDirName=no
 DefaultGroupName=OMNIX-Entropy
 DisableDirPage=no
 DisableProgramGroupPage=yes

@@ -333,4 +333,3 @@ These three sections had accumulated across many slices in the live `handoff.md`
 - Fresh screenshots for the latest installer/Agent/Timeline/machine/crash/error-boundary/category/closure changes: after the user confirmed updated antivirus definitions, Computer Use listed Windows apps but the OMNIX-Entropy `launch_app` request timed out, passive refresh found no target, and no fallback UI automation was used.
 - Signed uninstall/migration on disposable fixtures remains a release gate.
 - Earlier MSIX, hardware Agent, skill-card, and C-drive root-cause visual gates retain Warn status.
-

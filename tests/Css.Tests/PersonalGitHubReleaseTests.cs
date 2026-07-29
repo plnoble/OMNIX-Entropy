@@ -99,6 +99,21 @@ public sealed class PersonalGitHubReleaseTests
             .And.NotContain("ProcessStartInfo\n            {\n                FileName = _verifiedPackage")
             .And.NotContain("ProcessStartInfo(\"powershell")
             .And.NotContain("runas");
+
+        var openHandlerStart = code.IndexOf(
+            "private void OpenReleasePage_Click",
+            StringComparison.Ordinal);
+        var openHandlerEnd = code.IndexOf(
+            "protected override void OnClosed",
+            openHandlerStart,
+            StringComparison.Ordinal);
+        openHandlerStart.Should().BeGreaterThanOrEqualTo(0);
+        openHandlerEnd.Should().BeGreaterThan(openHandlerStart);
+        var openHandler = code[openHandlerStart..openHandlerEnd];
+        openHandler.Should().Contain("try")
+            .And.Contain("catch (Exception)")
+            .And.Contain("没有打开发布页")
+            .And.Contain("没有下载或安装任何内容");
     }
 
     private static string Read(params string[] segments) =>

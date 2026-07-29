@@ -1069,4 +1069,3 @@ Project: OMNIX-Entropy
 - Last verification: production mode/handler/lifecycle focused 57/57 Debug and Release; full 427/427; Debug/Release builds 0 warnings/errors. Release binary dual-encoding audit finds mode/session only in Elevated, Elevated deps excludes Css.Scanner, mutation scan is empty, registry reads are non-writable, and no process remains.
 - Blockers: Positive end-to-end native production execution cannot be run until OMNIX App/worker are signed with the same certificate; injected trusted integration covers the allowed branch.
 - Exact next action: generalize the App lifecycle from fake-only completion to typed production completion/failure, add a production-mode launcher that is constructible only from `CanLaunchProduction` trust evidence, and test the full one-shot response with injected trusted package/launcher/scanner. Keep WPF execution disconnected until result presentation and manual UAC evidence pass.
-
