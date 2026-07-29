@@ -1,5 +1,19 @@
 # Skill Candidates
 
+### 2026-07-29 - Give append-only agent records a readability budget
+
+- Trigger: any project whose protocol requires agents to read state files before working, where those files are append-only.
+- Reusable lesson: retention and readability are separate properties, and protocols usually mandate only the first. Records that "never lose anything" reliably grow past tool read limits, at which point the mandatory startup read fails and the protocol silently stops being followed. Here four of eight records passed 256 KB, `current.md` at 566 KB.
+- Prevention: archive older dated entries when a live record approaches roughly 200 KB, keeping undated templates and checklists in the live file because they are policy rather than history.
+- Proposed form: a small cross-project `verify-record-size.ps1` that fails when a tracked record exceeds a configured budget, runnable beside the existing source-integrity gate.
+
+### 2026-07-29 - Map headings and dates before splitting a long-lived log
+
+- Trigger: archiving, truncating, or reordering any append-only file that several agents have written to over time.
+- Reusable lesson: ordering conventions change mid-life and are rarely migrated. These records were appended oldest-first, then later prepended newest-first, leaving recent entries at *both* ends and reusable checklists stranded in the middle. Sampling the first and last few entries confirms a convention that does not actually hold.
+- Prevention: enumerate every heading with its line number and date first, select by date rather than position, always retain undated structural sections, and verify by comparing every block against the committed version before accepting the change.
+- Proposed form: a reusable date-aware record splitter plus a block-level preservation checker, since the checker is what makes the split safe to accept.
+
 ### 2026-07-28 - Parse Windows PowerShell smoke scripts before GUI launch
 
 - Trigger: a newly authored `.ps1` will start a desktop app, request elevation, or touch any system-facing test boundary.

@@ -271,18 +271,10 @@ public sealed class PersonalReleasePackageDownloader
         catch (OperationCanceledException)
             when (!cancellationToken.IsCancellationRequested)
         {
-            CleanupStaging(
-                currentExecutablePath,
-                validatedChannel.Version,
-                stagingDirectory);
             return Failed("更新包下载超时，请检查网络后重试。");
         }
         catch (OperationCanceledException)
         {
-            CleanupStaging(
-                currentExecutablePath,
-                validatedChannel.Version,
-                stagingDirectory);
             return new PersonalUpdateDownloadResult
             {
                 Status = PersonalUpdateDownloadStatus.Canceled,
@@ -291,30 +283,20 @@ public sealed class PersonalReleasePackageDownloader
         }
         catch (HttpRequestException)
         {
-            CleanupStaging(
-                currentExecutablePath,
-                validatedChannel.Version,
-                stagingDirectory);
             return Failed("无法下载更新包，请检查网络后重试。");
         }
         catch (InvalidDataException)
         {
-            CleanupStaging(
-                currentExecutablePath,
-                validatedChannel.Version,
-                stagingDirectory);
             return Refused("更新包大小与发布记录不一致，已停止更新。");
         }
         catch (Exception)
         {
-            CleanupStaging(
-                currentExecutablePath,
-                validatedChannel.Version,
-                stagingDirectory);
             return Failed("更新包没有准备完成，也没有启动安装程序。");
         }
         finally
         {
+            // Sole cleanup authority: only a fully verified package survives, so
+            // every refusal, failure, cancellation, and throw exits through here.
             if (!retainVerifiedPackage)
             {
                 CleanupStaging(

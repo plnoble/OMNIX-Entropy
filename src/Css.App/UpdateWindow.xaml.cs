@@ -224,11 +224,20 @@ public partial class UpdateWindow : Window
         if (_releasePageUrl is null)
             return;
 
-        Process.Start(new ProcessStartInfo
+        try
         {
-            FileName = _releasePageUrl,
-            UseShellExecute = true
-        });
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = _releasePageUrl,
+                UseShellExecute = true
+            });
+        }
+        catch (Exception)
+        {
+            UpdateStatusTitleTextBlock.Text = "没有打开发布页";
+            UpdateStatusBodyTextBlock.Text =
+                "发布页没有在浏览器中打开，OMNIX 没有下载或安装任何内容。可以稍后重试。";
+        }
     }
 
     protected override void OnClosed(EventArgs e)
