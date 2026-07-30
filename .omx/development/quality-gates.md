@@ -5,12 +5,12 @@
 | Category | Status | Evidence | Residual risk |
 | --- | --- | --- | --- |
 | Scope and consent | Pass | User explicitly requested “推送发布” after the reviewed local 0.1.4 commit. | Installer execution, certificate/trust changes, private-key export, antivirus changes, and `LocalMachine` actions remain unauthorized. |
-| Source readiness | Pass | Local `337e037` is clean and ahead of public 0.1.3 by one commit; Debug/full/Release/integrity/GUI gates passed before release authorization. | A release-preparation records commit will become the exact target and must pass CI before signing. |
+| Source readiness | Pass | Feature commit `337e037` and release-preparation target `68a7bd4ba9b73c9dd425da92baaf60c45450a81d` are pushed; GitHub CI `30517231962` passed Release build, full tests, and source integrity on the exact target. | The final records-only commit is newer than the immutable release target by design. |
 | Signing prerequisites | Pass | Host read-only inspection reports one eligible CurrentUser RSA code-signing certificate with private key/EKU, thumbprint `5688958FEA0056861558E8DCF9D2381AF46074B2`, valid through 2029; SignTool and Inno Setup exist. | RFC3161 availability remains external; signer must be selected explicitly. |
 | GitHub identity | Pass | Host `gh auth status` reports active `plnoble` login with `repo` and `workflow`; origin is fixed to `plnoble/OMNIX-Entropy`. | Network and GitHub availability remain external. |
-| CI and source publication | Warn | Not pushed yet. | Must pass before artifact signing. |
-| Signed payload and installer | Warn | Not built for the release target yet. | Must pass same-signer, timestamp, manifest, D-first, visible-directory, and no-silent-install gates. |
-| Draft download-back and public latest | Warn | No `v0.1.4` draft/public Release exists yet. | Must verify all four remote assets before publication and latest after publication. |
+| CI and source publication | Pass | `main` contains target `68a7bd4`; CI run `30517231962` completed successfully before signing began. | GitHub-hosted availability remains external. |
+| Signed payload and installer | Pass | Fresh target-bound App/worker payload and Inno setup passed independent signature/timestamp/same-signer checks. Setup reports version 0.1.4, D-first managed directory, visible directory selection, no silent install, and `CanStageGitHubRelease=true`. | Personal signing does not create public SmartScreen reputation; disposable-machine behavioral acceptance is still absent. |
+| Draft download-back and public latest | Pass | Four draft assets matched local SHA-256 values; the downloaded setup independently verified. Public `releases/latest` reports stable `v0.1.4`, target `68a7bd4`, and four uploaded assets. Setup SHA-256 is `9B32AB55D61637A14275D741D6E120F5D07E3FEC960DFF5E890BA445BA7AA48D`. | No installer was run; installed-update acceptance remains a user-visible follow-up. |
 
 ## 2026-07-30 - 0.1.4 review pre-change gate
 

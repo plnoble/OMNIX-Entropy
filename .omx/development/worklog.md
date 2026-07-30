@@ -1,5 +1,14 @@
 # Development Worklog
 
+## 2026-07-30 - Published 0.1.4
+
+- Committed release-preparation records as `68a7bd4`, pushed `main`, and required GitHub CI `30517231962` to pass before any artifact signing. CI passed Release build, full tests, and source integrity on the exact release target.
+- Built a fresh portable candidate and a fresh signed payload from `68a7bd4`. Independent verification covered 110 payload files and confirmed the expected App/worker signer; disposable-machine behavioral acceptance remains intentionally unclaimed.
+- Built the Inno setup with the existing personal publisher. Independent verification confirmed version 0.1.4, default `D:\Software\OMNIX-Entropy\Install`, visible directory selection, no silent install, signer `5688958FEA0056861558E8DCF9D2381AF46074B2`, and `CanStageGitHubRelease=true`.
+- Created a draft with exactly four assets. All four were downloaded back and matched local SHA-256 values; the downloaded setup independently passed the same installer verifier.
+- Published `v0.1.4` and confirmed `releases/latest` reports non-draft/non-prerelease, target `68a7bd4`, and four uploaded assets. Public setup: 14,842,384 bytes; SHA-256 `9B32AB55D61637A14275D741D6E120F5D07E3FEC960DFF5E890BA445BA7AA48D`.
+- No installer, product process, UAC flow, install/uninstall, certificate/trust mutation, antivirus action, or system operation ran.
+
 ## 2026-07-30 - Began public 0.1.4 release
 
 - User explicitly requested push and publication after the reviewed local 0.1.4 commit.

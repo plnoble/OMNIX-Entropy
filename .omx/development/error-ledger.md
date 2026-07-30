@@ -1,5 +1,35 @@
 # Error Ledger
 
+## 2026-07-30 - Restricted release staging could not see the trusted signer
+
+- Symptom: the first local `prepare-personal-github-release.ps1` run rejected the already independently verified setup as having an invalid signature or timestamp.
+- Wrong assumption: a restricted process would observe the same CurrentUser trust chain as the real Windows user context.
+- Root cause: the sandboxed certificate provider did not expose the authorized CurrentUser Root/publisher trust used by Windows Authenticode.
+- Detection method: the host-context verifier immediately returned the expected signer and `CanStageGitHubRelease=true`; the same full staging script then passed unchanged in that context.
+- Fix: rerun the guarded verifier/staging script in the host certificate context without changing the package, certificate, trust stores, or verification policy.
+- Prevention rule: personal-publisher release verification is host-context evidence; never interpret a restricted trust-store miss as package corruption or weaken signature checks to make it pass.
+- Skill candidate: no; this context boundary is already documented in prior release reflections.
+
+## 2026-07-30 - GitHub release transport failed in ambiguous and partial states
+
+- Symptom: the first draft-create request timed out during TLS; a later download returned three complete assets and repeated EOF for the fourth 1 KB manifest.
+- Wrong assumption: one bulk GitHub command would provide an atomic success/failure receipt for release creation and all downloads.
+- Root cause: GitHub API/CDN transport failed independently across requests; the create timeout was ambiguous and the download command retained already completed files.
+- Detection method: explicit `gh release view` after the create timeout, directory enumeration plus SHA-256 after the partial download, and comparison with GitHub asset digests.
+- Fix: confirm the absent release before retrying creation; preserve the draft; inspect partial outputs; fetch only the missing asset through the authenticated asset API; compare all four files; independently reverify the downloaded setup.
+- Prevention rule: release automation must reconcile remote state after create timeouts and support per-asset resumable download-back verification.
+- Skill candidate: yes.
+
+## 2026-07-30 - The first authenticated asset fallback used incompatible shell quoting
+
+- Symptom: two attempts to redirect `gh api` output through `cmd` failed immediately with “filename, directory name, or volume label syntax is incorrect.”
+- Wrong assumption: the execution wrapper's shell selection and quoting would preserve the nested `cmd` redirection exactly.
+- Root cause: quoting was transformed before `cmd` parsed the command line.
+- Detection method: immediate exit before any network transfer and no new asset file.
+- Fix: stop composing nested shell redirection; use `curl.exe` with the in-process `gh auth token`, GitHub's asset API, bounded retries, and a direct binary output path.
+- Prevention rule: use a binary-capable HTTP client with an explicit output file for authenticated release assets; do not nest shell redirection through another command parser.
+- Skill candidate: yes.
+
 ## 2026-07-30 - The combined disk flow leaked context across selections
 
 - Symptom: switching disks or starting another scan cleared headline/progress but left old plan steps and safety copy; the selected safe recommendation's specific explanation was overwritten by generic list copy; a D-drive prevention step still said to move data to D; retained C-drive history was not visibly scoped.

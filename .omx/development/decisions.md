@@ -1,5 +1,12 @@
 # Decision Log
 
+## 2026-07-30 - Keep the draft closed through transport retries
+
+- Decision: after transient GitHub TLS/EOF failures, query remote state before retrying creation, retain the release as a draft, and require exact download-back hashes plus independent installer verification before publication.
+- Rejected alternative: assume a timed-out create failed, recreate blindly, accept GitHub's asset digest without downloading, or publish because the larger setup file happened to download successfully.
+- Reason: release transport has ambiguous failure states; draft isolation and immutable hash/signature checks make retries recoverable without weakening the publication boundary.
+- Consequence: one missing 1 KB asset was recovered through GitHub's authenticated asset API, all four returned bytes matched, and only then was `v0.1.4` made public.
+
 ## 2026-07-30 - Bind 0.1.4 artifacts to a pushed CI-passing release-preparation revision
 
 - Decision: create one records-only release-preparation commit after the reviewed 0.1.4 feature commit; push it and require passing CI before local signing. The channel manifest, Release target, signed payload revision, and tag must all identify that preparation revision.

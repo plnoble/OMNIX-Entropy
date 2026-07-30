@@ -1,6 +1,6 @@
 # Current Development State
 
-## Active Slice - 2026-07-30 Public 0.1.4 release
+## Completed Slice - 2026-07-30 Public 0.1.4 release
 
 - Objective: push the reviewed 0.1.4 source, obtain passing GitHub CI, build and independently verify the existing personal-signer Windows installer, stage and download-back verify the four fixed GitHub assets, publish `v0.1.4`, and confirm the public latest endpoint.
 - Authorization: the user explicitly requested “推送发布”, authorizing push, tag/Release creation, local signing with the existing non-exportable personal publisher key, and public GitHub publication of 0.1.4. This does not authorize installer execution, certificate creation/export, trust-store mutation, antivirus changes, or `LocalMachine` changes.
@@ -8,8 +8,9 @@
 - Risks: publishing an artifact from a revision different from the Release target, accepting a stale or unsigned payload, exposing local secrets, calling a draft public before download-back verification, or implying installation without running the visible installer.
 - Impact scope: release records, one release-preparation commit, push, CI, ignored local artifacts, Authenticode signing/timestamping, tag `v0.1.4`, and four public GitHub Release assets. No product operation, installer launch, install/uninstall, or machine trust change.
 - Acceptance: release-preparation revision pushed; CI passes; portable and signed candidates match the committed 0.1.4 revision; App, worker, setup, and uninstaller share the expected signer and timestamps; installer verifier returns `CanStageGitHubRelease=true`; draft assets re-download and hash-match; downloaded setup independently verifies; public latest is non-draft/non-prerelease `v0.1.4`; final records are committed and pushed.
-- Status: in progress. Host preflight found the existing eligible RSA signer with private key and code-signing EKU, SignTool, Inno Setup, and valid GitHub CLI authentication. No artifact has been signed or published yet.
-- Exact next action: commit the release-preparation records, push `main`, and wait for CI before producing any signed artifact.
+- Status: complete. Release-preparation commit `68a7bd4ba9b73c9dd425da92baaf60c45450a81d` is pushed and GitHub CI run `30517231962` passed Release build, all tests, and source integrity. A fresh payload from that revision was signed with `5688958FEA0056861558E8DCF9D2381AF46074B2`; the App, worker, uninstaller, and setup passed the existing timestamp/same-signer checks. The setup independently returned `CanStageGitHubRelease=true`, and all four draft assets were downloaded back and matched the local SHA-256 values byte for byte. The downloaded setup independently passed the same installer verifier. Public `releases/latest` now reports non-draft/non-prerelease `v0.1.4`, target `68a7bd4`, and four uploaded assets.
+- Public artifact: `https://github.com/plnoble/OMNIX-Entropy/releases/tag/v0.1.4`; setup length 14,842,384 bytes; SHA-256 `9B32AB55D61637A14275D741D6E120F5D07E3FEC960DFF5E890BA445BA7AA48D`; signer `5688958FEA0056861558E8DCF9D2381AF46074B2`.
+- Exact next action: the user may use the installed app's update window to check for 0.1.4, review its visible download/install confirmation, and report the resulting installed version. No installer or product update was run during publication.
 
 ## Completed Slice - 2026-07-30 Review, commit, and version 0.1.4
 

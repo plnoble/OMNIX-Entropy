@@ -1,5 +1,15 @@
 # Agent Handoff
 
+## Latest Update - 2026-07-30 Public 0.1.4 released
+
+- Current objective: preserve the completed 0.1.4 release evidence and obtain a user-run in-app update receipt from the currently installed version.
+- What changed: reviewed multi-disk read-only scans, bounded homepage scrolling, and the beginner C-drive 80% comfort plan are publicly available in `v0.1.4`.
+- What is verified: release target `68a7bd4ba9b73c9dd425da92baaf60c45450a81d` passed GitHub CI run `30517231962`; the fresh payload/setup used signer `5688958FEA0056861558E8DCF9D2381AF46074B2`; independent installer verification returned `CanStageGitHubRelease=true`; all four draft assets matched after download-back; the downloaded setup independently passed; public `releases/latest` reports stable `v0.1.4`, four assets, and target `68a7bd4`.
+- Public artifact: `https://github.com/plnoble/OMNIX-Entropy/releases/tag/v0.1.4`; setup length 14,842,384 bytes; SHA-256 `9B32AB55D61637A14275D741D6E120F5D07E3FEC960DFF5E890BA445BA7AA48D`.
+- What is not verified: no installer was launched, installed, or uninstalled; no user confirmation or UAC flow ran; disposable-machine behavioral acceptance remains absent.
+- Known risks: personal signing does not provide public SmartScreen reputation; GitHub and timestamp availability remain external; the first real installed update receipt still depends on the user's visible confirmation.
+- Exact next recommended action: open the installed OMNIX update window, check for 0.1.4, use the visible download/install action, review the final confirmation, and report whether the installed version becomes 0.1.4. Do not automate or silently run the installer.
+
 ## Latest Update - 2026-07-30 Public 0.1.4 release in progress
 
 - Current objective: publish a signed, independently verified `v0.1.4` from one pushed CI-passing revision, then record and push the completion evidence.

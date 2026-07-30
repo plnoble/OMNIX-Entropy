@@ -1,5 +1,13 @@
 # Skill Candidates
 
+### 2026-07-30 - Reconcile release transport instead of retrying blindly
+
+- Trigger: a release create/upload/download command times out or returns partial output after remote state may already have changed.
+- Reusable lesson: first query remote state, then inventory local partial files by name/length/hash, retry only missing boundaries, and preserve draft isolation until every downloaded asset matches immutable metadata. A command exit code is not an atomic release receipt.
+- Evidence: the 0.1.4 draft-create TLS timeout required an absence check before retry; the bulk download retained three valid assets while one CDN request repeatedly ended with EOF.
+- Proposed form: a release reconciler that records tag/target/draft state, expected asset digests, per-asset download status, independent package verification, and final latest-channel confirmation.
+- Promotion threshold: already repeated across the 0.1.2 and 0.1.4 GitHub release flows; ready for a cross-project skill or repository script.
+
 ### 2026-07-30 - Scope WPF UIAutomation discovery to the target process
 
 - Trigger: a desktop smoke must find controls in a popup or secondary HWND and is tempted to call `AutomationElement.RootElement.FindAll(Descendants, ...)`.

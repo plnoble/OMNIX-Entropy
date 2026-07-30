@@ -3,6 +3,14 @@
 Add an entry at the top of this file before declaring a meaningful task finished.
 Keep entries short and focused on reusable learning.
 
+## 2026-07-30 - Public 0.1.4 release
+
+- What worked: binding CI, payload, installer, tag, and channel metadata to one immutable commit made every later check concrete. Draft-only upload plus download-back hashing caught transport as its own trust boundary.
+- What caught real risk: querying remote state after a TLS timeout avoided a duplicate release, and enumerating the partial download showed that three assets were complete while one was absent. Neither condition was safely represented by the original command's exit code alone.
+- Safety lesson: a host trust-context retry is acceptable only when the package and strict verifier remain unchanged. Restricted certificate visibility is not a reason to relax Authenticode policy.
+- Delivery lesson: GitHub's `releases/latest` receipt is the point at which an installed client can discover the update; a source version, pushed commit, or uploaded draft is not enough.
+- Next improvement: make the guarded release script support an existing staging directory, remote-state reconciliation, per-asset download retries, and a machine-readable final receipt so manual fallback commands disappear.
+
 ## 2026-07-30 - A multi-disk UI needs scoped state, history, and tests
 
 - What worked: reviewing the combined slice as one user journey caught cross-feature problems that isolated tests missed: stale plan details, generic copy replacing a selected explanation, and system history appearing under a D-drive selection without an explicit label.
