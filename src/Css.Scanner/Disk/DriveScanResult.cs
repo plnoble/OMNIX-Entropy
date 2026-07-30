@@ -16,6 +16,9 @@ public sealed class DriveScanResult
     /// <summary>System files/stores probed without crawling.</summary>
     public List<BigRock> BigRocks { get; init; } = [];
 
+    /// <summary>Bounded read-only evidence from known cleanup stores on the system drive.</summary>
+    public List<SystemCleanupOpportunity> SystemCleanupOpportunities { get; init; } = [];
+
     /// <summary>Convenience: top-level nodes flagged as unexpected roots.</summary>
     public List<CategoryNode> UnexpectedRoots =>
         TopLevel.FindAll(n => n.IsUnexpectedRoot);

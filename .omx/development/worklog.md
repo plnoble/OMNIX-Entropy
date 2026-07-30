@@ -1,5 +1,65 @@
 # Development Worklog
 
+## 2026-07-30 - Began 0.1.5 review and release
+
+- User explicitly authorized review, commit, version bump, push, signing, and publication for the combined working-tree slice.
+- Chosen version is the next patch, 0.1.5. Existing main-direct release history and guarded personal-signing workflow remain in force; no installer execution or machine-maintenance operation is authorized.
+- Review sequence: complete diff and safety-boundary audit; version/release-note update; focused/full/Release/integrity/GUI gates; source commit/push/CI; immutable target-bound signing/package verification; draft download-back verification; public latest receipt; final records commit.
+- Review found one beginner-identity defect: unregistered paths could be called the main program. Wording and tests now distinguish exact registered main installs from programs, copies, and updater payloads. No new mutation authority or release-blocking safety defect was found.
+- Updated source version and release notes to 0.1.5.
+- Local pre-commit gates pass: full Debug 1100/1100; Release 0 warnings/errors with 0.1.5 product/file versions; source integrity 395 files/18 XAML; script parsers pass; app-family and home/C-drive WPF smokes pass with no operation executed; diff and mutation-authority checks are clean.
+- Host release prerequisites pass: authenticated `plnoble` GitHub CLI with `repo`/`workflow`, fixed origin, SignTool found, and one eligible explicitly selected CurrentUser RSA code-signing certificate. Signing remains blocked until the pushed commit passes CI.
+
+## 2026-07-30 - Completed system cleanup and app-family decision slice
+
+- Finalized known-store measurement bounds for both files and directories, preserved exact software evidence through growth-profile cloning, and made the family drawer account for other C-drive program/update payloads separately from C-drive user data.
+- Real app-family smoke verified three OpenCode records, one exact official uninstall entry, disabled actions for unregistered copies, and quantified C-drive remainder. The home/C-drive smoke reported 4.0 KB immediately safe cleanup versus at least 3.3 GB of temp/system-cache candidates and executed no operation.
+- Completion gates: focused 12/12; full Debug 1099/1099; Release 0 warnings/errors; source integrity 395 files and 18/18 XAML; both Windows PowerShell scripts parse; screenshots inspected without product-content overlap.
+- Delivery boundary: no cleanup, uninstall, migration, commit, version bump, push, signing, installer, or release action occurred. Public/installed 0.1.4 is unchanged.
+
+## 2026-07-30 - Began system cleanup and app-family implementation
+
+- User authorized continued development after reviewing evidence that the root scan misses material nested temp data and that Antigravity/OpenCode cards do not explain exact install/data/updater identities.
+- Scope is read-only evidence and beginner decisions. Existing official-uninstaller, migration snapshot, quarantine, confirmation, and `OperationPipeline` boundaries remain unchanged.
+- Planned sequence: red contracts; bounded known-store probe; cleanup handling classification; version/source/data-size profile evidence; family explanation without identity merging; quantified migration outcome; full and GUI gates.
+- Added three user-shaped red contract files. The expected compile failure proves the product still lacks the cleanup-opportunity model/probe, family-aware drawer/tile overloads, exact-entry wording, version/source evidence, and C-drive data-size evidence; no production behavior changed yet.
+- Implemented a bounded, cancellable, read-only known-store probe for user temp, Windows temp/update/delivery caches, DirectX shader cache, and crash dumps. User-review and Windows-managed findings use different beginner copy; truncated or partially inaccessible measurements render as lower bounds and never become cleanup authority.
+- Preserved display version and registry source through inventory and growth enrichment; populated deduplicated data size and C-drive data size with cached bounded sizing. App total-size sorting no longer double-counts cache already included inside a measured data root.
+- Added explanation-only app-family normalization for version/user-scope suffixes. Tiles show related-record counts; the drawer identifies the exact selected entry, enables official uninstall only for that entry, and states whether moving the current main program changes C space or leaves family data/program copies behind.
+- Added stable drawer AutomationIds, first-view ordering contracts, a no-horizontal-scroll C-drive source list, and an isolated three-entry OpenCode WPF smoke. The smoke verifies one enabled exact official uninstall entry, one disabled D-drive copy, quantified C-data persistence, and no operation execution.
+- The existing home/C-drive WPF smoke now reports C at 86.5%, safe cleanup 4.0 KB, and at least 3.3 GB of known temp/system-cache candidates while retaining the 19.5 GB comfort-target gap. It executed no operation.
+
+## 2026-07-30 - Investigated system-cleanup blind spots and duplicate app cards
+
+- Confirmed that current disk recommendations focus on top-level Temp classification plus recycle-bin/system-reserved probes; they do not surface material nested current-user temp, crash-dump, shader-cache, update-download, or delivery-optimization stores as a beginner cleanup inventory.
+- A bounded read-only host check found at least about 4.59 GB in the first 20,000 current-user temp files, about 102.2 MB of crash dumps, 13.4 MB of DirectX shader cache, and 5.2 MB of Windows Update downloads. These are candidates requiring age/lock/ownership or Windows-managed cleanup checks, not automatic deletion authority.
+- Confirmed that software inventory groups only exact display-name/install-path duplicates and does not preserve display version in `SoftwareProfile`. This explains why same-family entries remain separate and unexplained.
+- Read-only Antigravity/OpenCode evidence shows that D-first installation does not close C-drive growth: updater and roaming data remain on C. OpenCode also has multiple C/D program locations, while only the exact registered entry currently has a trustworthy official uninstall route.
+- Chosen product direction: group entries for explanation but never for execution; label exact entries as registered install, portable/unregistered copy, updater payload, or user data; quantify what moving the main program changes and what remains on C.
+- No uninstaller, cleanup, migration, process, registry mutation, or product source change ran.
+
+## 2026-07-30 - Began impact-aware C-drive priority correction
+
+- User rejected the current primary suggestion on quantitative grounds: 337.6 MB is negligible beside the roughly 19.5 GB required to reach the stated 80% comfort target.
+- Root cause is decision policy, not scanner absence: the current presenter treats any executable low-risk cleanup as the primary action, and the bounded key-finding list ranks safety ahead of impact.
+- Chosen scope keeps the safe cleanup visible but makes it secondary when it contributes less than 10% of the target and larger read-only evidence exists. The Agent will quantify contribution and remaining gap, then route the primary action to personal files or major space sources.
+- No deletion authority, cleanup eligibility, operation execution, installer, updater, version, or release behavior is included.
+- Added a user-shaped 19.5 GB versus 337.6 MB contract and an impact-first bounded-finding contract. Safe evidence remains visible but no longer outranks multi-GB observations.
+- Implemented contribution percentage, the 10% materiality rule, impact-first primary/optional-safe secondary actions, and quantified beginner copy.
+- Repaired the GUI smoke readiness check after repeated WPF control-type enumeration failures; stable per-row AutomationIds and a failure screenshot now provide the evidence.
+- Final gates: focused 12/12; full Debug 1087/1087; Release 0 warnings/errors; source integrity 390 files/18 XAML; PowerShell parse pass; diff check has no errors. Real WPF smoke verified the impact-first button, optional cleanup preview, scroll behavior, and `noOperationExecuted=true`.
+
+## 2026-07-30 - Diagnosed the empty-adjustment impression
+
+- Read the user's latest local health digest in read-only mode. It reports C at 86.5%, score 64, about 337.6 MB potentially safe to process, five unexpected-root observations, and 105 ordinary C-drive application clues.
+- Found a concrete contradiction: `HealthCheckSummaryBuilder` calculates reclaimable bytes from all low-risk recommendations, but `HealthDigestBuilder` counts only the first five rendered key findings. Five higher-impact observation cards can occupy those slots and hide a later executable cleanup, producing “可安全处理 337.6 MB” beside “低风险清理 0 项”.
+- Found a workflow gap: `DriveHealthPlanPresenter` correctly selects the safe item as the first action, but after that small contribution it offers no distinct secondary action for the much larger remaining gap.
+- Chosen scope keeps cleanup authority unchanged: prioritize actionable findings in the summary, expose honest opportunity counts, and add a read-only “continue finding larger space” path.
+- Added red contracts for hidden cleanup ordering, explicit opportunity counts, secondary actions, and stable UIAutomation identity. Red failed only on the missing secondary-plan model/API.
+- Implemented recommendation priority, safe-now/investigate-next plan copy, and a secondary read-only action. The primary action still only previews an existing low-risk operation; the secondary action only navigates to large-file or root-cause evidence.
+- Real WPF smoke showed 1 safe item, 7 investigation items, a 19.5 GB remaining gap, both visible buttons, successful root-cause navigation, and `noOperationExecuted=true`. Screenshot inspection found no clipping or overlap.
+- Final gates: focused 11/11 plus adjacent 226/226; full Debug 1086/1086; Release 0 warnings/errors; source integrity 390 files/18 XAML; no new mutation-authority hits; diff check clean.
+
 ## 2026-07-30 - Published 0.1.4
 
 - Committed release-preparation records as `68a7bd4`, pushed `main`, and required GitHub CI `30517231962` to pass before any artifact signing. CI passed Release build, full tests, and source integrity on the exact release target.

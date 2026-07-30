@@ -3,6 +3,33 @@
 Add an entry at the top of this file before declaring a meaningful task finished.
 Keep entries short and focused on reusable learning.
 
+## 2026-07-30 - A duplicate app card needs an exact identity and an outcome
+
+- What worked: treating Antigravity/OpenCode as one explanatory family but several independent operation targets. The user can understand the relationship without one ambiguous family-wide uninstall action.
+- Product lesson: “installed on D” answers only where the main executable lives. A useful decision must separately state other C-drive program/update payloads, C-drive data/cache, and whether those locations can keep growing.
+- Safety lesson: a multi-gigabyte known temp store is an opportunity to evaluate, not proof that every file is garbage. Ownership, age, locks, and Windows-managed cleanup routes belong before execution authority.
+- Test lesson: the strongest receipt selected each family entry in a real WPF drawer, checked exact official-uninstall enablement, read the storage outcome, and asserted that no operation ran.
+- Process lesson: immutable-looking C# profile models still need clone-preservation contracts; adding a field is incomplete until every copy/enrichment path preserves it.
+- Next improvement: attach per-application cache-location capabilities and vendor-supported redirection evidence, so the Agent can distinguish “main program moved” from a verified closed-loop data migration.
+
+## 2026-07-30 - Safety answers can, impact answers first
+
+- What worked: converting the user's objection into a contribution ratio made the product error undeniable: 337.6 MB against 19.5 GB is about 1.7%, not a meaningful primary solution.
+- Product lesson: safety is an eligibility gate, not a recommendation rank. A beginner Agent should lead with material progress while retaining small safe work as an honest option.
+- UX lesson: show target, contribution percentage, and remaining gap together; button hierarchy should mirror that arithmetic.
+- Test lesson: use the user's scale in a contract, then prove both GUI action paths without executing either.
+- Process lesson: WPF control-type enumeration was weaker than the stable AutomationIds already present. Screenshot evidence distinguished an automation failure from a layout failure.
+- Next improvement: rank the read-only major-source route by software ownership and growth evidence so “找大头” becomes a concrete shortlist rather than a technical source list.
+
+## 2026-07-30 - A safe scanner still owes the user a next decision
+
+- What worked: reading the sanitized real digest turned a vague UX complaint into a precise contradiction: 337.6 MB reclaimable beside zero low-risk findings.
+- Root lesson: observation-only evidence should not outrank a safe executable recommendation in a five-item beginner summary. Safety is preserved by execution gates, not by hiding the one thing the user can safely do.
+- UX lesson: one primary action is insufficient when it solves only a tiny part of the stated target. Show the honest remaining gap and provide a second read-only route to the larger opportunity.
+- Test lesson: the strongest receipt combined priority/count unit tests, stable AutomationIds, navigation assertions, `noOperationExecuted=true`, and a screenshot with both buttons in the first visible plan area.
+- Waste: guessed source paths, helper names, nested parser quoting, and the solution filename were avoidable. The canonical solution is now a repository rule.
+- Next improvement: turn “继续找更大的占用” into ranked application ownership and cache-location recommendations, so the second step becomes as concrete as the first without making unknown roots executable.
+
 ## 2026-07-30 - Public 0.1.4 release
 
 - What worked: binding CI, payload, installer, tag, and channel metadata to one immutable commit made every later check concrete. Draft-only upload plus download-back hashing caught transport as its own trust boundary.

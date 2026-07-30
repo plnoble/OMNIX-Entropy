@@ -255,7 +255,8 @@ public class ProductExperienceTests
         script.Should().Contain("'HealthDimension_' + $dimension.Name");
         script.Should().Contain("healthDimensionCount");
         script.Should().Contain("machineHealthRows");
-        script.Should().Contain("lastHealthDimensionCount -ge 7");
+        script.Should().Contain("$healthDimensionCount++");
+        script.Should().Contain("healthDimensionCount = $healthDimensionCount");
         script.Should().Contain("HomeDriveHealthPlanHeadlineTextBlock");
         script.Should().Contain("HomeDriveHealthPlanProgressTextBlock");
         script.Should().Contain("HomeDriveHealthPlanButton");

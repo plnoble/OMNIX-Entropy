@@ -16,6 +16,7 @@ public sealed class DiskScanner
 {
     private readonly RootDirCrawler _crawler = new();
     private readonly BigRocksProbe _bigRocks = new();
+    private readonly KnownCleanupStoreProbe _knownCleanupStores = new();
 
     /// <summary>
     /// Scans <paramref name="driveRoot"/> (e.g. "C:\\"). <paramref name="rulesPath"/> points to
@@ -44,6 +45,13 @@ public sealed class DiskScanner
         var bigRocks = isSystemDrive
             ? _bigRocks.Probe(systemDriveRoot)
             : [];
+        if (isSystemDrive)
+            progress?.Report("盘点已知临时文件和 Windows 清理位置...");
+        var systemCleanupOpportunities = isSystemDrive
+            ? await Task.Run(
+                () => _knownCleanupStores.ProbeDefault(ct).ToList(),
+                ct)
+            : [];
 
         progress?.Report("爬取目录...");
         var topLevel = await _crawler.CrawlTopLevelAsync(driveRoot, progress, ct);
@@ -61,7 +69,8 @@ public sealed class DiskScanner
             TotalBytes = drive.TotalSize,
             FreeBytes = drive.AvailableFreeSpace,
             TopLevel = topLevel,
-            BigRocks = bigRocks
+            BigRocks = bigRocks,
+            SystemCleanupOpportunities = systemCleanupOpportunities
         };
     }
 }

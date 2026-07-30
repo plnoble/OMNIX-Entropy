@@ -35,8 +35,11 @@ public sealed class AppDrawerViewModel
 {
     public required string Name { get; init; }
     public required string CategorySummary { get; init; }
+    public required string FamilySummary { get; init; }
+    public required string CurrentEntrySummary { get; init; }
     public required string InstallLocationSummary { get; init; }
     public required string SizeSummary { get; init; }
+    public required string StorageOutcomeSummary { get; init; }
     public required string ResidencySummary { get; init; }
     public required string SystemFootprintSummary { get; init; }
     public required AgentRecommendation AgentAdvice { get; init; }
@@ -51,6 +54,7 @@ public sealed class AppDrawerViewModel
     public required bool StartupControlCanExecuteDirectly { get; init; }
     public required string MigrationSummary { get; init; }
     public required IReadOnlyList<string> MigrationPreviewLines { get; init; }
+    public required string UninstallActionLabel { get; init; }
     public required bool TechnicalDetailsHiddenByDefault { get; init; }
     public required IReadOnlyList<string> TechnicalDetails { get; init; }
 }
@@ -194,7 +198,14 @@ public static class AppCatalogPresenter
     }
 
     private static long TotalSizeBytes(SoftwareProfile profile) =>
-        profile.InstalledSizeBytes + profile.DataSizeBytes + profile.CacheSizeBytes;
+        SaturatingAdd(
+            profile.InstalledSizeBytes,
+            profile.DataSizeBytes > 0
+                ? profile.DataSizeBytes
+                : profile.CacheSizeBytes);
+
+    private static long SaturatingAdd(long left, long right) =>
+        right > long.MaxValue - left ? long.MaxValue : left + right;
 
     private static int RiskOrder(SoftwareProfile profile) =>
         AppPresentationBuilder.CreateTile(profile).Status switch
@@ -283,10 +294,15 @@ public static class AppCatalogSummaryPresenter
 
 public static class AppPresentationBuilder
 {
-    public static AppTileViewModel CreateTile(SoftwareProfile profile)
+    public static AppTileViewModel CreateTile(SoftwareProfile profile) =>
+        CreateTile(profile, [profile]);
+
+    public static AppTileViewModel CreateTile(
+        SoftwareProfile profile,
+        IReadOnlyList<SoftwareProfile> inventory)
     {
         var status = DetermineStatus(profile);
-        var shortTag = status switch
+        var statusTag = status switch
         {
             AppTileStatus.System => "\u7cfb\u7edf\u7ec4\u4ef6",
             AppTileStatus.Attention => CDriveAttentionTag(profile),
@@ -295,6 +311,16 @@ public static class AppPresentationBuilder
             AppTileStatus.Warning => "\u6709\u5efa\u8bae",
             _ => "\u6b63\u5e38"
         };
+        var family = AppFamilyPresentationBuilder.Create(profile, inventory);
+        var shortTag = family.RelatedEntryCount > 1
+            ? $"同类 {family.RelatedEntryCount} 条"
+            : statusTag;
+        var familyStatusSuffix = family.RelatedEntryCount > 1
+            ? " " + statusTag
+            : string.Empty;
+        var familyAccessibilitySuffix = family.RelatedEntryCount > 1
+            ? ", " + statusTag
+            : string.Empty;
 
         return new AppTileViewModel
         {
@@ -305,8 +331,8 @@ public static class AppPresentationBuilder
             Status = status,
             ShortTag = shortTag,
             Risk = status == AppTileStatus.Attention ? RiskLevel.Medium : RiskLevel.Low,
-            VisibleText = profile.Name + " " + shortTag,
-            AccessibilityName = profile.Name + ", " + shortTag
+            VisibleText = profile.Name + " " + shortTag + familyStatusSuffix,
+            AccessibilityName = profile.Name + ", " + shortTag + familyAccessibilitySuffix
         };
     }
 
@@ -325,22 +351,32 @@ public static class AppPresentationBuilder
         return "C 盘线索待确认";
     }
 
-    public static AppDrawerViewModel CreateDrawer(SoftwareProfile profile)
+    public static AppDrawerViewModel CreateDrawer(SoftwareProfile profile) =>
+        CreateDrawer(profile, [profile]);
+
+    public static AppDrawerViewModel CreateDrawer(
+        SoftwareProfile profile,
+        IReadOnlyList<SoftwareProfile> inventory)
     {
         var requiresOwnershipReview = RequiresSystemOwnershipReview(profile);
         var cachePreview = AppCacheCleanupPreviewPresenter.Create(profile);
         var startupPreview = AppStartupControlPreviewPresenter.Create(profile);
+        var family = AppFamilyPresentationBuilder.Create(profile, inventory);
+        var actions = CreateActions(profile, family);
 
         return new AppDrawerViewModel
         {
             Name = profile.Name,
             CategorySummary = CategorySummary(profile),
+            FamilySummary = family.Summary,
+            CurrentEntrySummary = family.CurrentEntrySummary,
             InstallLocationSummary = LocationSummary(profile),
             SizeSummary = SizeSummary(profile),
+            StorageOutcomeSummary = CreateStorageOutcomeSummary(profile, family),
             ResidencySummary = ResidencySummary(profile),
             SystemFootprintSummary = CreateSystemFootprintSummary(profile),
             AgentAdvice = CreateAgentAdvice(profile),
-            AvailableActions = CreateActions(profile),
+            AvailableActions = actions,
             UninstallResidueReview = CreateUninstallResidueReviewAvailability(profile),
             UninstallPreviewLines = CreateUninstallPreview(profile),
             CacheCleanupSummary = requiresOwnershipReview
@@ -359,6 +395,9 @@ public static class AppPresentationBuilder
             StartupControlCanExecuteDirectly = startupPreview.CanExecuteDirectly,
             MigrationSummary = CreateMigrationSummary(profile),
             MigrationPreviewLines = CreateMigrationPreview(profile),
+            UninstallActionLabel = actions
+                .Single(action => action.Kind == AppActionKind.Uninstall)
+                .Label,
             TechnicalDetailsHiddenByDefault = true,
             TechnicalDetails = CreateTechnicalDetails(profile)
         };
@@ -651,7 +690,9 @@ public static class AppPresentationBuilder
         };
     }
 
-    private static IReadOnlyList<AppActionViewModel> CreateActions(SoftwareProfile profile)
+    private static IReadOnlyList<AppActionViewModel> CreateActions(
+        SoftwareProfile profile,
+        AppFamilyContextViewModel family)
     {
         if (profile.Category == SoftwareCategory.SystemTool)
         {
@@ -677,14 +718,71 @@ public static class AppPresentationBuilder
             ];
         }
 
+        var uninstallLabel = family.RelatedEntryCount > 1
+            ? CanReviewUninstall(profile) ? "卸载这个版本" : "此条不可卸载"
+            : "\u5378\u8f7d\u5e72\u51c0\u70b9";
+        var uninstallReason = CanReviewUninstall(profile)
+            ? "只运行当前这条记录的官方卸载器，再扫描它的残留。"
+            : "当前这条记录没有可验证的官方卸载入口，不会直接删除目录。";
+
         return
         [
-            new() { Kind = AppActionKind.Uninstall, Label = "\u5378\u8f7d\u5e72\u51c0\u70b9", IsEnabled = CanReviewUninstall(profile), Reason = "\u5148\u8fd0\u884c\u5b98\u65b9\u5378\u8f7d\u5668\uff0c\u518d\u626b\u63cf\u6b8b\u7559\u3002" },
+            new() { Kind = AppActionKind.Uninstall, Label = uninstallLabel, IsEnabled = CanReviewUninstall(profile), Reason = uninstallReason },
             new() { Kind = AppActionKind.Migration, Label = "\u8fc1\u79fb\u5230 D \u76d8", IsEnabled = CanReviewMigration(profile), Reason = MigrationActionReason(profile) },
             new() { Kind = AppActionKind.CacheCleanup, Label = "\u6e05\u7406\u7f13\u5b58", IsEnabled = profile.CachePaths.Count > 0 || profile.CacheSizeBytes > 0, Reason = "\u53ea\u751f\u6210\u4f4e\u98ce\u9669\u7f13\u5b58\u65b9\u6848\uff0c\u6267\u884c\u524d\u4ecd\u9700\u786e\u8ba4\u3002" },
             new() { Kind = AppActionKind.StartupControl, Label = "\u7ba1\u7406\u81ea\u542f\u52a8", IsEnabled = HasStartupControlSignals(profile), Reason = "\u4f1a\u5148\u751f\u6210\u786e\u8ba4\u65b9\u6848\uff0c\u4e0d\u4f1a\u76f4\u63a5\u6539\u7cfb\u7edf\u3002" },
             new() { Kind = AppActionKind.TechnicalDetails, Label = "\u6280\u672f\u8be6\u60c5", IsEnabled = true, Reason = "\u5c55\u5f00\u8def\u5f84\u3001\u670d\u52a1\u3001\u81ea\u542f\u52a8\u548c\u8ba1\u5212\u4efb\u52a1\u660e\u7ec6\u3002" }
         ];
+    }
+
+    private static string CreateStorageOutcomeSummary(
+        SoftwareProfile profile,
+        AppFamilyContextViewModel family)
+    {
+        var cData = family.CDriveDataBytes > 0
+            ? $"C 盘数据至少 {FormatBytes(family.CDriveDataBytes)}"
+            : "暂未量出已归属的 C 盘数据";
+        var familyCProgram = family.CDriveProgramBytes > 0
+            ? $"；同类记录里还有约 {FormatBytes(family.CDriveProgramBytes)} 的 C 盘程序或更新载荷"
+            : string.Empty;
+
+        if (IsOnDrive(profile.InstallPath, "D"))
+        {
+            var currentEntryLabel = !string.IsNullOrWhiteSpace(profile.UninstallCommand)
+                ? "当前主程序"
+                : "当前这条程序或副本";
+            if (family.CDriveDataBytes == 0 && family.CDriveProgramBytes == 0)
+                return $"{currentEntryLabel}已经在 D 盘，继续迁移不会改善 C 盘；暂未发现同类记录仍在 C 盘占用。";
+
+            return $"{currentEntryLabel}已经在 D 盘，继续迁移它不会释放 C 盘{familyCProgram}；{cData}。"
+                + "这些数据不会跟着主程序自动搬走，只有应用支持改目录或安全重定向后才会长期改善，否则仍可能增长。";
+        }
+
+        if (IsOnDrive(profile.InstallPath, "C"))
+        {
+            var hasOfficialUninstaller = !string.IsNullOrWhiteSpace(profile.UninstallCommand);
+            var currentEntryLabel = hasOfficialUninstaller
+                ? "当前主程序"
+                : "当前这条程序、副本或更新载荷";
+            var program = profile.InstalledSizeBytes > 0
+                ? $"{currentEntryLabel}约 {FormatBytes(profile.InstalledSizeBytes)}"
+                : $"{currentEntryLabel}大小尚未量出";
+            var otherProgramWarning = family.OtherCDriveProgramBytes > 0
+                ? $"；同类记录另有约 {FormatBytes(family.OtherCDriveProgramBytes)} 的程序或更新载荷留在 C 盘，当前迁移不会改变它"
+                : string.Empty;
+            var dataWarning = family.CDriveDataBytes > 0
+                ? $"；{cData}，不会随主程序自动搬走，迁移后仍可能增长"
+                : "；迁移后仍要复查原 C 盘位置是否继续写入";
+            return $"{program} 在 C 盘，迁移或重装最多先改变主程序这一部分{otherProgramWarning}{dataWarning}。";
+        }
+
+        if (family.CDriveDataBytes > 0 || family.CDriveProgramBytes > 0)
+        {
+            return $"当前主程序位置未知{familyCProgram}；{cData}。"
+                + "在确认哪条是主程序前，无法承诺迁移能释放多少空间。";
+        }
+
+        return "当前没有足够的安装位置和 C 盘数据证据，暂时不能判断迁移收益。";
     }
 
     private static bool HasStartupControlSignals(SoftwareProfile profile) =>
@@ -856,6 +954,8 @@ public static class AppPresentationBuilder
     {
         var details = new List<string>();
         details.Add($"Category: {profile.Category}; confidence {profile.CategoryAssessment.Confidence}; fallback {profile.CategoryAssessment.IsFallback}");
+        if (!string.IsNullOrWhiteSpace(profile.DisplayVersion)) details.Add("Display version: " + profile.DisplayVersion);
+        if (!string.IsNullOrWhiteSpace(profile.InventorySource)) details.Add("Inventory source: " + profile.InventorySource);
         details.AddRange(profile.CategoryAssessment.Evidence.Select(evidence =>
             $"Category evidence: {evidence.Source}; rule {evidence.MatchedRule}"));
         if (!string.IsNullOrWhiteSpace(profile.InstallPath)) details.Add("Install path: " + profile.InstallPath);

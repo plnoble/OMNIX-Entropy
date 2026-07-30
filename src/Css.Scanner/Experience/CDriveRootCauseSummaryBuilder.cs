@@ -47,6 +47,12 @@ public static class CDriveRootCauseSummaryBuilder
             result.Drive,
             Environment.GetFolderPath(Environment.SpecialFolder.Windows));
 
+        cards.AddRange(result.SystemCleanupOpportunities
+            .Where(item => item.IsAccessible && item.SizeBytes > 0)
+            .OrderByDescending(item => item.SizeBytes)
+            .Take(4)
+            .Select(CreateCleanupOpportunityCard));
+
         cards.AddRange(result.TopLevel
             .OrderByDescending(item => item.SizeBytes)
             .Take(6)
@@ -67,6 +73,30 @@ public static class CDriveRootCauseSummaryBuilder
             Subheadline = "\u5148\u770b\u54ea\u4e9b\u7c7b\u578b\u5728\u5360\u7a7a\u95f4\uff0c\u518d\u8ba9 Agent \u751f\u6210\u53ef\u56de\u6eda\u7684\u5904\u7406\u65b9\u6848\u3002",
             TechnicalReportAvailable = true,
             Cards = cards
+        };
+    }
+
+    private static CDriveRootCauseCard CreateCleanupOpportunityCard(
+        SystemCleanupOpportunity opportunity)
+    {
+        var size = RootCauseReportBuilder.Fmt(opportunity.SizeBytes);
+        var sizeWithConfidence = opportunity.IsSizeLowerBound
+            ? "至少 " + size
+            : size;
+        var isWindowsManaged = opportunity.Handling == CleanupHandling.WindowsManaged;
+
+        return new CDriveRootCauseCard
+        {
+            Title = isWindowsManaged ? "交给 Windows 清理" : "可评估清理",
+            PrimaryText = $"{opportunity.Title} {sizeWithConfidence}",
+            Explanation = isWindowsManaged
+                ? "这是 Windows 管理的临时或下载缓存位置。能检测到占用，不代表适合手动删除目录。"
+                : "这里通常是可重新生成的临时、着色器或崩溃诊断文件，但正在使用和近期文件仍要先排除。",
+            AgentSuggestion = isWindowsManaged
+                ? "Agent 建议：通过 Windows 存储设置复查；OMNIX 不会自行处理这个目录。"
+                : "Agent 建议：先检查文件年龄和占用状态，再生成低风险隔离方案。",
+            SizeText = sizeWithConfidence,
+            Severity = isWindowsManaged ? 2 : 1
         };
     }
 

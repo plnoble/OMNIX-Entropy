@@ -64,6 +64,7 @@ public static class SoftwareInventoryBuilder
             .ToList();
         var exists = pathExists ?? Directory.Exists;
         var observationTime = (observedAtUtc ?? DateTimeOffset.UtcNow).ToUniversalTime();
+        var cachedDataSizeResolver = CreateCachedSizeResolver(cacheSizeResolver);
 
         return installedRecords
             .Where(r => IsUsableDisplayName(r.DisplayName))
@@ -79,10 +80,28 @@ public static class SoftwareInventoryBuilder
                 installSizeResolver,
                 dataRoots,
                 exists,
-                cacheSizeResolver,
+                cachedDataSizeResolver,
                 observationTime))
             .OrderBy(p => p.Name, StringComparer.CurrentCultureIgnoreCase)
             .ToList();
+    }
+
+    private static Func<string, long>? CreateCachedSizeResolver(
+        Func<string, long>? resolver)
+    {
+        if (resolver is null)
+            return null;
+
+        var cache = new Dictionary<string, long>(StringComparer.OrdinalIgnoreCase);
+        return path =>
+        {
+            if (cache.TryGetValue(path, out var size))
+                return size;
+
+            size = resolver(path);
+            cache[path] = size;
+            return size;
+        };
     }
 
     private static SoftwareProfile BuildProfile(
@@ -190,6 +209,8 @@ public static class SoftwareInventoryBuilder
             SignatureSubject = executableHint is null ? null : signatureResolver?.Invoke(executableHint),
             Category = categoryAssessment.Category,
             CategoryAssessment = categoryAssessment,
+            DisplayVersion = record.DisplayVersion,
+            InventorySource = record.RegistryKeyPath,
             InstallPath = installPath,
             UninstallCommand = record.UninstallCommand,
             DisplayIconPath = iconReference?.Path,
@@ -201,6 +222,8 @@ public static class SoftwareInventoryBuilder
             InstalledSizeBytes = installPath is null || installSizeResolver is null
                 ? 0
                 : Math.Max(0, installSizeResolver(installPath)),
+            DataSizeBytes = userData.DataSizeBytes,
+            CDriveDataSizeBytes = userData.CDriveDataSizeBytes,
             CacheSizeBytes = userData.CacheSizeBytes,
             DataPaths = userData.DataPaths,
             CachePaths = userData.CachePaths,
@@ -237,6 +260,7 @@ public static class SoftwareInventoryBuilder
             }
         }
 
+        MeasureDataRoots(result, cacheSizeResolver);
         return result;
     }
 
@@ -449,6 +473,59 @@ public static class SoftwareInventoryBuilder
         }
     }
 
+    private static void MeasureDataRoots(
+        UserDataCandidateSet result,
+        Func<string, long>? sizeResolver)
+    {
+        var outermostRoots = result.DataPaths
+            .Select(TryCanonicalPath)
+            .Where(path => path is not null)
+            .Cast<string>()
+            .OrderBy(path => path.Length)
+            .Aggregate(
+                new List<string>(),
+                (selected, candidate) =>
+                {
+                    if (!selected.Any(parent => IsSameOrDescendant(parent, candidate)))
+                        selected.Add(candidate);
+                    return selected;
+                });
+
+        foreach (var root in outermostRoots)
+        {
+            var size = SafeSize(sizeResolver, root);
+            result.DataSizeBytes = SaturatingAdd(result.DataSizeBytes, size);
+            if (IsCDrivePath(root))
+                result.CDriveDataSizeBytes = SaturatingAdd(result.CDriveDataSizeBytes, size);
+        }
+    }
+
+    private static string? TryCanonicalPath(string path)
+    {
+        try
+        {
+            return Path.GetFullPath(path)
+                .TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    private static bool IsSameOrDescendant(string parent, string candidate)
+    {
+        if (parent.Equals(candidate, StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        return candidate.StartsWith(
+            parent + Path.DirectorySeparatorChar,
+            StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static long SaturatingAdd(long left, long right) =>
+        right > long.MaxValue - left ? long.MaxValue : left + right;
+
     private static void AddDistinct(List<string> values, string value)
     {
         TryAddDistinct(values, value);
@@ -471,6 +548,8 @@ public static class SoftwareInventoryBuilder
         public List<string> CachePaths { get; } = new();
         public List<string> LogPaths { get; } = new();
         public List<string> CDriveWritePaths { get; } = new();
+        public long DataSizeBytes { get; set; }
+        public long CDriveDataSizeBytes { get; set; }
         public long CacheSizeBytes { get; set; }
     }
 

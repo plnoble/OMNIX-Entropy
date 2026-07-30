@@ -22,18 +22,26 @@ public sealed class DriveHealthPlanViewModel
     public required string Progress { get; init; }
     public required IReadOnlyList<string> Steps { get; init; }
     public required string PrimaryActionLabel { get; init; }
+    public required string SecondaryActionLabel { get; init; }
     public required string SafetyBoundary { get; init; }
     public required DriveHealthPlanAction PrimaryAction { get; init; }
+    public required DriveHealthPlanAction SecondaryAction { get; init; }
     public required long TargetReleaseBytes { get; init; }
     public required long SafeCleanupBytes { get; init; }
     public required long RemainingGapBytes { get; init; }
+    public required double SafeContributionPercent { get; init; }
+    public required bool IsSafeCleanupMeaningful { get; init; }
     public bool HasPrimaryAction => PrimaryAction != DriveHealthPlanAction.None;
+    public bool HasSecondaryAction =>
+        SecondaryAction != DriveHealthPlanAction.None
+        && SecondaryAction != PrimaryAction;
     public bool CanExecuteDirectly => false;
 }
 
 public static class DriveHealthPlanPresenter
 {
     private const double ComfortUsedRatio = 0.80;
+    private const double MeaningfulContributionRatio = 0.10;
 
     public static DriveHealthPlanViewModel Create(
         DriveScanResult result,
@@ -59,10 +67,20 @@ public static class DriveHealthPlanPresenter
                 && item.Reversibility == ReversibilityLevel.Reversible
                 && item.Operation is not null)
             .ToArray();
+        var investigationCount = recommendations.Count(item =>
+            item.Action == RecommendationAction.Observe);
         var safeCleanupBytes = SaturatingSum(safeRecommendations
             .Select(item => Math.Max(0, item.EstimatedImpactBytes)));
         var usefulSafeCleanupBytes = Math.Min(targetReleaseBytes, safeCleanupBytes);
         var remainingGapBytes = Math.Max(0, targetReleaseBytes - usefulSafeCleanupBytes);
+        var safeContributionRatio = targetReleaseBytes <= 0
+            ? 0
+            : (double)usefulSafeCleanupBytes / targetReleaseBytes;
+        var safeContributionPercent = safeContributionRatio * 100;
+        var safeCleanupAvailable = safeRecommendations.Length > 0
+            && safeCleanupBytes > 0;
+        var isSafeCleanupMeaningful = safeCleanupAvailable
+            && safeContributionRatio >= MeaningfulContributionRatio;
         var usedPercent = totalBytes <= 0
             ? 0
             : usedBytes * 100d / totalBytes;
@@ -91,32 +109,62 @@ public static class DriveHealthPlanPresenter
                     $"预防：定期体检增长来源，应用缓存和下载位置优先放到{storageDestination}。"
                 ],
                 PrimaryActionLabel = "暂时不用处理",
+                SecondaryActionLabel = string.Empty,
                 SafetyBoundary = "Agent 只给建议；没有必要时不会为了提高分数制造清理任务。",
                 PrimaryAction = DriveHealthPlanAction.None,
+                SecondaryAction = DriveHealthPlanAction.None,
                 TargetReleaseBytes = 0,
                 SafeCleanupBytes = safeCleanupBytes,
-                RemainingGapBytes = 0
+                RemainingGapBytes = 0,
+                SafeContributionPercent = 0,
+                IsSafeCleanupMeaningful = false
             };
         }
 
-        var primaryAction = safeRecommendations.Length > 0 && safeCleanupBytes > 0
-            ? DriveHealthPlanAction.ReviewSafeCleanup
-            : personalStorageCandidateCount > 0
-                ? DriveHealthPlanAction.ReviewPersonalStorage
-                : rootCauseCount > 0
-                    ? DriveHealthPlanAction.ReviewSpaceSources
-                    : DriveHealthPlanAction.None;
+        var largerEvidenceAction = personalStorageCandidateCount > 0
+            ? DriveHealthPlanAction.ReviewPersonalStorage
+            : rootCauseCount > 0 || investigationCount > 0
+                ? DriveHealthPlanAction.ReviewSpaceSources
+                : DriveHealthPlanAction.None;
+        var hasLargerEvidence = largerEvidenceAction != DriveHealthPlanAction.None;
+        var minorSafeCleanupWithLargerEvidence = safeCleanupAvailable
+            && !isSafeCleanupMeaningful
+            && hasLargerEvidence;
+        var primaryAction = safeCleanupAvailable
+            && (isSafeCleanupMeaningful || !hasLargerEvidence)
+                ? DriveHealthPlanAction.ReviewSafeCleanup
+                : largerEvidenceAction;
+        var secondaryAction = primaryAction switch
+        {
+            DriveHealthPlanAction.ReviewSafeCleanup when hasLargerEvidence =>
+                largerEvidenceAction,
+            DriveHealthPlanAction.ReviewPersonalStorage when safeCleanupAvailable =>
+                DriveHealthPlanAction.ReviewSafeCleanup,
+            DriveHealthPlanAction.ReviewPersonalStorage when rootCauseCount > 0 =>
+                DriveHealthPlanAction.ReviewSpaceSources,
+            DriveHealthPlanAction.ReviewSpaceSources when safeCleanupAvailable =>
+                DriveHealthPlanAction.ReviewSafeCleanup,
+            _ => DriveHealthPlanAction.None
+        };
 
-        var progress = safeCleanupBytes > 0
-            ? $"当前已使用 {usedPercent:0.0}%。已确认低风险内容约 {FormatBytes(safeCleanupBytes)}；处理后距离目标仍差 {FormatBytes(remainingGapBytes)}。"
-            : $"当前已使用 {usedPercent:0.0}%。现在没有已确认可安全清理的内容，先不要删除；距离目标还差 {FormatBytes(remainingGapBytes)}。";
+        var progress = minorSafeCleanupWithLargerEvidence
+            ? $"不是没有可调整项，但 {FormatBytes(safeCleanupBytes)} 只占改善目标的 {safeContributionPercent:0.0}%，单独处理意义不大；即使处理完仍差 {FormatBytes(remainingGapBytes)}。先找能贡献更多空间的应用、个人文件或数据来源；这 {safeRecommendations.Length} 项低风险清理可作为顺手处理。"
+            : safeCleanupAvailable
+                ? $"不是没有可调整项：已找到 {safeRecommendations.Length} 项现在可以安全处理，约 {FormatBytes(safeCleanupBytes)}，可完成改善目标的 {safeContributionPercent:0.0}%；另有 {investigationCount} 项需要 Agent 先确认来源。处理后距离目标仍差 {FormatBytes(remainingGapBytes)}。"
+            : $"现在没有已确认可以直接处理的项目，但不是没有改善方向：有 {Math.Max(investigationCount, rootCauseCount)} 个占用来源需要继续确认。先不要删除；距离目标还差 {FormatBytes(remainingGapBytes)}。";
 
-        var firstStep = safeCleanupBytes > 0
-            ? $"先处理：{safeRecommendations.Length} 项低风险、可回滚内容，预计最多释放 {FormatBytes(safeCleanupBytes)}。"
+        var firstStep = minorSafeCleanupWithLargerEvidence
+            ? $"先找主要差额：距离目标仍差 {FormatBytes(remainingGapBytes)}，优先确认应用、个人文件和持续增长来源；这里先只读查看。"
+            : safeCleanupAvailable
+                ? $"先处理：{safeRecommendations.Length} 项低风险、可回滚内容，预计最多释放 {FormatBytes(safeCleanupBytes)}。"
             : "先别删除：目前没有低风险清理证据，先只读查看空间来源。";
-        var secondStep = personalStorageCandidateCount > 0
-            ? $"再腾空间：仍差 {FormatBytes(remainingGapBytes)}，先只读查看 {personalStorageCandidateCount} 组大文件或个人文件候选，再看占用来源；不碰系统文件。"
-            : $"再腾空间：仍差 {FormatBytes(remainingGapBytes)}，优先查看大文件和占用来源；不碰系统文件。";
+        var secondStep = minorSafeCleanupWithLargerEvidence
+            ? $"可选顺手：{safeRecommendations.Length} 项低风险内容约 {FormatBytes(safeCleanupBytes)}，确认后仍走隔离区和后悔药，不会直接删除。"
+            : personalStorageCandidateCount > 0
+                ? $"继续确认：仍差 {FormatBytes(remainingGapBytes)}，先只读查看 {personalStorageCandidateCount} 组大文件或个人文件候选，再看占用来源；不碰系统文件。"
+            : investigationCount > 0
+                ? $"继续确认：仍差 {FormatBytes(remainingGapBytes)}，让 Agent 逐步判断 {investigationCount} 个来源属于软件、缓存、驱动还是安装残留；不直接删除。"
+                : $"继续确认：仍差 {FormatBytes(remainingGapBytes)}，优先查看应用和主要占用来源；不碰系统文件。";
 
         return new DriveHealthPlanViewModel
         {
@@ -131,16 +179,27 @@ public static class DriveHealthPlanPresenter
             ],
             PrimaryActionLabel = primaryAction switch
             {
-                DriveHealthPlanAction.ReviewSafeCleanup => "先看 Agent 选好的最安全一项",
-                DriveHealthPlanAction.ReviewPersonalStorage => "先看可移动的大文件",
-                DriveHealthPlanAction.ReviewSpaceSources => "先看主要占用来源",
+                DriveHealthPlanAction.ReviewSafeCleanup => "先看能明显改善的安全项",
+                DriveHealthPlanAction.ReviewPersonalStorage => "先找能释放更多空间的大文件",
+                DriveHealthPlanAction.ReviewSpaceSources => "先找能释放更多空间的来源",
                 _ => "等待更多安全证据"
+            },
+            SecondaryActionLabel = secondaryAction switch
+            {
+                DriveHealthPlanAction.ReviewSafeCleanup =>
+                    $"可选：顺手处理 {FormatBytes(safeCleanupBytes)}",
+                DriveHealthPlanAction.ReviewPersonalStorage => "继续找更大的文件",
+                DriveHealthPlanAction.ReviewSpaceSources => "继续找更大的占用",
+                _ => string.Empty
             },
             SafetyBoundary = "这只是只读计划和页面引导，不会自动删除、移动或修改系统；真实处理仍要经过本地确认和后悔药管线。",
             PrimaryAction = primaryAction,
+            SecondaryAction = secondaryAction,
             TargetReleaseBytes = targetReleaseBytes,
             SafeCleanupBytes = safeCleanupBytes,
-            RemainingGapBytes = remainingGapBytes
+            RemainingGapBytes = remainingGapBytes,
+            SafeContributionPercent = safeContributionPercent,
+            IsSafeCleanupMeaningful = isSafeCleanupMeaningful
         };
     }
 

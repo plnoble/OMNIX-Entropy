@@ -33,5 +33,6 @@ public enum HealthFindingKind
     General,
     SustainedGrowth,
     PersonalStorage,
-    MigrationClosure
+    MigrationClosure,
+    SystemCleanup
 }

@@ -951,7 +951,7 @@ public partial class MainWindow : Window
 
     private async Task ShowUninstallPlanAsync(SoftwareProfile profile)
     {
-        var drawer = AppPresentationBuilder.CreateDrawer(profile);
+        var drawer = AppPresentationBuilder.CreateDrawer(profile, _softwareProfiles);
         var entry = AppActionEntryPolicy.Evaluate(drawer, AppActionKind.Uninstall);
         if (!entry.IsAllowed)
         {
@@ -1959,14 +1959,24 @@ public partial class MainWindow : Window
 
     private void OpenDriveHealthPlan_Click(object sender, RoutedEventArgs e)
     {
-        if (_driveHealthPlan is null || !_driveHealthPlan.HasPrimaryAction)
+        OpenDriveHealthPlanAction(_driveHealthPlan?.PrimaryAction ?? DriveHealthPlanAction.None);
+    }
+
+    private void OpenDriveHealthPlanSecondary_Click(object sender, RoutedEventArgs e)
+    {
+        OpenDriveHealthPlanAction(_driveHealthPlan?.SecondaryAction ?? DriveHealthPlanAction.None);
+    }
+
+    private void OpenDriveHealthPlanAction(DriveHealthPlanAction action)
+    {
+        if (_driveHealthPlan is null || action == DriveHealthPlanAction.None)
         {
-            StatusTextBlock.Text = "当前没有需要执行的改善动作；先完成体检或继续观察。";
+            StatusTextBlock.Text = "当前没有可用的下一步；先完成体检或继续观察。";
             return;
         }
 
         ShowPage("CDrive");
-        switch (_driveHealthPlan.PrimaryAction)
+        switch (action)
         {
             case DriveHealthPlanAction.ReviewSafeCleanup:
                 var preferredCard = RecommendationsListBox.Items
@@ -2483,6 +2493,9 @@ public partial class MainWindow : Window
         CDriveHealthPlanSafetyTextBlock.Text = safetyBoundary;
         CDriveHealthPlanButton.Content = "查看下一步";
         CDriveHealthPlanButton.IsEnabled = false;
+        CDriveHealthPlanSecondaryButton.Content = "继续找更大的占用";
+        CDriveHealthPlanSecondaryButton.IsEnabled = false;
+        CDriveHealthPlanSecondaryButton.Visibility = Visibility.Collapsed;
     }
 
     private void ApplyDriveHealthPlan(DriveHealthPlanViewModel plan)
@@ -2501,6 +2514,11 @@ public partial class MainWindow : Window
         CDriveHealthPlanSafetyTextBlock.Text = plan.SafetyBoundary;
         CDriveHealthPlanButton.Content = plan.PrimaryActionLabel;
         CDriveHealthPlanButton.IsEnabled = plan.HasPrimaryAction;
+        CDriveHealthPlanSecondaryButton.Content = plan.SecondaryActionLabel;
+        CDriveHealthPlanSecondaryButton.IsEnabled = plan.HasSecondaryAction;
+        CDriveHealthPlanSecondaryButton.Visibility = plan.HasSecondaryAction
+            ? Visibility.Visible
+            : Visibility.Collapsed;
     }
 
     private void SetCDriveResultVisibility(
@@ -2946,7 +2964,7 @@ public partial class MainWindow : Window
 
     private void ShowAppDrawer(SoftwareProfile profile)
     {
-        var drawer = AppPresentationBuilder.CreateDrawer(profile);
+        var drawer = AppPresentationBuilder.CreateDrawer(profile, _softwareProfiles);
         var migrationClosure = FindMigrationClosure(profile);
         var migrationState = MigrationClosureDrawerStatePresenter.Create(profile, drawer, migrationClosure);
         DrawerTitleTextBlock.Text = drawer.Name;
@@ -2954,8 +2972,11 @@ public partial class MainWindow : Window
             ? "发布者未知"
             : profile.Publisher;
         DrawerCategorySummaryTextBlock.Text = drawer.CategorySummary;
+        DrawerFamilySummaryTextBlock.Text = drawer.FamilySummary;
+        DrawerCurrentEntryTextBlock.Text = drawer.CurrentEntrySummary;
         DrawerLocationTextBlock.Text = drawer.InstallLocationSummary;
         DrawerSizeTextBlock.Text = drawer.SizeSummary;
+        DrawerStorageOutcomeTextBlock.Text = drawer.StorageOutcomeSummary;
         DrawerResidencyTextBlock.Text = drawer.ResidencySummary;
         DrawerSystemFootprintTextBlock.Text = drawer.SystemFootprintSummary;
         DrawerAdviceTextBlock.Text = migrationState.AdviceText;
@@ -2983,6 +3004,7 @@ public partial class MainWindow : Window
         AppActionKind kind)
     {
         var action = drawer.AvailableActions.FirstOrDefault(a => a.Kind == kind);
+        button.Content = action?.Label ?? "当前不可用";
         button.IsEnabled = action?.IsEnabled == true;
         button.ToolTip = action?.Reason ?? "当前不可用";
     }
@@ -3022,7 +3044,10 @@ public partial class MainWindow : Window
                 MigrationClosureTileStatePresenter.ShouldPrioritize(profile, FindMigrationClosure(profile)))
             .ToList();
         AppTilesListBox.ItemsSource = filteredList
-            .Select(profile => AppTileUi.From(profile, FindMigrationClosure(profile)))
+            .Select(profile => AppTileUi.From(
+                profile,
+                _softwareProfiles,
+                FindMigrationClosure(profile)))
             .ToList();
         AppsSummaryTextBlock.Text =
             AppCatalogSummaryPresenter.Create(_softwareProfiles, filtered.Count).Text +
@@ -3054,8 +3079,11 @@ public partial class MainWindow : Window
         DrawerTitleTextBlock.Text = empty.Title;
         DrawerPublisherTextBlock.Text = empty.SupportingText;
         DrawerCategorySummaryTextBlock.Text = empty.CategorySummary;
+        DrawerFamilySummaryTextBlock.Text = "选择应用后，这里会解释同名卡片是不是不同版本、不同安装位置或只有数据线索。";
+        DrawerCurrentEntryTextBlock.Text = "尚未选择具体记录。";
         DrawerLocationTextBlock.Text = empty.InstallLocationSummary;
         DrawerSizeTextBlock.Text = empty.SizeSummary;
+        DrawerStorageOutcomeTextBlock.Text = "选择应用后，Agent 会分别说明主程序和 C 盘数据能否搬走。";
         DrawerResidencyTextBlock.Text = empty.ResidencySummary;
         DrawerSystemFootprintTextBlock.Text = empty.SystemFootprintSummary;
         DrawerAdviceTextBlock.Text = empty.AgentAdviceText;
@@ -3063,6 +3091,7 @@ public partial class MainWindow : Window
         DrawerTechnicalListBox.ItemsSource = Array.Empty<string>();
         ApplyDrawerTechnicalDetailsState(AppDrawerTechnicalDetailsPresenter.Collapsed(), DrawerTechnicalDetailsButton);
         DrawerUninstallButton.IsEnabled = false;
+        DrawerUninstallButton.Content = "卸载干净点";
         DrawerMigrateButton.IsEnabled = false;
         DrawerMigrateButton.Content = "迁移到 D 盘";
         DrawerCleanCacheButton.IsEnabled = false;
@@ -4218,9 +4247,10 @@ public partial class MainWindow : Window
 
         public static AppTileUi From(
             SoftwareProfile profile,
+            IReadOnlyList<SoftwareProfile> inventory,
             MigrationClosureSummaryViewModel? migrationClosure = null)
         {
-            var tile = AppPresentationBuilder.CreateTile(profile);
+            var tile = AppPresentationBuilder.CreateTile(profile, inventory);
             var iconSource = ApplicationIconLoader.TryLoad(tile.IconPath, tile.IconIndex);
             var closureState = MigrationClosureTileStatePresenter.Create(profile, tile, migrationClosure);
             return new AppTileUi

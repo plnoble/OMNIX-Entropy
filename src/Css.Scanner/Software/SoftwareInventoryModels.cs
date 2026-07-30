@@ -14,7 +14,8 @@ public sealed record InstalledSoftwareRecord(
     string? InstallSource = null,
     bool IsWindowsInstaller = false,
     string? WindowsInstallerProductCode = null,
-    DateOnly? InstallDate = null);
+    DateOnly? InstallDate = null,
+    string? DisplayVersion = null);
 
 public sealed record DisplayIconReference(string Path, int ResourceIndex);
 
@@ -156,7 +157,8 @@ public static class InstalledSoftwareRegistryRecordFactory
         string registrySubKeyName,
         string? installSource,
         object? windowsInstallerValue,
-        object? installDateValue = null)
+        object? installDateValue = null,
+        object? displayVersionValue = null)
     {
         var isWindowsInstaller = IsEnabled(windowsInstallerValue);
         var productCode = isWindowsInstaller && Guid.TryParse(registrySubKeyName, out _)
@@ -173,7 +175,14 @@ public static class InstalledSoftwareRegistryRecordFactory
             installSource,
             isWindowsInstaller,
             productCode,
-            ParseInstallDate(installDateValue));
+            ParseInstallDate(installDateValue),
+            NormalizeOptionalText(displayVersionValue));
+    }
+
+    private static string? NormalizeOptionalText(object? value)
+    {
+        var text = value?.ToString()?.Trim();
+        return string.IsNullOrWhiteSpace(text) ? null : text;
     }
 
     private static DateOnly? ParseInstallDate(object? value)

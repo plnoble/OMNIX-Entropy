@@ -498,11 +498,33 @@
                                        Foreground="#4B5563"
                                        TextWrapping="Wrap"
                                        Margin="0,5,0,0"/>
-                            <Separator Margin="0,16,0,14"/>
+                            <Separator Margin="0,14,0,12"/>
+                            <TextBlock Text="这些卡片是什么" Style="{StaticResource MetricTitleStyle}"/>
+                            <TextBlock x:Name="DrawerFamilySummaryTextBlock"
+                                       AutomationProperties.AutomationId="DrawerFamilySummaryTextBlock"
+                                       Text="-"
+                                       Foreground="#374151"
+                                       TextWrapping="Wrap"
+                                       Margin="0,6,0,6"/>
+                            <TextBlock x:Name="DrawerCurrentEntryTextBlock"
+                                       AutomationProperties.AutomationId="DrawerCurrentEntryTextBlock"
+                                       Text="-"
+                                       Foreground="#111827"
+                                       FontWeight="SemiBold"
+                                       TextWrapping="Wrap"
+                                       Margin="0,0,0,14"/>
                             <TextBlock Text="装在哪里" Style="{StaticResource MetricTitleStyle}"/>
                             <TextBlock x:Name="DrawerLocationTextBlock" Text="-" FontSize="16" Foreground="#111827" Margin="0,6,0,14" TextWrapping="Wrap"/>
                             <TextBlock Text="占多少" Style="{StaticResource MetricTitleStyle}"/>
                             <TextBlock x:Name="DrawerSizeTextBlock" Text="-" FontSize="16" Foreground="#111827" Margin="0,6,0,14" TextWrapping="Wrap"/>
+                            <TextBlock Text="搬到 D 盘有没有用" Style="{StaticResource MetricTitleStyle}"/>
+                            <TextBlock x:Name="DrawerStorageOutcomeTextBlock"
+                                       AutomationProperties.AutomationId="DrawerStorageOutcomeTextBlock"
+                                       Text="-"
+                                       FontSize="16"
+                                       Foreground="#111827"
+                                       Margin="0,6,0,14"
+                                       TextWrapping="Wrap"/>
                             <TextBlock Text="是否常驻" Style="{StaticResource MetricTitleStyle}"/>
                             <TextBlock x:Name="DrawerResidencyTextBlock" Text="-" FontSize="16" Foreground="#111827" Margin="0,6,0,14" TextWrapping="Wrap"/>
                             <TextBlock Text="还会出现在哪" Style="{StaticResource MetricTitleStyle}"/>
@@ -591,7 +613,15 @@
                                      AutomationProperties.AutomationId="CDriveRootCauseListBox"
                                      Height="220"
                                      Margin="0,0,0,12"
+                                     HorizontalContentAlignment="Stretch"
+                                     ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                     ScrollViewer.VerticalScrollBarVisibility="Auto"
                                      Visibility="Collapsed">
+                                <ListBox.ItemContainerStyle>
+                                    <Style TargetType="ListBoxItem">
+                                        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                    </Style>
+                                </ListBox.ItemContainerStyle>
                                 <ListBox.ItemTemplate>
                                     <DataTemplate>
                                         <Border BorderBrush="#E5E7EB" BorderThickness="0,0,0,1" Padding="0,9">
@@ -844,14 +874,22 @@
                                                FontSize="12"
                                                TextWrapping="Wrap"
                                                Margin="0,6,0,0"/>
-                                    <Button x:Name="CDriveHealthPlanButton"
-                                            AutomationProperties.AutomationId="CDriveHealthPlanButton"
-                                            Content="&#x67E5;&#x770B;&#x4E0B;&#x4E00;&#x6B65;"
-                                            Height="32"
-                                            HorizontalAlignment="Left"
-                                            Padding="12,0"
-                                            Margin="0,8,0,0"
-                                            Click="OpenDriveHealthPlan_Click"/>
+                                    <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                                        <Button x:Name="CDriveHealthPlanButton"
+                                                AutomationProperties.AutomationId="CDriveHealthPlanButton"
+                                                Content="&#x67E5;&#x770B;&#x4E0B;&#x4E00;&#x6B65;"
+                                                Height="32"
+                                                Padding="12,0"
+                                                Click="OpenDriveHealthPlan_Click"/>
+                                        <Button x:Name="CDriveHealthPlanSecondaryButton"
+                                                AutomationProperties.AutomationId="CDriveHealthPlanSecondaryButton"
+                                                Content="&#x7EE7;&#x7EED;&#x627E;&#x66F4;&#x5927;&#x7684;&#x5360;&#x7528;"
+                                                Height="32"
+                                                Padding="12,0"
+                                                Margin="8,0,0,0"
+                                                Visibility="Collapsed"
+                                                Click="OpenDriveHealthPlanSecondary_Click"/>
+                                    </StackPanel>
                                 </StackPanel>
                             </Border>
                             <TextBlock x:Name="RecommendationsEmptyStateTextBlock"

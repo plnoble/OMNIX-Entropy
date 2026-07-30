@@ -1,5 +1,51 @@
 # Quality Gates
 
+## 2026-07-30 - 0.1.5 release pre-change gate
+
+| Category | Status | Evidence | Residual risk |
+| --- | --- | --- | --- |
+| Scope and consent | Pass | User explicitly requested review, commit, version bump, and publication. | Installer execution, product operations, certificate/trust mutation, antivirus changes, and `LocalMachine` remain unauthorized. |
+| Working-tree ownership | Pass | `git status -sb` contains the continuous user-requested C-drive/app-family source, tests, smokes, and required development records; no unrelated file group was found. | Review must still identify behavioral defects within the intended scope. |
+| Safety boundary | Pass | Previous completion gate reports no added production delete/registry/process authority and both real WPF smokes executed no operation. | Re-run after review fixes and version changes. |
+| Version and channel | Pass | `Css.App.csproj`, Release ProductVersion/FileVersion, and `docs/release/0.1.5.zh-CN.md` report 0.1.5. | Public latest remains 0.1.4 until tag, package, and Release verification complete. |
+| Tests and build | Pass | Full Debug 1100/1100; Release 0 warnings/errors; source integrity 395 files/18 XAML; both scripts parse; both real WPF smokes pass with no operation executed; diff and mutation-authority checks pass. | Exact pushed-commit CI remains pending. |
+| GitHub identity | Pass | Host `gh auth status` reports active `plnoble` with `repo` and `workflow`; origin is fixed to `plnoble/OMNIX-Entropy`. | Network and GitHub availability remain external. |
+| Signing prerequisites | Pass | Read-only inspector reports `CanCreateSignedCandidate=true`, SignTool at the Windows Kits registered path, and one explicitly selected eligible CurrentUser RSA signer `5688958FEA0056861558E8DCF9D2381AF46074B2`. | Timestamp availability remains external; no signing occurs before CI passes. |
+| Delivery | Warn | Existing guarded process provides source-bound signing, installer verification, draft staging, download-back hashes, and latest-channel checks. | Commit/push/CI, signed payload, installer, draft assets, and public latest are pending. |
+
+## 2026-07-30 - System cleanup and app-family completion gate
+
+| Category | Status | Evidence | Residual risk |
+| --- | --- | --- | --- |
+| Scope and consent | Pass | User explicitly said “继续开发” after reviewing the proposed read-only classification/presentation slice. | No new execution, version, commit, or release authority. |
+| Real evidence | Pass | Bounded host evidence found at least 4.59 GB current-user temp plus Antigravity/OpenCode split program/updater/data locations. | Directory totals can be lower bounds or overlap; active-use intent remains unknown. |
+| System cleanup safety | Pass | `KnownCleanupStoreProbe` is bounded, cancellable, skips reparse points, reports lower bounds, and produces evidence only. User-review and Windows-managed findings have distinct copy and no new cleanup operation. | Per-file age/lock/ownership and actual Windows cleanup routing remain future execution prerequisites. |
+| Application identity safety | Pass | Family grouping is presentation-only; exact `SoftwareProfile` remains the operation target. The isolated OpenCode smoke exposed one enabled official-uninstall entry and two disabled non-registered entries. | Name normalization can group intentional parallel versions, so family-level execution must remain prohibited. |
+| Beginner UX | Pass | `.omx/qa-app-family-decision.png` shows family count, exact selected version/source, uninstallability, migration outcome, C remainder, and future growth in the first drawer view. Home/C-drive screenshots separate 4 KB immediately safe cleanup from at least 3.3 GB of candidates. | Application-specific support for moving cache/data still requires per-product evidence; the drawer says so rather than promising redirection. |
+| Operation safety | Pass | Both real WPF smokes report no operation executed; added production source contains no delete/registry/process authority, and existing official-uninstall/confirmation/quarantine/migration pipelines are unchanged. | Tests delete only isolated temporary fixtures during cleanup. |
+| Tests and build | Pass | Focused 12/12; full Debug 1099/1099; Release 0 warnings/errors; source integrity 395 files/18 XAML; both PowerShell scripts parse. | No installed/package acceptance or real cleanup/uninstall/migration ran. |
+| Delivery scope | Pass | Product version remains 0.1.4 and the worktree is uncommitted; no push, tag, signing, installer, or Release action occurred. | Installed/public 0.1.4 does not contain this work. |
+
+## 2026-07-30 - Impact-aware C-drive priority pre-change gate
+
+| Category | Status | Evidence | Residual risk |
+| --- | --- | --- | --- |
+| Scope and consent | Pass | User explicitly challenged the usefulness of a 337.6 MB primary action against the whole C-drive shortage. | This slice changes read-only guidance only; no release is included. |
+| Quantitative honesty | Pass | Latest evidence requires about 19.5 GB to reach the 80% target; 337.6 MB contributes about 1.7%. | Observation sizes identify where to investigate, not guaranteed reclaimable bytes. |
+| Safety boundary | Pass | Existing low-risk/reversible/operation eligibility, confirmation, quarantine, and `OperationPipeline` remain unchanged. | The larger-source route must remain read-only until ownership and action evidence exists. |
+| Beginner UX | Pass | Real screenshots show a 19.5 GB target, 0.0% fixture contribution, impact-first primary button, and clearly optional safe-cleanup button without overlap. | Observation sizes are investigation clues, not promised recoverable amounts. |
+| Tests and build | Pass | Focused 12/12; full Debug 1087/1087; Release 0 warnings/errors; integrity 390 files/18 XAML; PowerShell parse and diff check pass; GUI smoke reports `noOperationExecuted=true`. | No real user-file cleanup or installed-build acceptance ran. |
+
+## 2026-07-30 - Actionable C-drive conclusion pre-change gate
+
+| Category | Status | Evidence | Residual risk |
+| --- | --- | --- | --- |
+| Scope and consent | Pass | User reports that a completed C-drive scan appears to offer nothing adjustable; the change is limited to making existing evidence lead to understandable next steps. | No new cleanup authority or release is included. |
+| Real evidence | Pass | Latest local digest: C 86.5%, score 64, reclaimable 337.6 MB, low-risk count 0, five observation findings, 105 ordinary C-drive app clues. | The digest is sanitized and intentionally does not persist the full in-memory recommendation graph. |
+| Safety boundary | Pass | Existing low-risk/reversible/operation requirements, confirmation page, quarantine, and `OperationPipeline` remain unchanged. | Read-only navigation must not be confused with approval to delete unexpected roots. |
+| Beginner UX | Pass | Real WPF screenshots show “不是没有可调整项”, safe-now/investigate-next counts, the remaining 80% gap, a primary safe-preview button, and a secondary larger-space button without overlap. | A small safe item can still be an insignificant contribution; the copy states the remaining gap rather than overstating it. |
+| Tests and build | Pass | Focused 11/11; adjacent experience 226/226; full Debug 1086/1086; Release 0 warnings/errors; integrity 390 files/18 XAML; diff check clean; mutation-authority hits 0; GUI smoke `noOperationExecuted=true`. | No installed-build or real cleanup acceptance was run. |
+
 ## 2026-07-30 - 0.1.4 public release preflight
 
 | Category | Status | Evidence | Residual risk |

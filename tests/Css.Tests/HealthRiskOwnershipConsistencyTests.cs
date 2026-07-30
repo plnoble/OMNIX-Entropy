@@ -87,6 +87,39 @@ public sealed class HealthRiskOwnershipConsistencyTests
     }
 
     [Fact]
+    public void Low_risk_cleanup_is_not_hidden_behind_five_observation_findings()
+    {
+        var observations = Enumerable.Range(1, 5)
+            .Select(index => new Recommendation
+            {
+                Title = "Observation " + index,
+                Finding = "Needs ownership evidence",
+                Reason = "Observe first",
+                Action = RecommendationAction.Observe,
+                Risk = RiskLevel.Medium,
+                Reversibility = ReversibilityLevel.PartiallyReversible,
+                EstimatedImpactBytes = index * 1024L * 1024 * 1024,
+                Evidence = ["fixture"]
+            });
+        var recommendations = observations
+            .Append(Recommendation("Safe temp cleanup", RiskLevel.Low, 337L * 1024 * 1024))
+            .ToArray();
+
+        var summary = HealthCheckSummaryBuilder.Build(DriveResult(), recommendations);
+        var snapshot = new ScanSnapshot(
+            new DateTimeOffset(2026, 7, 30, 6, 0, 0, TimeSpan.Zero),
+            []);
+        var digest = HealthDigestBuilder.Create(@"C:\", snapshot, summary, []);
+
+        summary.KeyFindings.Should().Contain(item =>
+            item.Text.Contains("Safe temp cleanup")
+            && item.Text.Contains("低风险"));
+        summary.KeyFindings[0].Text.Should().Contain("Observation 5");
+        summary.KeyFindings[0].Text.Should().NotContain("Safe temp cleanup");
+        digest.Summary.Should().Contain("低风险清理 1 项");
+    }
+
+    [Fact]
     public void Startup_dimension_separates_ordinary_system_and_ownership_pending_clues()
     {
         var ordinary = new SoftwareProfile

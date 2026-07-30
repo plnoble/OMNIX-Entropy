@@ -4,6 +4,7 @@ $repoRoot = Split-Path -Parent $PSScriptRoot
 $exe = Join-Path $repoRoot 'src\Css.App\bin\Debug\net8.0-windows\Css.App.exe'
 $screenshotPath = Join-Path $PSScriptRoot 'qa-home-agent-next-action.png'
 $drivePlanScreenshotPath = Join-Path $PSScriptRoot 'qa-drive-health-plan.png'
+$driveOpportunityScreenshotPath = Join-Path $PSScriptRoot 'qa-drive-health-opportunities.png'
 $isolatedDataRoot = Join-Path $PSScriptRoot 'qa-home-agent-data'
 $scanRoot = Join-Path 'C:\tmp' ('OMNIX-HomeHealth-Smoke-' + [Guid]::NewGuid().ToString('N'))
 $previousDataRoot = $env:OMNIX_ENTROPY_DATA_ROOT
@@ -112,34 +113,37 @@ try {
     }
     Invoke-Element $startScan
 
-    $lastHealthDimensionCount = 0
+    $summaryDimensionAutomationId = 'HealthDimension_' +
+        (Get-UnicodeText @(0x7EFC, 0x5408, 0x8BC4, 0x5206))
     $healthDimensions = Wait-Until -TimeoutSeconds 90 -Probe {
         if ($process.HasExited) {
             throw "The app exited before rendering health dimensions. Exit code: $($process.ExitCode)"
         }
         $candidate = Find-ByAutomationId $window 'HealthDimensionListView' 250
-        if ($null -ne $candidate) {
-            $lastHealthDimensionCount = Get-ListItemCount $candidate
-            if ($lastHealthDimensionCount -ge 7) {
-                return $candidate
-            }
+        $summaryRow = Find-ByAutomationId $window $summaryDimensionAutomationId 250
+        if ($null -ne $candidate -and $null -ne $summaryRow) {
+            return $candidate
         }
         return $null
     }
     if ($null -eq $healthDimensions) {
         $status = Find-ByAutomationId $window 'StatusTextBlock' 500
         $statusText = if ($null -eq $status) { '<missing>' } else { $status.Current.Name }
-        throw "The whole-PC health dimensions were not rendered after the fixture scan. UIAutomation list items: $lastHealthDimensionCount; status: $statusText"
+        Show-WpfWindowForSmoke $window
+        Save-WindowScreenshot $window $screenshotPath
+        throw "The whole-PC health dimensions were not rendered after the fixture scan. Missing stable row: $summaryDimensionAutomationId; status: $statusText"
     }
-    $healthDimensionCount = Get-ListItemCount $healthDimensions
 
     $dimensionNames = @(
+        [PSCustomObject]@{ Key = 'overall'; Name = Get-UnicodeText @(0x7EFC, 0x5408, 0x8BC4, 0x5206) },
+        [PSCustomObject]@{ Key = 'disk'; Name = Get-UnicodeText @(0x78C1, 0x76D8, 0x5065, 0x5EB7) },
         [PSCustomObject]@{ Key = 'secondaryDrive'; Name = 'D ' + (Get-UnicodeText @(0x76D8, 0x7A7A, 0x95F4)) },
         [PSCustomObject]@{ Key = 'memory'; Name = Get-UnicodeText @(0x5185, 0x5B58, 0x5360, 0x7528) },
         [PSCustomObject]@{ Key = 'battery'; Name = Get-UnicodeText @(0x7535, 0x6C60, 0x72B6, 0x6001) },
         [PSCustomObject]@{ Key = 'startup'; Name = Get-UnicodeText @(0x81EA, 0x542F, 0x52A8, 0x7EBF, 0x7D22) },
         [PSCustomObject]@{ Key = 'usage'; Name = Get-UnicodeText @(0x4F7F, 0x7528, 0x8D8B, 0x52BF) }
     )
+    $healthDimensionCount = 0
     $machineHealthRows = [ordered]@{}
     foreach ($dimension in $dimensionNames) {
         $automationId = 'HealthDimension_' + $dimension.Name
@@ -179,6 +183,7 @@ try {
             }
         }
         $machineHealthRows[$dimension.Key] = $rowText
+        $healthDimensionCount++
     }
 
     $notRead = Get-UnicodeText @(0x672A, 0x8BFB, 0x53D6)
@@ -230,11 +235,49 @@ try {
     if ($healthGoalProgress.Current.Name -notmatch '\d+(\.\d+)?\s+(KB|MB|GB|TB)') {
         throw 'The drive-health progress did not quantify safe cleanup or the remaining gap.'
     }
+    $notEmptyAdjustment = Get-UnicodeText @(0x4E0D, 0x662F, 0x6CA1, 0x6709, 0x53EF, 0x8C03, 0x6574, 0x9879)
+    if (-not $healthGoalProgress.Current.Name.Contains($notEmptyAdjustment)) {
+        throw 'The drive-health progress still looked like there was nothing adjustable.'
+    }
     if (-not $healthGoalButton.Current.IsEnabled) {
         throw 'The Agent-led drive-health next step was not enabled for the cleanup fixture.'
     }
 
     Invoke-Element $healthGoalButton
+    $rootCauseList = Wait-Until -TimeoutSeconds 8 -Probe {
+        $candidate = Find-ByAutomationId $window 'CDriveRootCauseListBox' 250
+        if ($null -ne $candidate -and -not $candidate.Current.IsOffscreen) {
+            return $candidate
+        }
+
+        return $null
+    }
+    if ($null -eq $rootCauseList) {
+        throw 'The impact-first next step did not navigate to the read-only source list.'
+    }
+
+    $drivePlanScroll = Find-ByAutomationId $window 'CDriveRecommendationsScrollViewer' 1000
+    $drivePlanScrollPattern = $drivePlanScroll.GetCurrentPattern(
+        [System.Windows.Automation.ScrollPattern]::Pattern)
+    if ($null -eq $drivePlanScrollPattern -or -not $drivePlanScrollPattern.Current.VerticallyScrollable) {
+        throw 'The drive-health plan did not expose its bounded scroll viewport.'
+    }
+    $drivePlanScrollPattern.SetScrollPercent(
+        [System.Windows.Automation.ScrollPattern]::NoScroll,
+        0)
+    Start-Sleep -Milliseconds 350
+
+    $secondaryPlanButton = Find-ByAutomationId $window 'CDriveHealthPlanSecondaryButton' 1000
+    if ($null -eq $secondaryPlanButton -or
+        $secondaryPlanButton.Current.IsOffscreen -or
+        -not $secondaryPlanButton.Current.IsEnabled) {
+        throw 'The optional low-risk cleanup was not visible after the larger-source route.'
+    }
+    Show-WpfWindowForSmoke $window
+    Save-WindowScreenshot $window $driveOpportunityScreenshotPath
+    $secondaryPlanButtonLabel = $secondaryPlanButton.Current.Name
+    Invoke-Element $secondaryPlanButton
+
     $selectedPlanTakeaway = Wait-Until -TimeoutSeconds 8 -Probe {
         $candidate = Find-ByAutomationId $window 'RecommendationActionTakeawayTextBlock' 250
         if ($null -ne $candidate -and
@@ -246,14 +289,15 @@ try {
         return $null
     }
     if ($null -eq $selectedPlanTakeaway) {
-        throw 'The Agent-led next step did not open the selected low-risk preview.'
+        throw 'The optional cleanup action did not open the selected low-risk preview.'
     }
     $selectedPlanButton = Find-ByAutomationId $window 'ExecuteRecommendationButton' 1000
     if ($null -eq $selectedPlanButton -or
         $selectedPlanButton.Current.IsOffscreen -or
         -not $selectedPlanButton.Current.IsEnabled) {
-        throw 'The selected low-risk preview did not bring its non-executing confirmation entry into view.'
+        throw 'The optional low-risk preview did not bring its non-executing confirmation entry into view.'
     }
+    Show-WpfWindowForSmoke $window
     Save-WindowScreenshot $window $drivePlanScreenshotPath
 
     $homeButton = Find-ByAutomationId $window 'HomeNavButton' 1000
@@ -359,6 +403,7 @@ try {
     }
 
     Start-Sleep -Milliseconds 500
+    Show-WpfWindowForSmoke $window
     Save-WindowScreenshot $window $screenshotPath
 
     $nextActionLabel = $navigateButton.Current.Name
@@ -388,12 +433,14 @@ try {
         healthGoalProgress = $healthGoalProgress.Current.Name
         selectedPlanTakeaway = $selectedPlanTakeaway.Current.Name
         selectedPlanButton = $selectedPlanButton.Current.Name
+        secondaryPlanButton = $secondaryPlanButtonLabel
         nextActionLabel = $nextActionLabel
         cDrivePageOpened = $true
         fixtureStillExists = (Test-Path -LiteralPath $fixtureTemp -PathType Container)
         noOperationExecuted = $true
         screenshot = $screenshotPath
         drivePlanScreenshot = $drivePlanScreenshotPath
+        driveOpportunityScreenshot = $driveOpportunityScreenshotPath
     } | ConvertTo-Json -Compress
 }
 finally {

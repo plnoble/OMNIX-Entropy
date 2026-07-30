@@ -8,6 +8,7 @@ namespace Css.Tests;
 
 public sealed class DriveHealthPlanExperienceTests
 {
+    private const long MiB = 1024L * 1024;
     private const long GiB = 1024L * 1024 * 1024;
 
     [Fact]
@@ -16,21 +17,73 @@ public sealed class DriveHealthPlanExperienceTests
         var result = Drive(totalGiB: 100, freeGiB: 10);
         var plan = DriveHealthPlanPresenter.Create(
             result,
-            [Cleanup(2 * GiB)],
+            [
+                Cleanup(2 * GiB),
+                Observation("Unknown cache", 3 * GiB),
+                Observation("Old installer", 1 * GiB)
+            ],
             personalStorageCandidateCount: 3,
             rootCauseCount: 4);
 
         plan.TargetReleaseBytes.Should().Be(10 * GiB);
         plan.SafeCleanupBytes.Should().Be(2 * GiB);
         plan.RemainingGapBytes.Should().Be(8 * GiB);
+        plan.SafeContributionPercent.Should().BeApproximately(20, 0.01);
+        plan.IsSafeCleanupMeaningful.Should().BeTrue();
         plan.Headline.Should().Contain("10.0 GB").And.Contain("80%");
-        plan.Progress.Should().Contain("2.0 GB").And.Contain("8.0 GB");
+        plan.Progress.Should().Contain("不是没有可调整项")
+            .And.Contain("1 项")
+            .And.Contain("2 项需要")
+            .And.Contain("2.0 GB")
+            .And.Contain("8.0 GB");
         plan.Steps.Should().HaveCount(3);
         plan.Steps[0].Should().Contain("低风险").And.Contain("2.0 GB");
-        plan.Steps[1].Should().Contain("8.0 GB").And.Contain("大文件");
+        plan.Steps[1].Should().Contain("8.0 GB").And.Contain("继续确认");
         plan.Steps[2].Should().Contain("D 盘");
         plan.PrimaryAction.Should().Be(DriveHealthPlanAction.ReviewSafeCleanup);
-        plan.PrimaryActionLabel.Should().Contain("最安全");
+        plan.PrimaryActionLabel.Should().Contain("明显改善").And.Contain("安全");
+        plan.SecondaryAction.Should().Be(DriveHealthPlanAction.ReviewPersonalStorage);
+        plan.SecondaryActionLabel.Should().Contain("继续找");
+        plan.HasSecondaryAction.Should().BeTrue();
+        plan.CanExecuteDirectly.Should().BeFalse();
+    }
+
+    [Fact]
+    public void Minor_safe_cleanup_is_optional_when_it_barely_changes_the_comfort_gap()
+    {
+        var safeBytes = (long)(337.6 * MiB);
+        var result = new DriveScanResult
+        {
+            Drive = @"C:\",
+            TotalBytes = 300 * GiB,
+            FreeBytes = (long)(40.5 * GiB)
+        };
+
+        var plan = DriveHealthPlanPresenter.Create(
+            result,
+            [
+                Cleanup(safeBytes),
+                Observation("Large application data", 8 * GiB),
+                Observation("Unexpected root", 2 * GiB)
+            ],
+            personalStorageCandidateCount: 0,
+            rootCauseCount: 2);
+
+        plan.TargetReleaseBytes.Should().Be((long)(19.5 * GiB));
+        plan.SafeCleanupBytes.Should().Be(safeBytes);
+        plan.SafeContributionPercent.Should().BeApproximately(1.7, 0.1);
+        plan.IsSafeCleanupMeaningful.Should().BeFalse();
+        plan.Progress.Should().Contain("337.6 MB")
+            .And.Contain("1.7%")
+            .And.Contain("单独处理意义不大")
+            .And.Contain("19.2 GB");
+        plan.Steps[0].Should().Contain("主要差额");
+        plan.Steps[1].Should().Contain("可选").And.Contain("337.6 MB");
+        plan.PrimaryAction.Should().Be(DriveHealthPlanAction.ReviewSpaceSources);
+        plan.PrimaryActionLabel.Should().Contain("释放更多空间");
+        plan.SecondaryAction.Should().Be(DriveHealthPlanAction.ReviewSafeCleanup);
+        plan.SecondaryActionLabel.Should().Contain("可选").And.Contain("337.6 MB");
+        plan.HasSecondaryAction.Should().BeTrue();
         plan.CanExecuteDirectly.Should().BeFalse();
     }
 
@@ -61,9 +114,13 @@ public sealed class DriveHealthPlanExperienceTests
 
         plan.TargetReleaseBytes.Should().Be(0);
         plan.RemainingGapBytes.Should().Be(0);
+        plan.SafeContributionPercent.Should().Be(0);
+        plan.IsSafeCleanupMeaningful.Should().BeFalse();
         plan.Headline.Should().Contain("舒适目标内");
         plan.PrimaryAction.Should().Be(DriveHealthPlanAction.None);
         plan.PrimaryActionLabel.Should().Contain("暂时不用处理");
+        plan.SecondaryAction.Should().Be(DriveHealthPlanAction.None);
+        plan.HasSecondaryAction.Should().BeFalse();
     }
 
     [Fact]
@@ -97,6 +154,7 @@ public sealed class DriveHealthPlanExperienceTests
             "CDriveHealthPlanProgressTextBlock",
             "CDriveHealthPlanStepsItemsControl",
             "CDriveHealthPlanSafetyTextBlock",
+            "CDriveHealthPlanSecondaryButton",
             "CDriveRecommendationsScrollViewer"
         })
         {
@@ -109,6 +167,7 @@ public sealed class DriveHealthPlanExperienceTests
             .And.Contain("ApplyDriveHealthPlan")
             .And.Contain("RecommendationsListBox.SelectedItem = preferredCard")
             .And.Contain("OpenDriveHealthPlan_Click")
+            .And.Contain("OpenDriveHealthPlanSecondary_Click")
             .And.Contain("ResetDriveHealthPlanPresentation(")
             .And.Contain("CDriveHealthPlanStepsItemsControl.ItemsSource = null;")
             .And.Contain("CDriveHealthPlanSafetyTextBlock.Text = safetyBoundary;");
@@ -161,6 +220,19 @@ public sealed class DriveHealthPlanExperienceTests
                     EstimatedImpactBytes = bytes
                 }
                 : null
+        };
+
+    private static Recommendation Observation(string title, long bytes) =>
+        new()
+        {
+            Title = title,
+            Finding = title + " finding",
+            Reason = "Needs ownership evidence",
+            Action = RecommendationAction.Observe,
+            Risk = RiskLevel.Medium,
+            Reversibility = ReversibilityLevel.PartiallyReversible,
+            EstimatedImpactBytes = bytes,
+            Evidence = [title + " evidence"]
         };
 
     private static string FindRepositoryRoot()

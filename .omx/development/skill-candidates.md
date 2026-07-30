@@ -1,5 +1,21 @@
 # Skill Candidates
 
+### 2026-07-30 - Guard model enrichment against dropped fields
+
+- Trigger: a shared immutable model gains fields while enrichers or presenters rebuild it with object initializers or copy methods.
+- Reusable lesson: construction still compiles when a non-required field is silently omitted. Add a preservation contract for every enrichment/clone path, or centralize copying in one constructor/helper, before trusting downstream UI evidence.
+- Evidence: software version, inventory source, and C-drive data size initially disappeared after growth enrichment even though registry scanning populated them; the real GUI smoke exposed the loss.
+- Proposed form: a Roslyn/source contract that enumerates model properties and checks designated clone paths, backed by one runtime fixture that crosses the full enrichment chain.
+- Promotion threshold: promote after one more shared model suffers the same omission or when the next `SoftwareProfile` field is added.
+
+### 2026-07-30 - Use a host-compatible bounded read-only filesystem audit helper
+
+- Trigger: a Windows investigation needs approximate sizes for several known directories without following reparse points, blocking indefinitely, or assuming modern .NET APIs in Windows PowerShell.
+- Reusable lesson: resolve the active shell/runtime first, use an explicit result collection around `foreach`, cap files/time, report lower bounds and inaccessible paths, and never turn approximate size into deletion authority.
+- Evidence: ad hoc audit commands twice used invalid `foreach |` grammar and once assumed `System.IO.EnumerationOptions`; a bounded Windows PowerShell-compatible fallback then produced useful lower-bound evidence without mutation.
+- Proposed form: a repository script accepting literal paths and limits, returning JSON fields for visibility, count, bytes, truncation, access errors, and reparse skips.
+- Promotion threshold: create the helper before the next host cleanup-store or application-data audit.
+
 ### 2026-07-30 - Reconcile release transport instead of retrying blindly
 
 - Trigger: a release create/upload/download command times out or returns partial output after remote state may already have changed.

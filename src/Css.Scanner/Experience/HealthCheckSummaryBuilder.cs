@@ -28,6 +28,13 @@ public static class HealthCheckSummaryBuilder
         var reclaimable = SaturatingSum(recommendations
             .Where(r => HealthFindingRiskPolicy.IsLowRiskClean(r.Action, r.Risk))
             .Select(r => r.EstimatedImpactBytes));
+        var knownCleanupCandidateBytes = SaturatingSum(result.SystemCleanupOpportunities
+            .Where(item => item.IsAccessible && item.SizeBytes > 0)
+            .Select(item => item.SizeBytes));
+        var knownCleanupIsLowerBound = result.SystemCleanupOpportunities.Any(item =>
+            item.IsAccessible
+            && item.SizeBytes > 0
+            && item.IsSizeLowerBound);
         var score = Math.Clamp(100 - (int)Math.Round(Math.Max(0, usedPercent - 50)), 0, 100);
         var driveLabel = DriveScanTargetPresenter.DriveLabel(result.Drive);
 
@@ -40,6 +47,8 @@ public static class HealthCheckSummaryBuilder
                 usedPercent,
                 driveLabel,
                 reclaimable,
+                knownCleanupCandidateBytes,
+                knownCleanupIsLowerBound,
                 machineHealth,
                 softwareProfiles,
                 growthFindings,
@@ -57,6 +66,8 @@ public static class HealthCheckSummaryBuilder
         double driveUsedPercent,
         string driveLabel,
         long reclaimableBytes,
+        long knownCleanupCandidateBytes,
+        bool knownCleanupIsLowerBound,
         MachineHealthObservation? machineHealth,
         IReadOnlyList<SoftwareProfile>? softwareProfiles,
         IReadOnlyList<GrowthFinding> growthFindings,
@@ -73,7 +84,10 @@ public static class HealthCheckSummaryBuilder
             new()
             {
                 Name = "磁盘健康",
-                Result = $"{driveLabel} {driveUsedPercent:0.0}%，可安全处理约 {FormatBytes(reclaimableBytes)}",
+                Result = $"{driveLabel} {driveUsedPercent:0.0}%，可安全处理约 {FormatBytes(reclaimableBytes)}"
+                    + (knownCleanupCandidateBytes > 0
+                        ? $"；待确认临时/系统缓存{(knownCleanupIsLowerBound ? "至少 " : "约 ")}{FormatBytes(knownCleanupCandidateBytes)}"
+                        : string.Empty),
                 Rating = driveUsedPercent >= 85 ? "需要关注" : "有优化空间"
             }
         };
@@ -181,6 +195,26 @@ public static class HealthCheckSummaryBuilder
             });
         }
 
+        var knownCleanup = result.SystemCleanupOpportunities
+            .Where(item => item.IsAccessible && item.SizeBytes > 0)
+            .OrderByDescending(item => item.SizeBytes)
+            .FirstOrDefault();
+        if (knownCleanup is not null && findings.Count < 5)
+        {
+            var handling = knownCleanup.Handling == CleanupHandling.WindowsManaged
+                ? "应交给 Windows 清理机制复查"
+                : "需先检查文件年龄和占用状态";
+            findings.Add(new HealthFinding
+            {
+                Text = $"{knownCleanup.Title} {(knownCleanup.IsSizeLowerBound ? "至少 " : "约 ")}{FormatBytes(knownCleanup.SizeBytes)}；{handling}，当前不算作可安全处理空间",
+                Kind = HealthFindingKind.SystemCleanup,
+                Action = RecommendationAction.Observe,
+                Risk = knownCleanup.Handling == CleanupHandling.WindowsManaged
+                    ? RiskLevel.Medium
+                    : RiskLevel.Low
+            });
+        }
+
         var largeFiles = personalStorage.Findings
             .Where(item => item.Kind == PersonalStorageFindingKind.LongUnusedLargeFile)
             .ToArray();
@@ -209,7 +243,31 @@ public static class HealthCheckSummaryBuilder
             });
         }
 
-        foreach (var recommendation in recommendations.Take(Math.Max(0, 5 - findings.Count)))
+        var orderedRecommendations = recommendations
+            .OrderByDescending(item => item.EstimatedImpactBytes)
+            .ThenBy(RecommendationPriority)
+            .ToArray();
+        var bestLowRiskCleanup = orderedRecommendations.FirstOrDefault(item =>
+            HealthFindingRiskPolicy.IsLowRiskClean(item.Action, item.Risk));
+        if (bestLowRiskCleanup is not null && findings.Count >= 5)
+            findings.RemoveAt(findings.Count - 1);
+
+        var availableRecommendationSlots = Math.Max(0, 5 - findings.Count);
+        var selectedRecommendations = orderedRecommendations
+            .Take(availableRecommendationSlots)
+            .ToList();
+        if (bestLowRiskCleanup is not null
+            && availableRecommendationSlots > 0
+            && !selectedRecommendations.Contains(bestLowRiskCleanup))
+        {
+            selectedRecommendations[^1] = bestLowRiskCleanup;
+            selectedRecommendations = selectedRecommendations
+                .OrderByDescending(item => item.EstimatedImpactBytes)
+                .ThenBy(RecommendationPriority)
+                .ToList();
+        }
+
+        foreach (var recommendation in selectedRecommendations)
         {
             var sizeText = recommendation.EstimatedImpactBytes > 0
                 ? " " + FormatBytes(recommendation.EstimatedImpactBytes)
@@ -233,6 +291,27 @@ public static class HealthCheckSummaryBuilder
         }
 
         return findings;
+    }
+
+    private static int RecommendationPriority(Recommendation recommendation)
+    {
+        if (HealthFindingRiskPolicy.IsLowRiskClean(
+                recommendation.Action,
+                recommendation.Risk))
+        {
+            return 0;
+        }
+
+        return recommendation.Action switch
+        {
+            RecommendationAction.Clean => 1,
+            RecommendationAction.Migrate
+                or RecommendationAction.DisableStartup
+                or RecommendationAction.Uninstall
+                or RecommendationAction.RepairInstallLocation => 2,
+            RecommendationAction.Keep => 4,
+            _ => 3
+        };
     }
 
     private static string ActionText(RecommendationAction action, RiskLevel risk) =>

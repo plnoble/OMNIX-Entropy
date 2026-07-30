@@ -1,5 +1,85 @@
 # Error Ledger
 
+## 2026-07-30 - Unregistered application evidence was called the main program
+
+- Symptom: the migration outcome called every C- or D-drive install-path record the “main program,” including entries without an official uninstall route that may be a portable copy or updater payload.
+- Wrong assumption: a non-empty install path was sufficient evidence that the selected record represented the canonical main installation.
+- Root cause: storage placement and uninstall identity were modelled separately, but the beginner wording used only drive placement.
+- Detection method: release review of the three-entry OpenCode drawer and its real screenshot.
+- Fix: reserve “main program” wording for entries with an official uninstaller; describe other entries as a program, copy, or update payload, and add unit/GUI contracts.
+- Prevention rule: beginner identity labels must combine path evidence with registration/uninstall evidence; never promote a path clue into canonical-install identity.
+- Skill candidate: no; this is covered by the existing exact-entry/family identity decision.
+
+## 2026-07-30 - Version audit repeated a prohibited wildcard path
+
+- Symptom: a final read-only `rg` command produced OS error 123 for a `release*` path and also referenced an unverified root props path.
+- Wrong assumption: filename globs were safe as path arguments in this Windows shell and the expected props file existed.
+- Root cause: the command ignored the repository search rule already read at startup.
+- Detection method: immediate `rg` path errors; no file or product state changed.
+- Fix: resolve candidates with `rg --files -g` first, then search only the returned exact paths.
+- Prevention rule: even during final verification, never place `*` or `?` in a Windows path argument and never add an unobserved path to a required read.
+- Skill candidate: no; this is already an explicit repository rule.
+
+## 2026-07-30 - Profile clone dropped newly added exact-entry evidence
+
+- Symptom: unit deserialization preserved version/source/C-data fields, but the real WPF drawer showed “版本未识别” and “扫描来源未确认”.
+- Wrong assumption: adding fields to `SoftwareProfile` and the inventory builder was sufficient for every downstream presentation path.
+- Root cause: `SoftwareGrowthProfileEnricher.CloneWithGrowth` manually copied the old property set and silently omitted the three new fields.
+- Detection method: isolated WPF fixture smoke, followed by a direct fixture-scanner contract and a search for `SoftwareProfile` cloning sites.
+- Fix: copy `DisplayVersion`, `InventorySource`, and `CDriveDataSizeBytes` in the growth enricher and add a preservation regression test.
+- Prevention rule: every manually cloned shared model needs a preservation contract or centralized copy mechanism when the model gains fields.
+- Skill candidate: yes; source analysis can flag manual shared-model clones when properties change.
+
+## 2026-07-30 - New Windows PowerShell smoke contained UTF-8 Chinese literals without a BOM
+
+- Symptom: the first parser gate reported cascading missing-parenthesis and unterminated-string errors even though the UTF-8 source looked structurally valid.
+- Wrong assumption: Windows PowerShell would decode the new no-BOM UTF-8 script the same way as .NET source files.
+- Root cause: Windows PowerShell parsed the Chinese literal bytes using its legacy default encoding.
+- Detection method: parser extents showed mojibake beginning at the first Chinese literal; `Get-Content -Encoding utf8` showed valid syntax.
+- Fix: construct required Chinese UI text from Unicode code points, matching existing repository smoke patterns; parser gate then passed.
+- Prevention rule: new Windows PowerShell 5 smoke scripts must stay ASCII or use the repository Unicode-code-point helper unless the file's BOM behavior is explicitly verified.
+- Skill candidate: no; this is a stable repository script rule candidate.
+
+## 2026-07-30 - Read-only host audit reused unverified PowerShell shapes
+
+- Symptom: two directory-audit commands placed a pipeline directly after a `foreach` statement and failed to parse; one source read guessed a separate `BigRocksProbe.cs` although the class lives in `BigRock.cs`; one host-size probe assumed `System.IO.EnumerationOptions` was available in Windows PowerShell.
+- Wrong assumption: PowerShell statement/pipeline grammar, source-file naming, and host runtime APIs matched the intended command without direct verification.
+- Root cause: the audit commands were composed from memory instead of first resolving the source path and using the repository-compatible Windows PowerShell surface.
+- Detection method: immediate parser/path/type errors; no mutation occurred.
+- Fix: collect loop output in an explicit array, resolve source symbols with `rg`, and use bounded `Get-ChildItem` enumeration compatible with the current host.
+- Prevention rule: never append a pipeline directly to a PowerShell `foreach` statement; resolve source files before reading; check the active PowerShell/.NET API surface before using newer runtime types.
+- Skill candidate: yes; the recurring PowerShell host-compatibility checks can become a small read-only audit helper.
+
+## 2026-07-30 - GUI smoke relied on WPF control-type enumeration
+
+- Symptom: three isolated GUI smoke runs completed the fixture scan and visibly rendered the health table, but the script reported zero `ListItem`/`DataItem` descendants and timed out before testing the new drive-health actions.
+- Wrong assumption: a populated WPF `ListView` will always expose its realized rows through UIAutomation control-type enumeration.
+- Root cause: the rendered rows retained their stable per-row AutomationIds, but this host's UIAutomation provider did not expose them through the script's `ListItem`/`DataItem` descendant count.
+- Detection method: repeated identical failures, completion status text, and a failure-point screenshot showing the full populated table.
+- Fix: wait for a stable summary-row AutomationId and verify each required dimension by its own AutomationId; retain failure-point screenshot capture.
+- Prevention rule: use stable semantic AutomationIds as GUI proof targets; do not use WPF control-type enumeration as the sole readiness condition.
+- Skill candidate: no; this is covered by the repository GUI protocol and smoke-helper pattern.
+
+## 2026-07-30 - Completion checks repeated unobserved command assumptions
+
+- Symptom: the first GUI smoke extension called nonexistent `Get-Pattern`; a nested parser probe reported zero parser errors but failed on its own success-output quoting; the first Release build targeted nonexistent `OMNIX-Entropy.sln`.
+- Wrong assumption: a helper API existed, nested PowerShell would preserve the final quoted string, and the solution name followed the product name.
+- Root cause: the relevant helper surface and build entry were not resolved before use; the parser probe also repeated the repository's known nested-shell quoting hazard.
+- Detection method: immediate command failures before product mutation; `rg` then found direct `GetCurrentPattern` usage and canonical `ComputerSecuritySoftware.slnx`.
+- Fix: use the UIAutomation element's real `GetCurrentPattern`, rely on the successfully executed Windows PowerShell smoke as the parser/runtime gate, and build the resolved `.slnx`.
+- Prevention rule: inspect helper definitions before calling them; do not nest ad hoc PowerShell parser probes; use the canonical solution entry recorded in `AGENTS.md`.
+- Skill candidate: no; existing project rules cover source/helper resolution and nested PowerShell, and the canonical solution is now explicit.
+
+## 2026-07-30 - Two source reads guessed paths after the owning symbols were searchable
+
+- Symptom: reads failed for `src\Css.Core\Apps\DriveHealthPlanPresentation.cs` and `src\Css.Scanner\Persistence\HealthDigestStore.cs`.
+- Wrong assumption: the namespace or conceptual owner predicted the physical source path.
+- Root cause: the files actually live under `Css.Scanner\Experience` and `Css.Core\Apps`; the paths were not resolved before the required read.
+- Detection method: immediate `PathNotFound`, followed by exact `rg --files`/symbol resolution.
+- Fix: read the paths returned by repository search.
+- Prevention rule: resolve every unobserved source path before adding it to a parallel read batch, including paths whose namespace appears obvious.
+- Skill candidate: no; this is already a repository rule.
+
 ## 2026-07-30 - Restricted release staging could not see the trusted signer
 
 - Symptom: the first local `prepare-personal-github-release.ps1` run rejected the already independently verified setup as having an invalid signature or timestamp.

@@ -53,6 +53,8 @@ public sealed class SoftwareProfile
     public string? SignatureSubject { get; init; }
     public SoftwareCategory Category { get; init; } = SoftwareCategory.Unknown;
     public SoftwareCategoryAssessment CategoryAssessment { get; init; } = new();
+    public string? DisplayVersion { get; init; }
+    public string? InventorySource { get; init; }
     public string? InstallPath { get; init; }
     public string? UninstallCommand { get; init; }
     public string? DisplayIconPath { get; init; }
@@ -63,6 +65,7 @@ public sealed class SoftwareProfile
     public DateOnly? InstallDate { get; init; }
     public long InstalledSizeBytes { get; init; }
     public long DataSizeBytes { get; init; }
+    public long CDriveDataSizeBytes { get; init; }
     public long CacheSizeBytes { get; init; }
     public long RecentGrowthBytes { get; init; }
     public IReadOnlyList<string> DataPaths { get; init; } = [];

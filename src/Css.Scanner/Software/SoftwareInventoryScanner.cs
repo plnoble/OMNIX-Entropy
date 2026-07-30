@@ -95,7 +95,8 @@ public sealed class SoftwareInventoryScanner
                 subKeyName,
                 sub.GetValue("InstallSource") as string,
                 sub.GetValue("WindowsInstaller"),
-                sub.GetValue("InstallDate")));
+                sub.GetValue("InstallDate"),
+                sub.GetValue("DisplayVersion")));
         }
     }
 

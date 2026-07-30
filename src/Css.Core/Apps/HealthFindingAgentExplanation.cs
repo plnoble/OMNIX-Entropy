@@ -59,6 +59,8 @@ public static class HealthFindingAgentExplanationBuilder
             return action == RecommendationAction.Migrate
                 ? "迁移后的原位置不再满足已记录的闭环状态，软件可能重新往 C 盘写入；继续手动移动会让回滚和定位更困难。"
                 : "这是一条只读的旧迁移记录；当前应用归属或对应关系不足以支持普通迁移复查，不能把历史记录当作新的迁移授权。";
+        if (kind == HealthFindingKind.SystemCleanup)
+            return "这是已知临时、缓存或诊断位置的只读体积证据。正在使用、近期生成或由 Windows 管理的文件不能仅凭目录名称当成垃圾。";
 
         return action switch
         {
@@ -91,6 +93,8 @@ public static class HealthFindingAgentExplanationBuilder
             return action == RecommendationAction.Migrate
                 ? "先打开对应应用详情并重新扫描，核对迁移状态；在新快照和回滚方案生成前不要再次手动移动。"
                 : "这条旧迁移记录仅供查看；请到应用管理确认系统归属或对应关系，当前不生成迁移动作。";
+        if (kind == HealthFindingKind.SystemCleanup)
+            return "到 C 盘页面查看它属于用户候选还是 Windows 管理项；先排除正在使用和近期文件，再决定是否生成隔离方案或使用 Windows 存储设置。";
 
         return action switch
         {
@@ -154,6 +158,17 @@ public static class HealthFindingAgentExplanationBuilder
                 "重新扫描迁移闭环状态",
                 "确认软件是否又在 C 盘生成内容",
                 "生成新的快照和迁移方案后再决定"
+            ];
+        }
+
+        if (kind == HealthFindingKind.SystemCleanup)
+        {
+            return
+            [
+                "到 C 盘页面查看候选类型和体积下限",
+                "区分用户临时文件与 Windows 管理缓存",
+                "先排除正在使用和近期生成的内容",
+                "有明确低风险证据后再生成隔离方案"
             ];
         }
 

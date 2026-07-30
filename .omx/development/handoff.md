@@ -1,5 +1,42 @@
 # Agent Handoff
 
+## Latest Update - 2026-07-30 System cleanup/app-family decisions complete
+
+- Current objective: preserve the completed working-tree implementation that turns material system-cleanup stores and duplicate application cards into beginner-readable, exact-entry decisions.
+- What changed: the system-drive scan now inventories bounded temp/crash/shader/update stores and distinguishes user-review candidates from Windows-managed cleanup. Software profiles retain version, inventory source, bounded data size, and C-drive data size. Same-family cards explain related records without merging operation identity. The drawer identifies the selected entry, enables official uninstall only for that exact entry, and quantifies current-program savings, other family payloads on C, C data that remains, and future growth.
+- What is verified: focused 12/12; full Debug 1099/1099; Release 0 warnings/errors; source integrity 395 files, invalid UTF-8 0, replacement files 0, XAML 18/18; both GUI scripts parse in Windows PowerShell. Real app-family and home/C-drive WPF smokes pass with no operation executed. Screenshots: `.omx/qa-app-family-decision.png`, `.omx/qa-home-agent-next-action.png`, `.omx/qa-drive-health-opportunities.png`, `.omx/qa-drive-health-plan.png`.
+- What is not verified: no cleanup, uninstall, migration, registry/service change, installer, installed-build acceptance, version bump, commit, push, signing, or release ran. The installed/public 0.1.4 is unchanged.
+- Known risks: known-store sizes can be lower bounds; individual file age/lock/ownership and application-specific cache redirection still need evidence before execution; name-based family normalization is explanation-only because it can group intentional parallel versions; the worktree combines this slice with the preceding actionable/impact-aware C-drive changes.
+- Exact next recommended action: review the combined diff and user wording, then make a separate commit/version/release decision. Do not expose family-level uninstall or cleanup authority; operations must continue targeting an exact profile and the existing safety pipeline.
+
+## Latest Update - 2026-07-30 System cleanup and app-family analysis
+
+- Current objective: turn system-cleanup blind spots and unexplained duplicate application cards into a scoped beginner-facing implementation.
+- What was learned: current root-oriented scanning misses at least about 4.59 GB of bounded current-user temp evidence on this machine. Antigravity/OpenCode prove that main-program placement, updater payloads, roaming data, and registered uninstall entries are separate facts.
+- What should change next: add read-only known cleanup-store detection with ownership/handling class; preserve application version and registry source; populate bounded data size; create app-family explanations while keeping exact profile identity for uninstall/migration; expose quantified migration outcome in the drawer.
+- What is verified: registry, directory, executable-version, and bounded-size checks were read-only. Current evidence identifies one exact registered OpenCode 1.14.41 uninstall target; other D locations are not authorized cleanup targets. Antigravity main files are on D while updater/roaming data remains on C.
+- What is not verified: active-use ownership, whether D copies are intentionally portable, whether updater payloads are still needed, and whether each application supports changing cache/data paths. No cleanup, uninstall, migration, or source implementation ran.
+- Known risks: family-name normalization can over-group unrelated products; directory sizes can overlap; Windows cleanup stores need Windows-managed handling; current screenshots may reflect an older in-memory inventory until “重新扫描”.
+- Exact next recommended action: implement the read-only classification/presentation slice with user-shaped Antigravity/OpenCode fixtures before adding any new execution authority.
+
+## Latest Update - 2026-07-30 Impact-aware C-drive priorities
+
+- Current objective: preserve the completed working-tree correction that prevents a tiny safe cleanup from being presented as the main answer to a large C-drive shortage.
+- What changed: the plan calculates safe contribution percentage; below 10% with larger evidence, personal files or major sources become the primary read-only action and safe cleanup becomes an optional secondary action. Bounded key findings rank by impact while retaining one low-risk item.
+- What is verified: the user-shaped 19.5 GB/337.6 MB contract reports about 1.7%, “单独处理意义不大”, a 19.2 GB remaining gap, impact-first primary action, and optional cleanup. Focused 12/12; full Debug 1087/1087; Release 0 warnings/errors; integrity 390 files/18 XAML; PowerShell parse and diff check pass. Real WPF smoke verified both action paths and `noOperationExecuted=true`; screenshots are `.omx/qa-home-agent-next-action.png`, `.omx/qa-drive-health-opportunities.png`, and `.omx/qa-drive-health-plan.png`.
+- What is not verified: no real user-file cleanup, quarantine, installed-product update, commit, version bump, push, signing, or release occurred.
+- Known risks: larger-source sizes remain investigation clues rather than guaranteed recovery; public/installed 0.1.4 still has the old priority behavior.
+- Exact next recommended action: review and commit the combined working-tree slice. Version and release only after a separate user request.
+
+## Latest Update - 2026-07-30 Actionable C-drive conclusion
+
+- Current objective: preserve the completed working-tree correction for the post-scan impression that nothing can be adjusted.
+- What changed: low-risk cleanup is prioritized ahead of observation-only key findings; the health plan separately counts safe-now and investigate-next items; the remaining 80% gap remains explicit; the detailed plan has a second read-only route to larger files or space sources.
+- What is verified: latest user digest established the original contradiction; focused 11/11 and adjacent 226/226 pass; full Debug 1086/1086; Release 0 warnings/errors; source integrity 390 files/18 XAML; no new mutation-authority hits. Real WPF smoke reported “不是没有可调整项”, primary safe preview, secondary “继续找更大的占用”, root-cause navigation, and `noOperationExecuted=true`; screenshots are under `.omx/qa-*.png`.
+- What is not verified: no real user-file cleanup, quarantine, or installed-product update ran; the correction is not committed, versioned, pushed, signed, or released.
+- Known risks: unexpected roots still require ownership evidence; a small safe cleanup may contribute very little to the 80% target; public/installed 0.1.4 still has the old conclusion ordering.
+- Exact next recommended action: review and commit the working-tree slice. Publish only through a separately authorized versioned release; do not imply the installed 0.1.4 has changed.
+
 ## Latest Update - 2026-07-30 Public 0.1.4 released
 
 - Current objective: preserve the completed 0.1.4 release evidence and obtain a user-run in-app update receipt from the currently installed version.

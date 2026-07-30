@@ -1,5 +1,41 @@
 # Decision Log
 
+## 2026-07-30 - Release the combined beginner-decision slice as 0.1.5
+
+- Decision: use the next patch version, 0.1.5, for the combined C-drive priority, known-cleanup inventory, and exact app-family decision changes.
+- Why: the work changes beginner-facing conclusions and application identity wording but does not add a new execution capability or break stored data contracts.
+- Review correction: an entry without an official uninstall route must be described as a program, copy, or update payload rather than asserted to be the main program. Exact registered entries may retain “main program” wording.
+- Delivery consequence: one pushed immutable source revision must bind CI, signed payload, installer, tag, channel manifest, and GitHub Release. Public availability is not claimed until `releases/latest` verifies 0.1.5.
+- Safety consequence: family grouping remains explanation-only; cleanup candidates remain read-only; no installer or product operation may run during publication.
+
+## 2026-07-30 - Group software families for explanation, never for execution
+
+- Decision: related Antigravity/OpenCode entries should share one family explanation, but each registered install, portable copy, updater payload, and user-data location must retain a distinct identity and operation boundary.
+- Rejected alternative: show every registry/data clue as an unexplained app card, merge same-family entries into one uninstall target, or recommend deleting the oldest-looking folder from version text alone.
+- Reason: users need to understand why several cards exist, while safe uninstall and migration require an exact registered command, path, signer, running state, snapshot, and rollback scope.
+- Consequence: the future drawer can say which exact version is uninstallable and what remains on C without allowing one button to affect sibling entries.
+
+## 2026-07-30 - Classify system cleanup by handling authority
+
+- Decision: known cleanup stores should be presented as user-safe candidates, Windows-managed cleanup, or protected system space. Size alone never makes a system location garbage.
+- Rejected alternative: call all temp/update/system-reserved space garbage, recursively delete Windows caches, or hide all system-managed opportunities because OMNIX cannot safely delete them itself.
+- Reason: current evidence includes material user temp alongside pagefile, hibernation, restore-point, update, and cache stores that require different handling.
+- Consequence: OMNIX can find and explain more space while keeping Windows-owned cleanup in Windows tools and preserving confirmation/quarantine for eligible user-owned files.
+
+## 2026-07-30 - Separate safety eligibility from recommendation priority
+
+- Decision: a safe cleanup may be recommended first only when it covers at least 10% of the stated drive-health target or when no larger evidence route exists. Otherwise it remains a visible optional action while the Agent first opens read-only personal-file or major-source evidence.
+- Rejected alternative: always put the safest executable item first, hide small safe items completely, or treat observation sizes as guaranteed reclaimable space.
+- Reason: 337.6 MB is safe but contributes only about 1.7% of the user's roughly 19.5 GB gap. Safety answers whether an action may be offered; impact answers what deserves attention first.
+- Consequence: the UI gives an honest main route toward the large gap, preserves a low-risk fallback, and does not weaken cleanup or ownership evidence requirements.
+
+## 2026-07-30 - Make safe evidence prominent without turning observations into cleanup authority
+
+- Decision: rank low-risk cleanup ahead of observation-only cards in the bounded key findings, state safe-now and investigate-next counts separately, and provide a second read-only navigation action when the safe contribution leaves a material gap.
+- Rejected alternative: mark unexpected roots such as AMD or OneDriveTemp as directly cleanable, hide the 80% gap behind a small safe cleanup, or add more technical cards.
+- Reason: the user's scan contained real opportunities, but ordering and one-action navigation made them feel absent. The correct repair is decision guidance, not weaker safety policy.
+- Consequence: beginners see one concrete safe next step and one larger-space investigation path; deletion, migration, and quarantine authority are unchanged.
+
 ## 2026-07-30 - Keep the draft closed through transport retries
 
 - Decision: after transient GitHub TLS/EOF failures, query remote state before retrying creation, retain the release as a draft, and require exact download-back hashes plus independent installer verification before publication.
