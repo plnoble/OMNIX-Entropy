@@ -28,7 +28,7 @@ public sealed class BigRocksProbe
         rocks.Add(GetPageFile());
         rocks.Add(GetHiberFile(systemRoot));
         rocks.Add(GetShadowStorage());
-        rocks.Add(GetRecycleBin());
+        rocks.Add(GetRecycleBin(systemRoot));
         rocks.RemoveAll(r => r.SizeBytes == 0 && r.Name is not "Hibernation file");
         return rocks;
     }
@@ -89,20 +89,29 @@ public sealed class BigRocksProbe
         }
     }
 
-    private BigRock GetRecycleBin()
+    private BigRock GetRecycleBin(string systemRoot)
     {
         // SHQueryRecycleBin per drive gives size of the recycle bin for the current user.
         try
         {
             var info = new SHQUERYRBINFO { cbSize = (uint)Marshal.SizeOf<SHQUERYRBINFO>() };
-            if (SHQueryRecycleBin("C:\\", ref info) == 0)
+            if (SHQueryRecycleBin(systemRoot, ref info) == 0)
             {
                 long size = info.i64Size;
-                return new BigRock { Name = "Recycle Bin (C:)", SizeBytes = size };
+                return new BigRock
+                {
+                    Name = $"Recycle Bin ({Path.GetPathRoot(systemRoot)})",
+                    SizeBytes = size
+                };
             }
         }
         catch { /* ignore */ }
-        return new BigRock { Name = "Recycle Bin (C:)", SizeBytes = 0, Note = "Unable to query" };
+        return new BigRock
+        {
+            Name = $"Recycle Bin ({Path.GetPathRoot(systemRoot)})",
+            SizeBytes = 0,
+            Note = "Unable to query"
+        };
     }
 
     [StructLayout(LayoutKind.Sequential)]

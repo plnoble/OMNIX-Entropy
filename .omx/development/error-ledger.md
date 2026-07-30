@@ -1,5 +1,125 @@
 # Error Ledger
 
+## 2026-07-30 - The combined disk flow leaked context across selections
+
+- Symptom: switching disks or starting another scan cleared headline/progress but left old plan steps and safety copy; the selected safe recommendation's specific explanation was overwritten by generic list copy; a D-drive prevention step still said to move data to D; retained C-drive history was not visibly scoped.
+- Wrong assumption: clearing the main result collections was enough, and wording that was correct for the original C-only page would remain correct after adding a drive selector.
+- Root cause: health-plan state was reset field by field in multiple paths, assignment order replaced selected state, and destination/history copy was not derived from scan scope.
+- Detection method: release review of the composed diff, focused source contracts, and final multi-disk screenshot inspection.
+- Fix: centralize plan reset; assign generic recommendation copy before selected-card presentation; derive destination guidance from system/data scope; keep digest history system-drive-only, label it, and reselect the system drive before current-evidence loading.
+- Prevention rule: any new scope selector must audit every cached field, history surface, action label, and destination sentence; screenshots must include the selected scope and retained historical evidence together.
+- Skill candidate: no.
+
+## 2026-07-30 - History wording changed without updating its safety-order contract
+
+- Symptom: the first full test run passed 1084 tests and failed `HealthDigestEvidenceNavigationTests` because it searched for the old escaped “当前 C 盘证据已打开” source string.
+- Wrong assumption: the broader focused set covered all static wording contracts affected by replacing C-drive history copy with system-drive copy.
+- Root cause: one dedicated test protects the load-before-success ordering by locating the exact user-visible string, and it was outside the initial focused filter.
+- Detection method: final full Debug test run.
+- Fix: update the contract to the system-drive wording, require `SelectSystemDriveTarget`, and retain the ordering assertions around `EnsureHealthScanLoadedAsync` and readiness checks.
+- Prevention rule: when a visible status sentence is also a static control-flow marker, search the entire test tree for the old text before the first full run.
+- Skill candidate: no.
+
+## 2026-07-30 - Multi-disk smoke searched the whole desktop
+
+- Symptom: two consecutive real GUI smoke attempts failed at `RootElement.FindAll(Descendants, ListItem)` with `RPC_E_SERVERFAULT` before any OMNIX assertion ran.
+- Wrong assumption: filtering by process id after whole-desktop enumeration was equivalent to scoping discovery to the product process.
+- Root cause: the enumeration still invoked every unrelated desktop accessibility provider before filtering, so one external COM server fault aborted the smoke.
+- Detection method: identical stack traces on two clean, bounded retries and line-level script inspection.
+- Fix: enumerate top-level windows matching the OMNIX process id and search only their descendants; tolerate a COM fault from one process-owned window and continue; collapse the ComboBox before the screenshot.
+- Prevention rule: GUI smokes must scope UIAutomation discovery before enumeration, not filter afterward.
+- Skill candidate: yes.
+
+## 2026-07-29 - The first health-plan layouts hid existing or downstream work
+
+- Symptom: the first detailed homepage plan made the real smoke report zero rendered health rows; after compressing the homepage, the first disk screenshot still left the selected preview action outside the visible workflow.
+- Wrong assumption: all three plan steps belonged on the homepage, and a fixed right-hand `StackPanel` plus `BringIntoView` was enough to reach content below a long recommendation list.
+- Root cause: the homepage's auto-height plan competed with a bounded results row; the disk recommendation card had no owning scroll viewport, while its nested list consumed the visible height.
+- Detection method: repeated real WPF UIAutomation runs and manual inspection of `.omx/qa-home-agent-next-action.png` and `.omx/qa-drive-health-plan.png`.
+- Fix: keep only target/progress/action on Home; move detailed steps to the disk page; give the complete right recommendation workflow one outer scroll surface; disable nested recommendation-list scrolling; keep the preview button inside its action panel and scroll to it.
+- Prevention rule: beginner first-view additions must preserve existing result capacity, and every multi-stage action workflow must prove the final next-step control in a real constrained window.
+- Skill candidate: yes.
+
+## 2026-07-29 - WPF parsed a bullet StringFormat as a markup extension
+
+- Symptom: the first health-plan XAML build failed at the bullet row with a generated error about a missing `Extension` assembly.
+- Wrong assumption: `Text="{Binding, StringFormat=• {0}}"` would be parsed as an ordinary composite format.
+- Root cause: the unescaped braces were interpreted as XAML markup-extension syntax.
+- Detection method: the focused test build failed before tests ran and reported the exact XAML line/position.
+- Fix: use a two-column template with a static bullet `TextBlock` and a separately bound wrapping `TextBlock`.
+- Prevention rule: avoid composite `StringFormat` for decorative WPF prefixes; use explicit template controls or escape the markup-extension braces.
+- Skill candidate: no.
+
+## 2026-07-29 - The home smoke timeout hid whether scanning or the app failed
+
+- Symptom: two real runs ended with “health dimensions: 0” after the old 60-second bound, while intervening and later runs passed on the same build.
+- Wrong assumption: a zero item count alone was enough evidence to diagnose a layout regression.
+- Root cause: the waiter did not report process exit or the current status text, and its 60-second bound left no allowance for variable machine-observation timing.
+- Detection method: rerunning the unchanged compact layout succeeded; the failure occurred before the new goal assertions.
+- Fix: retain a bounded 90-second wait, stop immediately if the app exits, and include current status text in timeout failures.
+- Prevention rule: GUI wait failures must distinguish process exit, still-running work, and rendered-but-empty state before assigning a product root cause.
+- Skill candidate: yes.
+
+## 2026-07-29 - A repository read guessed paths already contradicted by search output
+
+- Symptom: `Get-Content` failed for two nonexistent `Css.Scanner\Experience\Recommendation*Presenter.cs` paths.
+- Wrong assumption: presenter filenames and ownership matched their type names under Scanner.
+- Root cause: the preceding symbol search had already shown the actual files under `src\Css.Core\Apps`, but the read command used guessed paths.
+- Detection method: immediate `PathNotFound` errors.
+- Fix: read the exact paths returned by `rg`.
+- Prevention rule: resolve every unobserved source path from `rg --files` or symbol-search output before adding it to a required read.
+- Skill candidate: no.
+
+## 2026-07-29 - Nested PowerShell parser check expanded its variables too early
+
+- Symptom: the first final parser-check command produced `[ref]` without variables and an empty pipeline.
+- Wrong assumption: a double-quoted `powershell -Command` payload would reach the child process unchanged when launched from PowerShell.
+- Root cause: the outer shell expanded `$tokens`, `$errors`, and `$_` before the child parser received the command.
+- Detection method: the command failed immediately with an empty-pipe parser error rather than reporting an error from the target smoke script.
+- Fix: enclose the child command payload in single quotes; the target script then passed parsing.
+- Prevention rule: single-quote nested PowerShell command payloads that contain `$` variables, or invoke a checked `.ps1` file directly.
+- Skill candidate: no.
+
+## 2026-07-29 - The first bounded history layout still clipped its action
+
+- Symptom: the first real WPF run made key findings scroll, but the history row collapsed; a second allocation showed the history row while clipping its evidence button below the card.
+- Wrong assumption: constraining only the daily-history list would make the complete variable-height history section usable, and every health-dimension row would remain simultaneously visible after its list became scrollable.
+- Root cause: the latest summary, weekly summary, monitoring notice, daily rows, and evidence action all consume the same limited card height; the old smoke also treated visibility as a fixed contract instead of scrolling offscreen rows into view.
+- Detection method: real window screenshots and UIAutomation's offscreen-row failure, followed by direct `ScrollPattern` inspection.
+- Fix: make the entire history section one bounded scroll surface with a non-nested `ItemsControl`; use `ScrollItemPattern.ScrollIntoView()` for health dimensions; require actual scroll-percent changes for both long result regions.
+- Prevention rule: bound and scroll the complete semantic variable-height region, then prove viewport movement and action reachability in a real constrained window.
+- Skill candidate: yes.
+
+## 2026-07-29 - The first multi-disk WPF smoke made three UIAutomation assumptions
+
+- Symptom: the new smoke first failed to parse under Windows PowerShell, then reported fewer than two drives, then tried to select an unrelated list item that did not support `SelectionItemPattern`.
+- Wrong assumption: Windows PowerShell would decode Chinese literals in a BOM-less UTF-8 script, a data-template panel name would reliably name its `ComboBoxItem`, and any process list item containing a drive letter plus `GB` was a drive choice.
+- Root cause: Windows PowerShell 5.1 decoding, accessibility metadata placed on a decorative panel instead of the control container, and a process-wide list-item search that also saw homepage results.
+- Detection method: parser gate followed by three real WPF UIAutomation runs; the second run's unsupported-pattern exception distinguished a false-positive list item from a drive choice.
+- Fix: use ASCII regexes in the smoke, bind `AutomationProperties.Name` on both the selector and its `ComboBoxItem` containers, and require `SelectionItemPattern` before treating a list item as a drive. Final smoke listed C/D, selected D, and captured an unobstructed window screenshot.
+- Prevention rule: keep Windows PowerShell smoke control flow ASCII; place beginner accessibility names on real UIAutomation controls; qualify process-wide UI searches by required control patterns.
+- Skill candidate: yes.
+
+## 2026-07-29 - A renamed machine-observation status left one exact source contract stale
+
+- Symptom: the first full suite had one failure after 1078 passes because an existing test still required the old fixed text `正在只读读取 D 盘`.
+- Wrong assumption: the focused multi-disk source contracts covered every fixed-drive status string affected by the wording change.
+- Root cause: `MachineHealthExperienceTests` exact-matched the old machine-observation progress text outside the focused test filter.
+- Detection method: the full Debug suite identified the exact assertion after product-focused tests were green.
+- Fix: update the contract to require the new drive-neutral `正在只读读取本机磁盘`; the final full suite passes 1079/1079.
+- Prevention rule: search the full test tree for exact UI copy before renaming shared progress text, even when the behavior has dedicated focused contracts.
+- Skill candidate: no.
+
+## 2026-07-29 - A FluentAssertions predicate used unsupported pattern syntax
+
+- Symptom: the first focused green compile failed with CS8122 in the new data-drive cleanup-authority test.
+- Wrong assumption: `NotContain` would compile the `recommendation.Operation is not null` predicate as an ordinary delegate.
+- Root cause: this FluentAssertions overload captures an expression tree, where C# pattern-matching syntax is unsupported.
+- Detection method: the focused test build failed before execution and identified the exact predicate line.
+- Fix: use the expression-tree-compatible `recommendation.Operation != null`; the focused suite then passed 200/200.
+- Prevention rule: keep predicates passed to expression-tree assertion overloads to supported comparisons rather than pattern syntax.
+- Skill candidate: no.
+
 ## 2026-07-29 - First GitHub CI attempt aborted the testhost without a failing test
 
 - Symptom: GitHub CI `30424760666` built successfully, then the testhost crashed after reporting 429 passed, zero failed, and `Test Run Aborted`; source integrity did not run.

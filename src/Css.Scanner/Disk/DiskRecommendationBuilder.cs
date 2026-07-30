@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -15,6 +16,9 @@ public static class DiskRecommendationBuilder
     public static IReadOnlyList<Recommendation> Build(DriveScanResult result)
     {
         var cards = new List<Recommendation>();
+        var isSystemDrive = DiskScanScopePolicy.IsSystemDrive(
+            result.Drive,
+            Environment.GetFolderPath(Environment.SpecialFolder.Windows));
 
         foreach (var root in result.UnexpectedRoots.OrderByDescending(n => n.SizeBytes))
         {
@@ -35,7 +39,10 @@ public static class DiskRecommendationBuilder
             });
         }
 
-        foreach (var temp in result.TopLevel.Where(n => n.Category == UsageCategory.Temp && n.SizeBytes > 0))
+        foreach (var temp in result.TopLevel.Where(n =>
+                     isSystemDrive
+                     && n.Category == UsageCategory.Temp
+                     && n.SizeBytes > 0))
         {
             var path = temp.Path ?? temp.Name;
             var evidence = $"临时目录 {path} 占用 {RootCauseReportBuilder.Fmt(temp.SizeBytes)}";

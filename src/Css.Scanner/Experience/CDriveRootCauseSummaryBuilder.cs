@@ -43,11 +43,17 @@ public static class CDriveRootCauseSummaryBuilder
     public static CDriveRootCauseSummary Build(DriveScanResult result)
     {
         var cards = new List<CDriveRootCauseCard>();
+        var isSystemDrive = DiskScanScopePolicy.IsSystemDrive(
+            result.Drive,
+            Environment.GetFolderPath(Environment.SpecialFolder.Windows));
 
         cards.AddRange(result.TopLevel
             .OrderByDescending(item => item.SizeBytes)
             .Take(6)
-            .Select(CreateTopLevelCard));
+            .Select(node => CreateTopLevelCard(
+                node,
+                result.Drive,
+                isSystemDrive)));
 
         cards.AddRange(result.BigRocks
             .Where(item => item.SizeBytes > 0)
@@ -57,30 +63,33 @@ public static class CDriveRootCauseSummaryBuilder
 
         return new CDriveRootCauseSummary
         {
-            Headline = $"C \u76d8\u5df2\u7528 {RootCauseReportBuilder.Fmt(result.UsedBytes)}\uff0c\u5269\u4f59 {RootCauseReportBuilder.Fmt(result.FreeBytes)}",
+            Headline = $"{DriveScanTargetPresenter.DriveLabel(result.Drive)}\u5df2\u7528 {RootCauseReportBuilder.Fmt(result.UsedBytes)}\uff0c\u5269\u4f59 {RootCauseReportBuilder.Fmt(result.FreeBytes)}",
             Subheadline = "\u5148\u770b\u54ea\u4e9b\u7c7b\u578b\u5728\u5360\u7a7a\u95f4\uff0c\u518d\u8ba9 Agent \u751f\u6210\u53ef\u56de\u6eda\u7684\u5904\u7406\u65b9\u6848\u3002",
             TechnicalReportAvailable = true,
             Cards = cards
         };
     }
 
-    private static CDriveRootCauseCard CreateTopLevelCard(CategoryNode node)
+    private static CDriveRootCauseCard CreateTopLevelCard(
+        CategoryNode node,
+        string driveRoot,
+        bool isSystemDrive)
     {
         var title = node.IsUnexpectedRoot
             ? "\u9700\u8981\u786e\u8ba4\u6765\u6e90"
             : CategoryTitle(node.Category);
-        var action = TopLevelAction(node);
+        var action = TopLevelAction(node, isSystemDrive);
 
         return new CDriveRootCauseCard
         {
             Title = title,
             PrimaryText = $"{node.Name} \u5360\u7528 {RootCauseReportBuilder.Fmt(node.SizeBytes)}",
-            Explanation = CategoryExplanation(node),
-            AgentSuggestion = CategorySuggestion(node),
+            Explanation = CategoryExplanation(node, isSystemDrive),
+            AgentSuggestion = CategorySuggestion(node, isSystemDrive),
             SizeText = RootCauseReportBuilder.Fmt(node.SizeBytes),
             Severity = Severity(node),
             Action = action,
-            ActionLabel = ActionLabel(action),
+            ActionLabel = ActionLabel(action, driveRoot),
             ActionAutomationId = BuildActionAutomationId(action, node.Name)
         };
     }
@@ -117,10 +126,19 @@ public static class CDriveRootCauseSummaryBuilder
     private static bool IsRecycleBin(BigRock rock) =>
         rock.Name.Contains("recycle", StringComparison.OrdinalIgnoreCase);
 
-    private static CDriveRootCauseAction TopLevelAction(CategoryNode node)
+    private static CDriveRootCauseAction TopLevelAction(
+        CategoryNode node,
+        bool isSystemDrive)
     {
         if (node.IsUnexpectedRoot)
             return CDriveRootCauseAction.None;
+
+        if (!isSystemDrive)
+        {
+            return node.Category == UsageCategory.UserProfiles
+                ? CDriveRootCauseAction.ReviewPersonalStorage
+                : CDriveRootCauseAction.None;
+        }
 
         return node.Category switch
         {
@@ -131,10 +149,16 @@ public static class CDriveRootCauseSummaryBuilder
         };
     }
 
-    private static string? ActionLabel(CDriveRootCauseAction action) =>
+    private static string? ActionLabel(
+        CDriveRootCauseAction action,
+        string driveRoot) =>
         action switch
         {
-            CDriveRootCauseAction.OpenCDriveApps => "查看占 C 盘应用",
+            CDriveRootCauseAction.OpenCDriveApps =>
+                DriveScanTargetPresenter.DriveLabel(driveRoot)
+                    .StartsWith("C ", StringComparison.OrdinalIgnoreCase)
+                    ? "查看占 C 盘应用"
+                    : "查看相关应用",
             CDriveRootCauseAction.ReviewPersonalStorage => "查看大文件候选",
             CDriveRootCauseAction.ReviewCleanupRecommendations => "查看可安全清理项",
             CDriveRootCauseAction.OpenRecycleBin => "打开回收站查看",
@@ -168,10 +192,15 @@ public static class CDriveRootCauseSummaryBuilder
             _ => "\u5176\u4ed6\u7a7a\u95f4"
         };
 
-    private static string CategoryExplanation(CategoryNode node)
+    private static string CategoryExplanation(
+        CategoryNode node,
+        bool isSystemDrive)
     {
         if (node.IsUnexpectedRoot)
             return "\u5b83\u4e0d\u5728 C \u76d8\u5e38\u89c1\u7cfb\u7edf\u76ee\u5f55\u91cc\uff0c\u53ef\u80fd\u662f\u9a71\u52a8\u3001\u5b89\u88c5\u6b8b\u7559\u6216\u67d0\u4e2a\u8f6f\u4ef6\u653e\u7684\u6570\u636e\u3002";
+
+        if (!isSystemDrive)
+            return "这是所选数据盘上的一级文件夹。只根据名称和大小，不能判断它是不是垃圾。";
 
         return node.Category switch
         {
@@ -184,10 +213,15 @@ public static class CDriveRootCauseSummaryBuilder
         };
     }
 
-    private static string CategorySuggestion(CategoryNode node)
+    private static string CategorySuggestion(
+        CategoryNode node,
+        bool isSystemDrive)
     {
         if (node.IsUnexpectedRoot)
             return "Agent \u5efa\u8bae\uff1a\u5148\u786e\u8ba4\u6765\u6e90\uff0c\u4e0d\u8981\u76f4\u63a5\u5220\u3002";
+
+        if (!isSystemDrive)
+            return "Agent 建议：先看大文件和增长趋势；没有明确证据前不会自动处理。";
 
         return node.Category switch
         {

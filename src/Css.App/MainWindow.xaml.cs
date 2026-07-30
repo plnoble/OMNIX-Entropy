@@ -79,6 +79,7 @@ public partial class MainWindow : Window
     private string? _pendingStartupTargetAppName;
     private HealthCheckSummary? _baseHealthSummary;
     private HealthCheckSummary? _lastHealthSummary;
+    private DriveHealthPlanViewModel? _driveHealthPlan;
     private bool _healthDigestHistoryHasEvidence;
     private bool _isOpeningHealthDigestEvidence;
     private MachineHealthObservation? _latestMachineHealthObservation;
@@ -124,6 +125,49 @@ public partial class MainWindow : Window
     private async void StartScan_Click(object sender, RoutedEventArgs e)
     {
         await RefreshHealthScanAsync();
+    }
+
+    private void DriveRootComboBox_SelectionChanged(
+        object sender,
+        SelectionChangedEventArgs e)
+    {
+        if (DriveRootComboBox.SelectedItem is not DriveScanTargetViewModel target)
+            return;
+
+        _healthScanLoadGate.Invalidate();
+        _baseHealthSummary = null;
+        _lastHealthSummary = null;
+        _driveHealthPlan = null;
+        _latestGrowthFindings = [];
+        _personalStorageEvidencePaths = [];
+        _latestObservedSnapshotCount = 0;
+
+        OverallScoreTextBlock.Text = "待体检";
+        DiskHealthTextBlock.Text = "待体检";
+        HealthDimensionListView.ItemsSource = null;
+        KeyFindingsListBox.ItemsSource = null;
+        KeyFindingsListBox.Visibility = Visibility.Collapsed;
+        KeyFindingsEmptyStateTextBlock.Text =
+            $"已选择 {target.DisplayName}，点击“开始体检”后显示结论。";
+        KeyFindingsEmptyStateTextBlock.Visibility = Visibility.Visible;
+        ReportTextBox.Text = "尚未扫描当前磁盘。";
+        CDriveSummaryHeadlineTextBlock.Text = $"{target.DisplayName}等待体检";
+        CDriveSummarySubheadlineTextBlock.Text =
+            "体检只读取空间占用，不会清理或移动文件。";
+        CDriveRootCauseListBox.ItemsSource = null;
+        RecommendationsListBox.ItemsSource = null;
+        GrowthListBox.ItemsSource = null;
+        PersonalStorageFindingsListBox.ItemsSource = null;
+        ResetDriveHealthPlanPresentation(
+            "完成体检后显示明确目标。",
+            "会告诉你先做什么，以及做完还差多少。",
+            "当前还没有这块磁盘的处理方案；不会沿用上一块磁盘的结论。");
+        SetCDriveResultVisibility(false, false, false, false);
+        ApplyRecommendationSelection(RecommendationSelectionPresenter.Create(null));
+        ApplyCDrivePageChrome();
+        LoadAgentNextSteps();
+        StatusTextBlock.Text =
+            $"已选择 {target.DisplayName}；点击“开始体检”后再显示该磁盘的结果。";
     }
 
     private void InstallRoutingMemoryListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -1489,6 +1533,9 @@ public partial class MainWindow : Window
         InstallPage.Visibility = page == "Install" ? Visibility.Visible : Visibility.Collapsed;
         TimelinePage.Visibility = page == "Timeline" ? Visibility.Visible : Visibility.Collapsed;
         AgentPage.Visibility = page == "Agent" ? Visibility.Visible : Visibility.Collapsed;
+        DiskScanToolbar.Visibility = page is "Home" or "CDrive"
+            ? Visibility.Visible
+            : Visibility.Collapsed;
 
         SetNavSelected(HomeNavButton, page == "Home");
         SetNavSelected(AppsNavButton, page == "Apps");
@@ -1500,7 +1547,7 @@ public partial class MainWindow : Window
         (PageTitleTextBlock.Text, PageSubtitleTextBlock.Text) = page switch
         {
             "Apps" => ("应用管理", "像应用中心一样查看软件，点击图标后再看结论和可做动作。"),
-            "CDrive" => ("C盘清理", "先看谁占空间，再让 Agent 生成安全处理方案。"),
+            "CDrive" => ("磁盘清理", "选择本地磁盘，先看谁占空间，再让 Agent 生成安全处理方案。"),
             "Install" => ("安装管控", "新软件优先建议安装到 D 盘指定目录，V1 不强行拦截安装器。"),
             "Timeline" => ("后悔药中心", "所有改动都应该留下证据、影响范围和还原入口。"),
             "Agent" => ("AI Agent", "Computer Agent 负责解释和判断，真正执行仍必须经过本地安全管线。"),
@@ -1910,6 +1957,54 @@ public partial class MainWindow : Window
     private static bool IsAgentNavigationTarget(string targetPage) =>
         targetPage is "Home" or "Apps" or "CDrive" or "Install" or "Timeline" or "Agent";
 
+    private void OpenDriveHealthPlan_Click(object sender, RoutedEventArgs e)
+    {
+        if (_driveHealthPlan is null || !_driveHealthPlan.HasPrimaryAction)
+        {
+            StatusTextBlock.Text = "当前没有需要执行的改善动作；先完成体检或继续观察。";
+            return;
+        }
+
+        ShowPage("CDrive");
+        switch (_driveHealthPlan.PrimaryAction)
+        {
+            case DriveHealthPlanAction.ReviewSafeCleanup:
+                var preferredCard = RecommendationsListBox.Items
+                    .OfType<RecommendationCardViewModel>()
+                    .FirstOrDefault(card => card.CanExecute && card.Operation is not null);
+                if (preferredCard is null)
+                {
+                    StatusTextBlock.Text = "当前没有通过安全策略的低风险清理项；不会用普通目录代替安全证据。";
+                    return;
+                }
+
+                RecommendationsListBox.SelectedItem = preferredCard;
+                RecommendationsListBox.ScrollIntoView(preferredCard);
+                RecommendationActionPanel.BringIntoView();
+                CDriveRecommendationsScrollViewer.UpdateLayout();
+                CDriveRecommendationsScrollViewer.ScrollToEnd();
+                ExecuteRecommendationButton.Focus();
+                StatusTextBlock.Text = "Agent 已选好第一项低风险建议；现在只是查看预案，仍未执行清理。";
+                return;
+
+            case DriveHealthPlanAction.ReviewPersonalStorage:
+                PersonalStorageFindingsListBox.BringIntoView();
+                PersonalStorageFindingsListBox.Focus();
+                StatusTextBlock.Text = "已定位到大文件和个人文件候选；这里只读查看，不会删除或移动。";
+                return;
+
+            case DriveHealthPlanAction.ReviewSpaceSources:
+                CDriveRootCauseListBox.BringIntoView();
+                CDriveRootCauseListBox.Focus();
+                StatusTextBlock.Text = "已定位到主要占用来源；先看来源，不会直接处理系统文件。";
+                return;
+
+            default:
+                StatusTextBlock.Text = "当前计划没有安全查看入口，已停止。";
+                return;
+        }
+    }
+
     private async void OpenCDriveRootCauseAction_Click(object sender, RoutedEventArgs e)
     {
         var element = sender as FrameworkElement;
@@ -2134,7 +2229,7 @@ public partial class MainWindow : Window
 
     private async Task<bool> RunHealthScanCoreAsync()
     {
-        var driveRoot = NormalizeDriveRoot(DriveRootComboBox.SelectedItem?.ToString() ?? "C:\\");
+        var driveRoot = SelectedDriveRoot();
         var scanRoot = AppDevelopmentPathResolver.ResolveCDriveScanRoot(driveRoot);
         var rulesPath = Path.Combine(AppContext.BaseDirectory, "rules.scan.json");
         _scanCts?.Dispose();
@@ -2143,14 +2238,20 @@ public partial class MainWindow : Window
 
         StartScanButton.IsEnabled = false;
         CancelScanButton.IsEnabled = true;
+        DriveRootComboBox.IsEnabled = false;
+        OpenHealthDigestEvidenceButton.IsEnabled = false;
         ReportTextBox.Text = "扫描中，请稍候...";
         CDriveRootCauseListBox.ItemsSource = null;
         RecommendationsListBox.ItemsSource = null;
+        ResetDriveHealthPlanPresentation(
+            "正在计算改善目标...",
+            "完成只读扫描后再给出处理顺序。",
+            "扫描完成前不会生成或执行处理方案。");
         ApplyRecommendationSelection(RecommendationSelectionPresenter.Create(null));
         RecommendationActionTextBlock.Text = "\u6b63\u5728\u626b\u63cf\uff0c\u5b8c\u6210\u540e\u4f1a\u663e\u793a\u53ef\u7406\u89e3\u7684\u5904\u7406\u9884\u6848\u3002";
         GrowthListBox.ItemsSource = null;
         _personalStorageEvidencePaths = [];
-        PersonalStorageSummaryTextBlock.Text = "正在分析个人文件夹中的大文件和疑似重复文件...";
+        PersonalStorageSummaryTextBlock.Text = "正在分析所选磁盘中的大文件和疑似重复文件...";
         PersonalStorageFindingsListBox.ItemsSource = null;
         CDriveRootCauseStateTextBlock.Text = "正在只读扫描空间占用，不会清理文件。";
         RecommendationsEmptyStateTextBlock.Text = "正在只读分析，完成后才会显示处理建议。";
@@ -2170,7 +2271,7 @@ public partial class MainWindow : Window
             var softwareInventoryAvailable = _softwareInventoryLoadGate.HasCompletedLoad;
             if (!softwareInventoryAvailable)
             {
-                StatusTextBlock.Text = "正在只读关联软件与 C 盘写入位置...";
+                StatusTextBlock.Text = "正在只读关联软件安装位置和磁盘写入线索...";
                 try
                 {
                     attributionProfiles = await ScanSoftwareProfilesAsync();
@@ -2190,7 +2291,10 @@ public partial class MainWindow : Window
             var personalStorageFixtureRoot =
                 AppDevelopmentPathResolver.ResolvePersonalStorageFixtureRoot();
             IReadOnlyList<string>? personalStorageRoots = personalStorageFixtureRoot is null
-                ? null
+                ? DiskScanScopePolicy.ResolvePersonalStorageRoots(
+                    driveRoot,
+                    scanRoot,
+                    Environment.GetFolderPath(Environment.SpecialFolder.Windows))
                 : [personalStorageFixtureRoot];
             var personalStorageOptions = personalStorageFixtureRoot is null
                 ? null
@@ -2210,7 +2314,7 @@ public partial class MainWindow : Window
                 personalStorageOptions);
             await _snapshotStore.SaveAsync(scanRoot, session.CurrentSnapshot, ct);
 
-            StatusTextBlock.Text = "正在只读读取 D 盘、内存、进程、电池和硬件配置...";
+            StatusTextBlock.Text = "正在只读读取本机磁盘、内存、进程、电池和硬件配置...";
             await RefreshMachineObservationAsync();
             ct.ThrowIfCancellationRequested();
             var machineHealth = _latestMachineHealthObservation
@@ -2226,13 +2330,22 @@ public partial class MainWindow : Window
                 machineHealth,
                 softwareInventoryAvailable ? attributionProfiles : null,
                 observedSnapshotCount);
-            var digestSaved = await TrySaveHealthDigestAsync(
-                scanRoot,
-                session.CurrentSnapshot,
-                summary,
-                ct);
+            var isSystemDriveScan = DiskScanScopePolicy.IsSystemDrive(
+                driveRoot,
+                Environment.GetFolderPath(Environment.SpecialFolder.Windows));
+            var digestSaved = isSystemDriveScan
+                && await TrySaveHealthDigestAsync(
+                    scanRoot,
+                    session.CurrentSnapshot,
+                    summary,
+                    ct);
+            var digestStatus = isSystemDriveScan
+                ? digestSaved
+                    ? " 系统盘体检摘要已保存。"
+                    : " 系统盘体检完成，但历史摘要暂未保存。"
+                : " 其他磁盘结果只保留在当前页面，不计入系统盘体检历史。";
             StatusTextBlock.Text = $"扫描完成: {session.CurrentSnapshot.Items.Count} 个监测位置，{session.Recommendations.Count} 张决策卡片，{session.PersonalStorage.Findings.Count} 条个人文件候选。" +
-                (digestSaved ? " 体检摘要已保存。" : " 体检完成，但历史摘要暂未保存。") +
+                digestStatus +
                 (closureAvailable ? "" : " 迁移闭环记录暂时无法读取。");
             return true;
         }
@@ -2242,6 +2355,10 @@ public partial class MainWindow : Window
             ReportTextBox.Text = "扫描已取消，没有执行任何清理或迁移动作。";
             CDriveRootCauseStateTextBlock.Text = "扫描已取消，没有清理任何文件；可以稍后重新体检。";
             RecommendationsEmptyStateTextBlock.Text = "扫描已取消，没有生成处理建议。";
+            ResetDriveHealthPlanPresentation(
+                "体检已取消，没有生成改善目标。",
+                "可以稍后重新开始；本次没有执行任何处理。",
+                "取消扫描不会沿用旧方案，也不会修改电脑。");
             return false;
         }
         catch (Exception)
@@ -2250,12 +2367,19 @@ public partial class MainWindow : Window
             ReportTextBox.Text = "体检失败。底层错误和本机路径未显示；请稍后重试。";
             CDriveRootCauseStateTextBlock.Text = "体检没有完成，当前没有可用结果；可以稍后重试。";
             RecommendationsEmptyStateTextBlock.Text = "体检没有完成，没有生成处理建议。";
+            ResetDriveHealthPlanPresentation(
+                "体检没有完成，暂时不能生成改善目标。",
+                "请稍后重试；不要把不完整结果当作处理依据。",
+                "失败时不会沿用旧方案，也不会修改电脑。");
             return false;
         }
         finally
         {
             StartScanButton.IsEnabled = true;
             CancelScanButton.IsEnabled = false;
+            DriveRootComboBox.IsEnabled = true;
+            OpenHealthDigestEvidenceButton.IsEnabled =
+                _healthDigestHistoryHasEvidence && !_isOpeningHealthDigestEvidence;
         }
     }
 
@@ -2320,7 +2444,14 @@ public partial class MainWindow : Window
         var hasPersonalStorageItems = personalStorage.Items.Count > 0;
         var recommendationList = RecommendationListPresenter.Create(session.Recommendations);
         RecommendationsListBox.ItemsSource = recommendationList.Cards;
+        RecommendationActionTextBlock.Text = recommendationList.ActionExplanationText;
         var hasRecommendationItems = recommendationList.Cards.Count > 0;
+        var healthPlan = DriveHealthPlanPresenter.Create(
+            session.Result,
+            session.Recommendations,
+            personalStorage.Items.Count,
+            rootCauseSummary.Cards.Count);
+        ApplyDriveHealthPlan(healthPlan);
         RecommendationsEmptyStateTextBlock.Text =
             "本次体检没有发现可进入处理预案的项目。";
         SetCDriveResultVisibility(
@@ -2328,11 +2459,48 @@ public partial class MainWindow : Window
             hasGrowthItems,
             hasPersonalStorageItems,
             hasRecommendationItems);
-        ApplyRecommendationSelection(RecommendationSelectionPresenter.Create(null));
-        RecommendationActionTextBlock.Text = recommendationList.ActionExplanationText;
+        var preferredCard = healthPlan.PrimaryAction == DriveHealthPlanAction.ReviewSafeCleanup
+            ? recommendationList.Cards.FirstOrDefault(card => card.CanExecute && card.Operation is not null)
+            : null;
+        RecommendationsListBox.SelectedItem = preferredCard;
+        if (preferredCard is not null)
+            RecommendationsListBox.ScrollIntoView(preferredCard);
+        ApplyRecommendationSelection(RecommendationSelectionPresenter.Create(preferredCard));
         LoadAgentNextSteps();
-        ExecuteRecommendationButton.Content = "选择可清理项后继续";
         return summary;
+    }
+
+    private void ResetDriveHealthPlanPresentation(
+        string headline,
+        string progress,
+        string safetyBoundary)
+    {
+        _driveHealthPlan = null;
+        HomeDriveHealthPlanPanel.Visibility = Visibility.Collapsed;
+        CDriveHealthPlanHeadlineTextBlock.Text = headline;
+        CDriveHealthPlanProgressTextBlock.Text = progress;
+        CDriveHealthPlanStepsItemsControl.ItemsSource = null;
+        CDriveHealthPlanSafetyTextBlock.Text = safetyBoundary;
+        CDriveHealthPlanButton.Content = "查看下一步";
+        CDriveHealthPlanButton.IsEnabled = false;
+    }
+
+    private void ApplyDriveHealthPlan(DriveHealthPlanViewModel plan)
+    {
+        _driveHealthPlan = plan;
+        HomeDriveHealthPlanScopeTextBlock.Text = plan.ScopeLabel;
+        HomeDriveHealthPlanHeadlineTextBlock.Text = plan.Headline;
+        HomeDriveHealthPlanProgressTextBlock.Text = plan.Progress;
+        HomeDriveHealthPlanButton.Content = plan.PrimaryActionLabel;
+        HomeDriveHealthPlanButton.IsEnabled = plan.HasPrimaryAction;
+        HomeDriveHealthPlanPanel.Visibility = Visibility.Visible;
+
+        CDriveHealthPlanHeadlineTextBlock.Text = plan.Headline;
+        CDriveHealthPlanProgressTextBlock.Text = plan.Progress;
+        CDriveHealthPlanStepsItemsControl.ItemsSource = plan.Steps;
+        CDriveHealthPlanSafetyTextBlock.Text = plan.SafetyBoundary;
+        CDriveHealthPlanButton.Content = plan.PrimaryActionLabel;
+        CDriveHealthPlanButton.IsEnabled = plan.HasPrimaryAction;
     }
 
     private void SetCDriveResultVisibility(
@@ -2451,10 +2619,10 @@ public partial class MainWindow : Window
         HealthDigestLatestSummaryTextBlock.Text = history.LatestSummary;
         HealthDigestWeeklySummaryTextBlock.Text = history.WeeklySummary;
         HealthDigestMonitoringNoticeTextBlock.Text = history.MonitoringNotice;
-        HealthDigestHistoryListBox.ItemsSource = history.DailyRows;
+        HealthDigestHistoryItemsControl.ItemsSource = history.DailyRows;
         OpenHealthDigestEvidenceButton.Content = _lastHealthSummary is null
             ? "\u91cd\u65b0\u4f53\u68c0\u5e76\u67e5\u770b\u5f53\u524d\u8bc1\u636e"
-            : "\u67e5\u770b\u5f53\u524d C \u76d8\u8bc1\u636e";
+            : "\u67e5\u770b\u5f53\u524d\u7cfb\u7edf\u76d8\u8bc1\u636e";
         OpenHealthDigestEvidenceButton.IsEnabled =
             history.HasEvidence && !_isOpeningHealthDigestEvidence;
     }
@@ -2467,10 +2635,11 @@ public partial class MainWindow : Window
         _isOpeningHealthDigestEvidence = true;
         OpenHealthDigestEvidenceButton.IsEnabled = false;
         OpenHealthDigestEvidenceButton.Content =
-            "\u6b63\u5728\u8bfb\u53d6\u5f53\u524d C \u76d8\u8bc1\u636e";
+            "\u6b63\u5728\u8bfb\u53d6\u5f53\u524d\u7cfb\u7edf\u76d8\u8bc1\u636e";
+        SelectSystemDriveTarget();
         ShowPage("CDrive");
         StatusTextBlock.Text =
-            "\u6b63\u5728\u8fdb\u884c\u53ea\u8bfb\u4f53\u68c0\uff0c\u5b8c\u6210\u540e\u518d\u663e\u793a\u5f53\u524d C \u76d8\u8bc1\u636e...";
+            "\u6b63\u5728\u8fdb\u884c\u53ea\u8bfb\u4f53\u68c0\uff0c\u5b8c\u6210\u540e\u518d\u663e\u793a\u5f53\u524d\u7cfb\u7edf\u76d8\u8bc1\u636e...";
 
         try
         {
@@ -2478,24 +2647,24 @@ public partial class MainWindow : Window
             if (!_healthScanLoadGate.HasCompletedLoad || _lastHealthSummary is null)
             {
                 StatusTextBlock.Text =
-                    "\u5f53\u524d C \u76d8\u8bc1\u636e\u6ca1\u6709\u66f4\u65b0\u5b8c\u6210\uff1b\u9996\u9875\u4ecd\u53ef\u67e5\u770b\u5386\u53f2\u6458\u8981\uff0c\u4f46\u4e0d\u80fd\u628a\u5b83\u5f53\u4f5c\u5f53\u524d\u660e\u7ec6\u3002";
+                    "\u5f53\u524d\u7cfb\u7edf\u76d8\u8bc1\u636e\u6ca1\u6709\u66f4\u65b0\u5b8c\u6210\uff1b\u9996\u9875\u4ecd\u53ef\u67e5\u770b\u5386\u53f2\u6458\u8981\uff0c\u4f46\u4e0d\u80fd\u628a\u5b83\u5f53\u4f5c\u5f53\u524d\u660e\u7ec6\u3002";
                 return;
             }
 
             StatusTextBlock.Text =
-                "\u5f53\u524d C \u76d8\u8bc1\u636e\u5df2\u6253\u5f00\uff1b\u8fd9\u662f\u53ea\u8bfb\u4f53\u68c0\u7ed3\u679c\uff0c\u6ca1\u6709\u81ea\u52a8\u6267\u884c\u4efb\u4f55\u5904\u7406\u3002";
+                "\u5f53\u524d\u7cfb\u7edf\u76d8\u8bc1\u636e\u5df2\u6253\u5f00\uff1b\u8fd9\u662f\u53ea\u8bfb\u4f53\u68c0\u7ed3\u679c\uff0c\u6ca1\u6709\u81ea\u52a8\u6267\u884c\u4efb\u4f55\u5904\u7406\u3002";
         }
         catch
         {
             StatusTextBlock.Text =
-                "\u5f53\u524d C \u76d8\u8bc1\u636e\u6682\u65f6\u65e0\u6cd5\u8bfb\u53d6\uff1b\u5386\u53f2\u6458\u8981\u4ecd\u4fdd\u7559\uff0c\u6ca1\u6709\u4fee\u6539\u7535\u8111\u3002";
+                "\u5f53\u524d\u7cfb\u7edf\u76d8\u8bc1\u636e\u6682\u65f6\u65e0\u6cd5\u8bfb\u53d6\uff1b\u5386\u53f2\u6458\u8981\u4ecd\u4fdd\u7559\uff0c\u6ca1\u6709\u4fee\u6539\u7535\u8111\u3002";
         }
         finally
         {
             _isOpeningHealthDigestEvidence = false;
             OpenHealthDigestEvidenceButton.Content = _lastHealthSummary is null
                 ? "\u91cd\u65b0\u4f53\u68c0\u5e76\u67e5\u770b\u5f53\u524d\u8bc1\u636e"
-                : "\u67e5\u770b\u5f53\u524d C \u76d8\u8bc1\u636e";
+                : "\u67e5\u770b\u5f53\u524d\u7cfb\u7edf\u76d8\u8bc1\u636e";
             OpenHealthDigestEvidenceButton.IsEnabled = _healthDigestHistoryHasEvidence;
         }
     }
@@ -3844,31 +4013,71 @@ public partial class MainWindow : Window
 
     private void InitializeDriveOptions()
     {
-        var drives = Directory.GetLogicalDrives()
-            .Select(NormalizeDriveRoot)
-            .Distinct(StringComparer.OrdinalIgnoreCase)
-            .OrderBy(d => d, StringComparer.OrdinalIgnoreCase)
-            .ToList();
+        var observations = new List<LocalDriveScanObservation>();
+        foreach (var drive in DriveInfo.GetDrives())
+        {
+            try
+            {
+                var isReady = drive.IsReady;
+                observations.Add(new LocalDriveScanObservation(
+                    drive.RootDirectory.FullName,
+                    isReady,
+                    drive.DriveType,
+                    isReady ? drive.TotalSize : 0,
+                    isReady ? drive.AvailableFreeSpace : 0));
+            }
+            catch
+            {
+                // A drive can disappear while Windows is enumerating it.
+            }
+        }
 
-        if (drives.Count == 0)
-            drives.Add("C:\\");
+        var systemDriveRoot = SystemDriveRoot();
+        var targets = DriveScanTargetPresenter.Create(
+            observations,
+            systemDriveRoot);
+        DriveRootComboBox.ItemsSource = targets;
+        DriveRootComboBox.SelectedItem =
+            targets.FirstOrDefault(target => target.IsSystemDrive)
+            ?? targets.First();
+    }
 
-        DriveRootComboBox.ItemsSource = drives;
-        DriveRootComboBox.SelectedItem = drives.FirstOrDefault(d => d.Equals("C:\\", StringComparison.OrdinalIgnoreCase))
-            ?? drives.First();
+    private void SelectSystemDriveTarget()
+    {
+        var systemTarget = DriveRootComboBox.Items
+            .OfType<DriveScanTargetViewModel>()
+            .FirstOrDefault(target => target.IsSystemDrive);
+        if (systemTarget is not null
+            && !ReferenceEquals(DriveRootComboBox.SelectedItem, systemTarget))
+        {
+            DriveRootComboBox.SelectedItem = systemTarget;
+        }
     }
 
     private void ApplyCDrivePageChrome()
     {
-        var driveRoot = NormalizeDriveRoot(DriveRootComboBox.SelectedItem?.ToString() ?? "C:\\");
-        var chrome = CDrivePageChromePresenter.Create(driveRoot);
+        var driveRoot = SelectedDriveRoot();
+        var chrome = CDrivePageChromePresenter.Create(
+            driveRoot,
+            SystemDriveRoot());
 
-        DriveTargetLabelTextBlock.Text = chrome.ScanTargetLabel;
-        DriveTargetHintTextBlock.Text = chrome.ScanTargetHint;
-        DriveTargetPanel.ToolTip = chrome.ScanTargetHint;
+        DriveRootComboBox.ToolTip = chrome.ScanTargetHint;
         ToggleTechnicalReportButton.Content = chrome.TechnicalReportToggleText;
         TechnicalReportHintTextBlock.Text = chrome.TechnicalReportHint;
         ReportTextBox.Visibility = chrome.IsTechnicalReportVisibleByDefault ? Visibility.Visible : Visibility.Collapsed;
+    }
+
+    private string SelectedDriveRoot() =>
+        DriveRootComboBox.SelectedItem is DriveScanTargetViewModel target
+            ? target.Root
+            : SystemDriveRoot();
+
+    private static string SystemDriveRoot()
+    {
+        var windowsDirectory =
+            Environment.GetFolderPath(Environment.SpecialFolder.Windows);
+        return NormalizeDriveRoot(
+            Path.GetPathRoot(windowsDirectory) ?? "C:\\");
     }
 
     private static string CategoryLabel(SoftwareCategory category) =>

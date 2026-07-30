@@ -31,7 +31,7 @@
                 <StackPanel Margin="12,8">
                     <Button x:Name="HomeNavButton" AutomationProperties.AutomationId="HomeNavButton" Content="首页体检" Tag="Home" Click="Nav_Click" Style="{StaticResource NavButtonStyle}"/>
                     <Button x:Name="AppsNavButton" AutomationProperties.AutomationId="AppsNavButton" Content="应用管理" Tag="Apps" Click="Nav_Click" Style="{StaticResource NavButtonStyle}"/>
-                    <Button x:Name="CDriveNavButton" AutomationProperties.AutomationId="CDriveNavButton" Content="C盘清理" Tag="CDrive" Click="Nav_Click" Style="{StaticResource NavButtonStyle}"/>
+                    <Button x:Name="CDriveNavButton" AutomationProperties.AutomationId="CDriveNavButton" Content="磁盘清理" Tag="CDrive" Click="Nav_Click" Style="{StaticResource NavButtonStyle}"/>
                     <Button x:Name="InstallNavButton" AutomationProperties.AutomationId="InstallNavButton" Content="安装管控" Tag="Install" Click="Nav_Click" Style="{StaticResource NavButtonStyle}"/>
                     <Button x:Name="TimelineNavButton" AutomationProperties.AutomationId="TimelineNavButton" Content="后悔药中心" Tag="Timeline" Click="Nav_Click" Style="{StaticResource NavButtonStyle}"/>
                     <Button x:Name="AgentNavButton" AutomationProperties.AutomationId="AgentNavButton" Content="AI Agent" Tag="Agent" Click="Nav_Click" Style="{StaticResource NavButtonStyle}"/>
@@ -55,24 +55,36 @@
                     <TextBlock x:Name="PageTitleTextBlock" Text="首页体检" FontSize="30" FontWeight="SemiBold" Foreground="#111827"/>
                     <TextBlock x:Name="PageSubtitleTextBlock" Text="先看结论，再决定要不要处理。" Foreground="#4B5563" FontSize="14" Margin="0,7,0,0"/>
                 </StackPanel>
-                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Top">
-                    <ComboBox x:Name="DriveRootComboBox" Visibility="Collapsed"/>
-                    <Border x:Name="DriveTargetPanel" Width="178" Height="44" Margin="0,0,8,0"
-                            Background="White" BorderBrush="#CBD5E1" BorderThickness="1" CornerRadius="6"
-                            Padding="12,6"
-                            ToolTip="&#x81EA;&#x52A8;&#x8BC6;&#x522B;&#x672C;&#x673A;&#x76D8;&#x7B26;&#xFF1B;&#x9ED8;&#x8BA4;&#x4F53;&#x68C0;&#x7CFB;&#x7EDF;&#x76D8;&#x3002;">
-                        <StackPanel>
-                            <TextBlock x:Name="DriveTargetLabelTextBlock"
-                                       Text="&#x7CFB;&#x7EDF;&#x76D8; C &#x76D8;"
-                                       FontWeight="SemiBold"
-                                       Foreground="#111827"/>
-                            <TextBlock x:Name="DriveTargetHintTextBlock"
-                                       Text="&#x81EA;&#x52A8;&#x8BC6;&#x522B;&#xFF0C;&#x4E0D;&#x7528;&#x624B;&#x8F93;"
-                                       FontSize="11"
-                                       Foreground="#6B7280"
-                                       TextTrimming="CharacterEllipsis"/>
-                        </StackPanel>
-                    </Border>
+                <StackPanel x:Name="DiskScanToolbar" Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Top">
+                    <ComboBox x:Name="DriveRootComboBox"
+                              AutomationProperties.AutomationId="DriveRootComboBox"
+                              AutomationProperties.Name="{Binding SelectedItem.AccessibilityName, RelativeSource={RelativeSource Self}}"
+                              IsEditable="False"
+                              IsReadOnly="True"
+                              Width="178"
+                              Height="48"
+                              Margin="0,0,8,0"
+                              Padding="10,2"
+                              MaxDropDownHeight="320"
+                              SelectionChanged="DriveRootComboBox_SelectionChanged">
+                        <ComboBox.ItemContainerStyle>
+                            <Style TargetType="{x:Type ComboBoxItem}">
+                                <Setter Property="AutomationProperties.Name" Value="{Binding AccessibilityName}"/>
+                            </Style>
+                        </ComboBox.ItemContainerStyle>
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel>
+                                    <TextBlock Text="{Binding DisplayName}"
+                                               FontWeight="SemiBold"
+                                               Foreground="#111827"/>
+                                    <TextBlock Text="{Binding SpaceSummary}"
+                                               FontSize="11"
+                                               Foreground="#6B7280"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
                     <Button x:Name="StartScanButton" AutomationProperties.AutomationId="StartScanButton" Content="开始体检" Width="104" Height="40" Click="StartScan_Click"/>
                     <Button x:Name="CancelScanButton" Content="取消" Width="70" Height="40" Margin="8,0,0,0" Click="CancelScan_Click" IsEnabled="False"/>
                 </StackPanel>
@@ -81,6 +93,7 @@
             <Grid Grid.Row="1">
                 <Grid x:Name="HomePage">
                     <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
@@ -112,19 +125,73 @@
                         </Border>
                     </UniformGrid>
 
-                    <Grid Grid.Row="1">
+                    <Border x:Name="HomeDriveHealthPlanPanel"
+                            Grid.Row="1"
+                            AutomationProperties.AutomationId="HomeDriveHealthPlanPanel"
+                            Background="#EEF7F2"
+                            BorderBrush="#BFD8C8"
+                            BorderThickness="1"
+                            CornerRadius="8"
+                            Padding="16"
+                            Margin="0,0,0,18"
+                            Visibility="Collapsed">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel>
+                                <TextBlock x:Name="HomeDriveHealthPlanScopeTextBlock"
+                                           Text="C &#x76D8;&#x6539;&#x5584;&#x76EE;&#x6807;"
+                                           Foreground="#356149"
+                                           FontWeight="SemiBold"/>
+                                <TextBlock x:Name="HomeDriveHealthPlanHeadlineTextBlock"
+                                           AutomationProperties.AutomationId="HomeDriveHealthPlanHeadlineTextBlock"
+                                           Text="&#x4F53;&#x68C0;&#x540E;&#xFF0C;Agent &#x4F1A;&#x544A;&#x8BC9;&#x4F60;&#x8FD8;&#x9700;&#x8981;&#x817E;&#x51FA;&#x591A;&#x5C11;&#x7A7A;&#x95F4;&#x3002;"
+                                           Foreground="#111827"
+                                           FontSize="18"
+                                           FontWeight="SemiBold"
+                                           TextWrapping="Wrap"
+                                           Margin="0,4,16,0"/>
+                                <TextBlock x:Name="HomeDriveHealthPlanProgressTextBlock"
+                                           AutomationProperties.AutomationId="HomeDriveHealthPlanProgressTextBlock"
+                                           Text="&#x4F1A;&#x5206;&#x5F00;&#x663E;&#x793A;&#x53EF;&#x5B89;&#x5168;&#x5904;&#x7406;&#x7684;&#x7A7A;&#x95F4;&#x548C;&#x5269;&#x4F59;&#x5DEE;&#x989D;&#x3002;"
+                                           Foreground="#374151"
+                                           TextWrapping="Wrap"
+                                           Margin="0,5,16,0"/>
+                            </StackPanel>
+                            <Button x:Name="HomeDriveHealthPlanButton"
+                                    Grid.Column="1"
+                                    AutomationProperties.AutomationId="HomeDriveHealthPlanButton"
+                                    Content="&#x67E5;&#x770B;&#x4E0B;&#x4E00;&#x6B65;"
+                                    MinWidth="176"
+                                    Height="38"
+                                    Padding="14,0"
+                                    VerticalAlignment="Center"
+                                    Click="OpenDriveHealthPlan_Click"/>
+                        </Grid>
+                    </Border>
+
+                    <Grid Grid.Row="2">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="1.4*"/>
                             <ColumnDefinition Width="0.6*"/>
                         </Grid.ColumnDefinitions>
 
                         <Border Style="{StaticResource SectionCardStyle}" Margin="0,0,16,0">
-                            <StackPanel>
-                                <TextBlock Text="体检结果摘要" Style="{StaticResource SectionTitleStyle}"/>
+                            <Grid x:Name="HealthSummaryLayoutGrid">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="2*"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+                                <TextBlock Grid.Row="0" Text="体检结果摘要" Style="{StaticResource SectionTitleStyle}"/>
                                 <ListView x:Name="HealthDimensionListView"
+                                          Grid.Row="1"
                                           AutomationProperties.AutomationId="HealthDimensionListView"
                                           Margin="0,14,0,0"
-                                          Height="260"
+                                          ScrollViewer.VerticalScrollBarVisibility="Auto"
                                           ScrollViewer.HorizontalScrollBarVisibility="Disabled">
                                     <ListView.ItemContainerStyle>
                                         <Style TargetType="ListViewItem">
@@ -160,41 +227,45 @@
                                         </GridView>
                                     </ListView.View>
                                 </ListView>
-                                <TextBlock Text="体检历史" Style="{StaticResource SectionTitleStyle}" Margin="0,16,0,0"/>
-                                <TextBlock x:Name="HealthDigestLatestHeadlineTextBlock"
-                                           AutomationProperties.AutomationId="HealthDigestLatestHeadlineTextBlock"
-                                           Text="还没有体检历史"
-                                           FontWeight="SemiBold"
-                                           Foreground="#111827"
-                                           TextWrapping="Wrap"
-                                           Margin="0,8,0,0"/>
-                                <TextBlock x:Name="HealthDigestLatestSummaryTextBlock"
-                                           AutomationProperties.AutomationId="HealthDigestLatestSummaryTextBlock"
-                                           Text="完成一次手动体检后，这里会保存摘要。"
-                                           Foreground="#374151"
-                                           TextWrapping="Wrap"
-                                           Margin="0,4,0,0"/>
-                                <TextBlock x:Name="HealthDigestWeeklySummaryTextBlock"
-                                           AutomationProperties.AutomationId="HealthDigestWeeklySummaryTextBlock"
-                                           Text="近 7 天暂无真实扫描记录。"
-                                           Foreground="#374151"
-                                           TextWrapping="Wrap"
-                                           Margin="0,4,0,0"/>
-                                <TextBlock x:Name="HealthDigestMonitoringNoticeTextBlock"
-                                           AutomationProperties.AutomationId="HealthDigestMonitoringNoticeTextBlock"
-                                           Text="当前没有后台定时扫描；只有你主动体检时才会新增记录。"
-                                           Foreground="#6B7280"
-                                           FontSize="12"
-                                           TextWrapping="Wrap"
-                                           Margin="0,4,0,0"/>
-                                <ListBox x:Name="HealthDigestHistoryListBox"
+                                <TextBlock Grid.Row="2" Text="系统盘体检历史" Style="{StaticResource SectionTitleStyle}" Margin="0,16,0,0"/>
+                                <ScrollViewer x:Name="HealthDigestHistoryScrollViewer"
+                                              Grid.Row="3"
+                                              AutomationProperties.AutomationId="HealthDigestHistoryScrollViewer"
+                                              VerticalScrollBarVisibility="Auto"
+                                              HorizontalScrollBarVisibility="Disabled"
+                                              PanningMode="VerticalFirst">
+                                <StackPanel>
+                                    <TextBlock x:Name="HealthDigestLatestHeadlineTextBlock"
+                                               AutomationProperties.AutomationId="HealthDigestLatestHeadlineTextBlock"
+                                               Text="还没有体检历史"
+                                               FontWeight="SemiBold"
+                                               Foreground="#111827"
+                                               TextWrapping="Wrap"
+                                               Margin="0,8,0,0"/>
+                                    <TextBlock x:Name="HealthDigestLatestSummaryTextBlock"
+                                               AutomationProperties.AutomationId="HealthDigestLatestSummaryTextBlock"
+                                               Text="完成一次手动体检后，这里会保存摘要。"
+                                               Foreground="#374151"
+                                               TextWrapping="Wrap"
+                                               Margin="0,4,0,0"/>
+                                    <TextBlock x:Name="HealthDigestWeeklySummaryTextBlock"
+                                               AutomationProperties.AutomationId="HealthDigestWeeklySummaryTextBlock"
+                                               Text="近 7 天暂无真实扫描记录。"
+                                               Foreground="#374151"
+                                               TextWrapping="Wrap"
+                                               Margin="0,4,0,0"/>
+                                    <TextBlock x:Name="HealthDigestMonitoringNoticeTextBlock"
+                                               AutomationProperties.AutomationId="HealthDigestMonitoringNoticeTextBlock"
+                                               Text="当前没有后台定时扫描；只有你主动体检时才会新增记录。"
+                                               Foreground="#6B7280"
+                                               FontSize="12"
+                                               TextWrapping="Wrap"
+                                               Margin="0,4,0,0"/>
+                                <ItemsControl x:Name="HealthDigestHistoryItemsControl"
                                          AutomationProperties.AutomationId="HealthDigestHistoryListBox"
-                                         Height="68"
                                          Margin="0,6,0,0"
-                                         BorderThickness="0"
-                                         ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                                          HorizontalContentAlignment="Stretch">
-                                    <ListBox.ItemTemplate>
+                                    <ItemsControl.ItemTemplate>
                                         <DataTemplate>
                                             <Grid Margin="0,3">
                                                 <Grid.ColumnDefinitions>
@@ -205,8 +276,8 @@
                                                 <TextBlock Grid.Column="1" Text="{Binding Summary}" Foreground="#4B5563" TextTrimming="CharacterEllipsis" Margin="8,0,0,0"/>
                                             </Grid>
                                         </DataTemplate>
-                                    </ListBox.ItemTemplate>
-                                </ListBox>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
                                 <Button x:Name="OpenHealthDigestEvidenceButton"
                                         AutomationProperties.AutomationId="OpenHealthDigestEvidenceButton"
                                         Content="重新体检并查看当前证据"
@@ -216,48 +287,59 @@
                                         Margin="0,6,0,0"
                                         IsEnabled="False"
                                         Click="OpenHealthDigestEvidence_Click"/>
-                            </StackPanel>
+                                </StackPanel>
+                                </ScrollViewer>
+                            </Grid>
                         </Border>
 
                         <Border Grid.Column="1" Style="{StaticResource SectionCardStyle}">
-                            <StackPanel>
-                                <TextBlock Text="关键发现" Style="{StaticResource SectionTitleStyle}"/>
-                                <TextBlock Text="Agent &#x56DE;&#x7B54;" Style="{StaticResource SectionTitleStyle}" Margin="0,12,0,0"/>
-                                <Border Background="#F9FAFB" BorderBrush="#E5E7EB" BorderThickness="1" CornerRadius="8" Padding="14" Margin="0,10,0,12">
-                                    <StackPanel>
-                                        <TextBlock x:Name="HomeAgentResponseTitleTextBlock"
-                                                   AutomationProperties.AutomationId="HomeAgentResponseTitleTextBlock"
-                                                   Text="Computer Agent"
-                                                   FontSize="16"
-                                                   FontWeight="SemiBold"
-                                                   Foreground="#111827"
-                                                   TextWrapping="Wrap"/>
-                                        <TextBlock x:Name="HomeAgentResponseBodyTextBlock"
-                                                   AutomationProperties.AutomationId="HomeAgentResponseBodyTextBlock"
-                                                   Text="&#x9009;&#x62E9;&#x4E00;&#x6761;&#x5173;&#x952E;&#x53D1;&#x73B0;&#xFF0C;Agent &#x4F1A;&#x5728;&#x8FD9;&#x91CC;&#x89E3;&#x91CA;&#x3002;"
-                                                   Foreground="#374151"
-                                                   FontSize="13"
-                                                   TextWrapping="Wrap"
-                                                   Margin="0,8,0,0"/>
-                                        <TextBlock x:Name="HomeAgentResponseSafetyTextBlock"
-                                                   AutomationProperties.AutomationId="HomeAgentResponseSafetyTextBlock"
-                                                   Text="&#x4E0D;&#x4F1A;&#x76F4;&#x63A5;&#x6267;&#x884C;&#xFF1B;&#x771F;&#x6B63;&#x52A8;&#x4F5C;&#x5FC5;&#x987B;&#x8FDB;&#x5165;&#x672C;&#x5730;&#x5B89;&#x5168;&#x7BA1;&#x7EBF;&#x3002;"
-                                                   Foreground="#6B7280"
-                                                   FontSize="12"
-                                                   TextWrapping="Wrap"
-                                                   Margin="0,10,0,0"/>
-                                        <Button x:Name="HomeAgentResponseNavigateButton"
-                                                AutomationProperties.AutomationId="HomeAgentResponseNavigateButton"
-                                                Content="&#x4E0B;&#x4E00;&#x6B65;"
-                                                Height="32"
-                                                Padding="12,0"
-                                                HorizontalAlignment="Left"
-                                                Margin="0,12,0,0"
-                                                Visibility="Collapsed"
-                                                Click="HomeAgentResponseNavigate_Click"/>
-                                    </StackPanel>
-                                </Border>
+                            <Grid x:Name="KeyFindingsLayoutGrid">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+                                <TextBlock Grid.Row="0" Text="关键发现" Style="{StaticResource SectionTitleStyle}"/>
+                                <StackPanel Grid.Row="1">
+                                    <TextBlock Text="Agent &#x56DE;&#x7B54;" Style="{StaticResource SectionTitleStyle}" Margin="0,12,0,0"/>
+                                    <Border Background="#F9FAFB" BorderBrush="#E5E7EB" BorderThickness="1" CornerRadius="8" Padding="14" Margin="0,10,0,12">
+                                        <StackPanel>
+                                            <TextBlock x:Name="HomeAgentResponseTitleTextBlock"
+                                                       AutomationProperties.AutomationId="HomeAgentResponseTitleTextBlock"
+                                                       Text="Computer Agent"
+                                                       FontSize="16"
+                                                       FontWeight="SemiBold"
+                                                       Foreground="#111827"
+                                                       TextWrapping="Wrap"/>
+                                            <TextBlock x:Name="HomeAgentResponseBodyTextBlock"
+                                                       AutomationProperties.AutomationId="HomeAgentResponseBodyTextBlock"
+                                                       Text="&#x9009;&#x62E9;&#x4E00;&#x6761;&#x5173;&#x952E;&#x53D1;&#x73B0;&#xFF0C;Agent &#x4F1A;&#x5728;&#x8FD9;&#x91CC;&#x89E3;&#x91CA;&#x3002;"
+                                                       Foreground="#374151"
+                                                       FontSize="13"
+                                                       TextWrapping="Wrap"
+                                                       Margin="0,8,0,0"/>
+                                            <TextBlock x:Name="HomeAgentResponseSafetyTextBlock"
+                                                       AutomationProperties.AutomationId="HomeAgentResponseSafetyTextBlock"
+                                                       Text="&#x4E0D;&#x4F1A;&#x76F4;&#x63A5;&#x6267;&#x884C;&#xFF1B;&#x771F;&#x6B63;&#x52A8;&#x4F5C;&#x5FC5;&#x987B;&#x8FDB;&#x5165;&#x672C;&#x5730;&#x5B89;&#x5168;&#x7BA1;&#x7EBF;&#x3002;"
+                                                       Foreground="#6B7280"
+                                                       FontSize="12"
+                                                       TextWrapping="Wrap"
+                                                       Margin="0,10,0,0"/>
+                                            <Button x:Name="HomeAgentResponseNavigateButton"
+                                                    AutomationProperties.AutomationId="HomeAgentResponseNavigateButton"
+                                                    Content="&#x4E0B;&#x4E00;&#x6B65;"
+                                                    Height="32"
+                                                    Padding="12,0"
+                                                    HorizontalAlignment="Left"
+                                                    Margin="0,12,0,0"
+                                                    Visibility="Collapsed"
+                                                    Click="HomeAgentResponseNavigate_Click"/>
+                                        </StackPanel>
+                                    </Border>
+                                </StackPanel>
                                 <TextBlock x:Name="KeyFindingsEmptyStateTextBlock"
+                                           Grid.Row="2"
                                            AutomationProperties.AutomationId="KeyFindingsEmptyStateTextBlock"
                                            Text="完成体检后，这里会显示最值得处理的项目。"
                                            Foreground="#6B7280"
@@ -265,10 +347,11 @@
                                            TextWrapping="Wrap"
                                            Margin="0,14,0,0"/>
                                 <ListBox x:Name="KeyFindingsListBox"
+                                         Grid.Row="3"
                                          AutomationProperties.AutomationId="KeyFindingsListBox"
                                          Margin="0,12,0,0"
-                                         MinHeight="240"
                                          Visibility="Collapsed"
+                                         ScrollViewer.VerticalScrollBarVisibility="Auto"
                                          ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                                          HorizontalContentAlignment="Stretch">
                                     <ListBox.ItemTemplate>
@@ -286,7 +369,7 @@
                                         </DataTemplate>
                                     </ListBox.ItemTemplate>
                                 </ListBox>
-                            </StackPanel>
+                            </Grid>
                         </Border>
                     </Grid>
                 </Grid>
@@ -485,7 +568,7 @@
                                       VerticalScrollBarVisibility="Auto"
                                       HorizontalScrollBarVisibility="Disabled">
                         <StackPanel>
-                            <TextBlock Text="&#x0043;&#x76D8;&#x7A7A;&#x95F4;&#x6458;&#x8981;" Style="{StaticResource SectionTitleStyle}"/>
+                            <TextBlock Text="&#x78C1;&#x76D8;&#x7A7A;&#x95F4;&#x6458;&#x8981;" Style="{StaticResource SectionTitleStyle}"/>
                             <TextBlock x:Name="CDriveSummaryHeadlineTextBlock"
                                        Text="&#x70B9;&#x51FB;&#x201C;&#x5F00;&#x59CB;&#x4F53;&#x68C0;&#x201D;&#x540E;&#xFF0C;&#x8FD9;&#x91CC;&#x4F1A;&#x663E;&#x793A;&#x5DF2;&#x7528;&#x7A7A;&#x95F4;&#x548C;&#x5269;&#x4F59;&#x7A7A;&#x95F4;&#x3002;"
                                        FontSize="18"
@@ -703,18 +786,83 @@
                             </ListBox>
                          </StackPanel>
                         </ScrollViewer>
-                     </Border>
+                    </Border>
                     <Border Grid.Column="1" Style="{StaticResource SectionCardStyle}">
+                        <ScrollViewer x:Name="CDriveRecommendationsScrollViewer"
+                                      AutomationProperties.AutomationId="CDriveRecommendationsScrollViewer"
+                                      VerticalScrollBarVisibility="Auto"
+                                      HorizontalScrollBarVisibility="Disabled"
+                                      PanningMode="VerticalFirst">
                         <StackPanel>
                             <TextBlock Text="处理建议" Style="{StaticResource SectionTitleStyle}"/>
+                            <Border Background="#EEF7F2"
+                                    BorderBrush="#BFD8C8"
+                                    BorderThickness="1"
+                                    CornerRadius="8"
+                                    Padding="12"
+                                    Margin="0,12,0,0">
+                                <StackPanel>
+                                    <TextBlock Text="Computer Agent &#x7ED9;&#x4F60;&#x7684;&#x6539;&#x5584;&#x65B9;&#x6848;"
+                                               Foreground="#356149"
+                                               FontWeight="SemiBold"/>
+                                    <TextBlock x:Name="CDriveHealthPlanHeadlineTextBlock"
+                                               AutomationProperties.AutomationId="CDriveHealthPlanHeadlineTextBlock"
+                                               Text="&#x5B8C;&#x6210;&#x4F53;&#x68C0;&#x540E;&#x663E;&#x793A;&#x660E;&#x786E;&#x76EE;&#x6807;&#x3002;"
+                                               Foreground="#111827"
+                                               FontSize="16"
+                                               FontWeight="SemiBold"
+                                               TextWrapping="Wrap"
+                                               Margin="0,5,0,0"/>
+                                    <TextBlock x:Name="CDriveHealthPlanProgressTextBlock"
+                                               AutomationProperties.AutomationId="CDriveHealthPlanProgressTextBlock"
+                                               Text="&#x4F1A;&#x544A;&#x8BC9;&#x4F60;&#x5148;&#x505A;&#x4EC0;&#x4E48;&#xFF0C;&#x4EE5;&#x53CA;&#x505A;&#x5B8C;&#x8FD8;&#x5DEE;&#x591A;&#x5C11;&#x3002;"
+                                               Foreground="#374151"
+                                               TextWrapping="Wrap"
+                                               Margin="0,5,0,0"/>
+                                    <ItemsControl x:Name="CDriveHealthPlanStepsItemsControl"
+                                                  AutomationProperties.AutomationId="CDriveHealthPlanStepsItemsControl"
+                                                  Margin="0,6,0,0">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Grid Margin="0,2,0,0">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                        <ColumnDefinition Width="*"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <TextBlock Text="&#x2022; " Foreground="#374151"/>
+                                                    <TextBlock Grid.Column="1"
+                                                               Text="{Binding}"
+                                                               Foreground="#374151"
+                                                               TextWrapping="Wrap"/>
+                                                </Grid>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                    <TextBlock x:Name="CDriveHealthPlanSafetyTextBlock"
+                                               AutomationProperties.AutomationId="CDriveHealthPlanSafetyTextBlock"
+                                               Foreground="#6B7280"
+                                               FontSize="12"
+                                               TextWrapping="Wrap"
+                                               Margin="0,6,0,0"/>
+                                    <Button x:Name="CDriveHealthPlanButton"
+                                            AutomationProperties.AutomationId="CDriveHealthPlanButton"
+                                            Content="&#x67E5;&#x770B;&#x4E0B;&#x4E00;&#x6B65;"
+                                            Height="32"
+                                            HorizontalAlignment="Left"
+                                            Padding="12,0"
+                                            Margin="0,8,0,0"
+                                            Click="OpenDriveHealthPlan_Click"/>
+                                </StackPanel>
+                            </Border>
                             <TextBlock x:Name="RecommendationsEmptyStateTextBlock"
                                        AutomationProperties.AutomationId="RecommendationsEmptyStateTextBlock"
                                        Text="完成体检后，这里会显示能不能处理、风险和后悔药方案。"
                                        Foreground="#374151"
                                        TextWrapping="Wrap"
                                        Margin="0,12,0,0"/>
-                            <ListBox x:Name="RecommendationsListBox" AutomationProperties.AutomationId="RecommendationsListBox" MinHeight="360" Margin="0,12,0,0"
+                            <ListBox x:Name="RecommendationsListBox" AutomationProperties.AutomationId="RecommendationsListBox" MinHeight="240" Margin="0,12,0,0"
                                      Visibility="Collapsed"
+                                     ScrollViewer.VerticalScrollBarVisibility="Disabled"
                                      ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                                      HorizontalContentAlignment="Stretch"
                                      SelectionChanged="RecommendationsListBox_SelectionChanged">
@@ -765,7 +913,7 @@
                                                Margin="0,6,0,8"/>
                                     <ListBox x:Name="RecommendationActionPlanListBox"
                                              AutomationProperties.AutomationId="RecommendationActionPlanListBox"
-                                             Height="92"
+                                             Height="76"
                                              ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                                              HorizontalContentAlignment="Stretch">
                                         <ListBox.ItemTemplate>
@@ -774,10 +922,18 @@
                                             </DataTemplate>
                                         </ListBox.ItemTemplate>
                                     </ListBox>
+                                    <Button x:Name="ExecuteRecommendationButton"
+                                            AutomationProperties.AutomationId="ExecuteRecommendationButton"
+                                            Content="选择可清理项后继续"
+                                            Height="34"
+                                            Margin="0,10,0,0"
+                                            Click="ExecuteRecommendation_Click"
+                                            IsEnabled="False"
+                                            Visibility="Collapsed"/>
                                 </StackPanel>
                             </Border>
-                            <Button x:Name="ExecuteRecommendationButton" AutomationProperties.AutomationId="ExecuteRecommendationButton" Content="选择可清理项后继续" Height="34" Margin="0,10,0,0" Click="ExecuteRecommendation_Click" IsEnabled="False" Visibility="Collapsed"/>
                         </StackPanel>
+                        </ScrollViewer>
                     </Border>
                 </Grid>
 

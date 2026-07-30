@@ -1,5 +1,46 @@
 # Development Worklog
 
+## 2026-07-30 - Began 0.1.4 combined-slice review
+
+- Confirmed `main` at `f372153`, source version 0.1.3, and the expected uncommitted multi-disk, homepage-scroll, and beginner health-plan files.
+- Review found three concrete defects: prior plan steps/safety survive a drive switch or new scan; selected recommendation-specific explanation is replaced by generic copy; and data-drive prevention guidance still says to move data to D.
+- Expanded review to system-drive history scope before editing. No system operation, installer, signing, push, or release action was performed.
+- Added complete plan reset for drive switches, scan starts, cancellation, and failure; preserved the specific selected-card explanation; made data-drive destination advice neutral; kept digest history system-drive-only and labelled it explicitly.
+- The first full run passed 1084 tests and failed one stale source-string contract after “C 盘证据” became “系统盘证据”; the focused correction passed 6/6 and final full Debug passed 1085/1085.
+- The multi-disk GUI smoke hit `RPC_E_SERVERFAULT` twice because it enumerated every desktop list item. Scoping enumeration to windows owned by the OMNIX process removed the external fault; the final smoke listed C/D, selected D, showed the D pending conclusion, and captured the updated system-history label.
+- Final evidence: focused review 26/26; full Debug 1085/1085; Release 0 warnings/errors; integrity 390 files and 18/18 XAML; both smoke parsers and both real WPF smokes pass; `ProductVersion=0.1.4`; `git diff --check` has no errors.
+
+## 2026-07-29 - Beginner C-drive health-plan diagnosis
+
+- User feedback exposed the remaining product gap: the UI reports 86% used and a few hundred MB of safe cleanup, but never says what “healthier” means, how many GB are actually needed, or what to do when safe cleanup is insufficient.
+- Existing evidence is enough to answer honestly: total/free bytes, low-risk reversible cleanup recommendations, personal-storage candidates, and root-cause cards. The current C-drive page resets recommendation selection to null after every scan, forcing a beginner to make the first technical choice.
+- Chosen scope: a read-only 80% comfort-target plan, explicit safe-cleanup contribution and remaining gap, three plain-language steps, and automatic selection of the first executable low-risk recommendation for preview only.
+- Implemented `DriveHealthPlanPresenter` with exact target/contribution/gap bytes, strict executable + reversible low-risk evidence, comfortable/no-evidence states, and navigation-only actions. The homepage keeps only the concise target/progress/button band; the detailed three steps and safety boundary live on the disk page.
+- Converted the complete right-hand recommendation region into one outer scroll surface and disabled nested scrolling on the recommendation list. The preferred low-risk card is selected after scanning; clicking the health-plan action scrolls to a self-contained preview panel with its still-unexecuted confirmation-entry button.
+- Expanded the isolated WPF smoke to prove first-view 80% target copy, quantified bytes, navigation to the selected low-risk preview, visible preview entry, unchanged Agent response and scroll surfaces, `noOperationExecuted=true`, and two screenshots: `.omx/qa-home-agent-next-action.png` and `.omx/qa-drive-health-plan.png`.
+- Verification closed with focused 13/13, full Debug 1084/1084, Release 0 warnings/errors, source integrity 390 files and 18/18 XAML, real WPF smoke pass, and diff check pass with only existing line-ending notices.
+
+## 2026-07-29 - Homepage scrolling diagnosis
+
+- Reproduced the screenshot structure in XAML: both `HealthDigestHistoryListBox` and `KeyFindingsListBox` are children of unconstrained vertical `StackPanel`s inside fixed-height cards.
+- Root cause: the lists are measured at desired content height rather than remaining card height, so their internal scroll viewers have no bounded viewport and the outer card clips the overflow.
+- Added a failing layout contract, then replaced both card roots with constrained `Grid` rows. The key-finding `ListBox` owns its scroll viewport; the complete variable-height history summary, rows, and evidence button share one outer `ScrollViewer` containing a non-scrolling `ItemsControl`.
+- The first bounded-history attempt still allocated the summary and evidence button outside the useful viewport. A real screenshot exposed the clipped button, so the semantic history region became the scroll unit rather than only its daily rows.
+- Expanded the isolated WPF smoke to create enough findings for overflow and to exercise `ScrollPattern` on both regions. Final runtime evidence moved key findings from 0% to 25% and history from 0% to 100%, kept the next-action navigation working, executed no operation, and captured `.omx/qa-home-agent-next-action.png`.
+- Verification closed with focused contracts 10/10, full Debug 1080/1080, Release 0 warnings/errors, source integrity 388 files and 18/18 XAML, smoke parser pass, and diff check pass with only existing line-ending notices.
+
+## 2026-07-29 - Multi-disk scan planning
+
+- Confirmed the current 0.1.3 UI collapses `DriveRootComboBox`, then initializes every logical drive internally and selects C. The crawler itself accepts another root, so the visible C-only limit is not a storage-engine limit.
+- Found three correctness blockers behind simply unhiding the control: `DiskScanner` always adds Windows/C-drive big-rock evidence, `CategoryClassifier` treats every non-whitelisted top-level folder as a C-drive anomaly, and root-cause/health summaries hardcode C.
+- Chosen scope: a non-editable menu of ready fixed local disks, system disk first; system-only probes and expected-root policy only on the actual Windows drive; whole selected data drive as the read-only large/duplicate-file scope; clear stale conclusions and invalidate the lazy load gate when selection changes.
+- Added focused red contracts across drive-target presentation, disk scope/classification, load-gate invalidation, dynamic summaries, and WPF source. Red fails only on the intentionally absent interfaces and behavior.
+- Implemented the drive-target presenter and visible selector, system/data scan-scope policy, dynamic beginner summaries, selected-drive personal-file analysis, and selection invalidation. The selector is disabled during an active scan.
+- Tightened the safety boundary after review: a data-drive folder named `Temp` cannot create a cleanup operation or a “safe cleanup” card action; data-drive folder cards say that names and sizes alone are not proof.
+- Added stable selector/item accessibility names and a reusable real-WPF smoke. The smoke listed `系统盘 C 盘，剩余 38.7 GB` and `D 盘，剩余 256.2 GB`, selected D, and verified the beginner pending conclusion without starting a scan.
+- Final gates: focused 200/200; full Debug 1079/1079; Release 0 warnings/errors; source integrity 388 files, no invalid UTF-8/replacement characters, 18/18 valid XAML; PowerShell smoke parser and `git diff --check` pass. Screenshot: `.omx/qa-multidisk-selector.png`.
+- No version bump, commit, push, release, installer execution, full-disk scan, or system mutation was performed.
+
 ## 2026-07-29 - Managed install-layout closure
 
 - Verified the user's corrected 0.1.2 installation in the host CurrentUser context: exact managed exe and registry path, version 0.1.2, valid expected signer and GlobalSign timestamp, fixed D drive, non-reparse directories, and no doubled executable.

@@ -1,5 +1,39 @@
 # Decision Log
 
+## 2026-07-30 - Keep health history system-drive scoped in 0.1.4
+
+- Decision: data-drive scans update the current page but do not enter the existing health-digest timeline; the timeline and its evidence action are explicitly labelled as system-drive history and the action reselects the system drive before loading current evidence.
+- Rejected alternative: mix C/D/E digests in one score trend or add an unreviewed database schema migration during the release review.
+- Reason: a score trend across different volumes is not comparable, while a per-drive history schema needs separate migration, filtering, retention, and UX design.
+- Consequence: 0.1.4 can safely add read-only multi-disk inspection without corrupting the meaning of existing history. Per-drive history remains future work.
+
+## 2026-07-30 - Version the reviewed source without implying publication
+
+- Decision: set the application source version and release notes to 0.1.4 in the requested local commit, but do not push, tag, sign, build an installer, or publish a GitHub Release.
+- Reason: a versioned source commit and an installable update have different trust and delivery gates in this repository.
+- Consequence: the built development executable reports 0.1.4, while installed/public 0.1.3 correctly remains the latest available update.
+
+## 2026-07-29 - C-drive health is a target and sequence, not another score
+
+- Decision: define OMNIX's beginner-facing comfort target as no more than 80% disk usage, calculate the bytes required to reach it, and separately show how much current low-risk reversible evidence can contribute.
+- Decision: when low-risk evidence exists, preselect its first recommendation for explanation and preview; do not open confirmation or execute it automatically. When it does not exist, say not to delete and route to read-only space sources.
+- Reason: “63 points” and “337 MB can be cleaned” do not tell a beginner whether that action solves an 86% full C drive. The remaining gap is the information needed to decide between cleanup, personal-file review, and application-data relocation.
+- Consequence: the Agent can lead with one safe next step while preserving `OperationPipeline` confirmation and avoiding false promises about small cleanups.
+
+## 2026-07-29 - Bound the two homepage lists instead of nesting page scroll viewers
+
+- Decision: replace each homepage card's vertical `StackPanel` with a row-constrained `Grid`. Keep the interactive key-finding `ListBox` in a bounded `*` row; put the complete history summary, daily rows, and evidence button in one bounded `ScrollViewer`, with a non-scrolling `ItemsControl` for rows.
+- Reason: key-finding rows need native list scrolling, while history is one variable-height semantic section. Scrolling only its rows left surrounding history text and the evidence button competing for clipped space; nesting another scrolling list would create wheel-routing ambiguity.
+- Consequence: Agent content stays visible, finding buttons remain interactive, and both long result regions get deterministic viewports without nested scroll controls.
+
+## 2026-07-29 - Multi-disk health scan uses a fixed-drive menu, not arbitrary path input
+
+- Decision: expose a non-editable list of ready `DriveType.Fixed` roots, order the Windows system drive first, and show drive/free-space labels. Do not accept manually typed folders, network drives, removable media, or unready volumes.
+- Decision: retain system big-rock probes and expected-root anomaly rules only for the actual Windows system drive. Other drives receive neutral space distribution, whole-drive large/duplicate-file candidates, snapshots, and growth analysis.
+- Decision: changing the selected drive clears stale result presentation and invalidates the read-only load gate; the selector is disabled while scanning.
+- Rejected: merely make the existing string ComboBox visible. It would expose raw paths and produce misleading C-specific evidence on D/E.
+- Consequence: internal `CDrive` page/type names can remain for compatibility, but all beginner-visible navigation, headings, and summaries become disk-generic or selected-drive-specific.
+
 ## 2026-07-29 - Installer guarantees the managed layout; updater keeps refusing malformed layouts
 
 - Choice: set `AppendDefaultDirName=no` so Inno's Browse dialog cannot append a second `Install`, while preserving the exact `OMNIX-Entropy\Install` updater layout check.

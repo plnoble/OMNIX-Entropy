@@ -40,6 +40,83 @@ public class DiskScannerTests
     }
 
     [Fact]
+    public void Classifier_does_not_apply_system_root_anomaly_rules_to_a_data_drive()
+    {
+        var nodes = new List<CategoryNode>
+        {
+            new() { Name = "Games", Path = @"D:\Games" },
+            new() { Name = "Software", Path = @"D:\Software" }
+        };
+
+        new CategoryClassifier(SampleRules()).Classify(
+            nodes,
+            @"D:\",
+            markUnexpectedRoots: false);
+
+        nodes.Should().OnlyContain(node => !node.IsUnexpectedRoot);
+    }
+
+    [Theory]
+    [InlineData(@"C:\", @"C:\Windows", true)]
+    [InlineData(@"C:\Users\Me\Fixture", @"C:\Windows", true)]
+    [InlineData(@"D:\", @"C:\Windows", false)]
+    public void Scan_scope_recognizes_only_the_windows_system_drive(
+        string scanRoot,
+        string windowsDirectory,
+        bool expected)
+    {
+        DiskScanScopePolicy.IsSystemDrive(scanRoot, windowsDirectory)
+            .Should().Be(expected);
+    }
+
+    [Fact]
+    public void Data_drive_personal_file_analysis_uses_the_whole_selected_scan_root()
+    {
+        DiskScanScopePolicy.ResolvePersonalStorageRoots(
+                selectedDriveRoot: @"D:\",
+                scanRoot: @"D:\",
+                windowsDirectory: @"C:\Windows")
+            .Should().Equal(@"D:\");
+
+        DiskScanScopePolicy.ResolvePersonalStorageRoots(
+                selectedDriveRoot: @"C:\",
+                scanRoot: @"C:\",
+                windowsDirectory: @"C:\Windows")
+            .Should().BeNull();
+
+        DiskScanScopePolicy.ResolvePersonalStorageRoots(
+                selectedDriveRoot: @"C:\",
+                scanRoot: @"D:\Fixture",
+                windowsDirectory: @"C:\Windows")
+            .Should().Equal(@"D:\Fixture");
+    }
+
+    [Fact]
+    public void Data_drive_folder_names_do_not_create_cleanup_authority()
+    {
+        var result = new DriveScanResult
+        {
+            Drive = @"D:\",
+            TotalBytes = 100_000,
+            FreeBytes = 50_000,
+            TopLevel =
+            [
+                new()
+                {
+                    Name = "Temp",
+                    Path = @"D:\Temp",
+                    SizeBytes = 20_000,
+                    Category = UsageCategory.Temp
+                }
+            ]
+        };
+
+        DiskRecommendationBuilder.Build(result)
+            .Should().NotContain(recommendation =>
+                recommendation.Operation != null);
+    }
+
+    [Fact]
     public void Classifier_maps_paths_to_categories_via_globs()
     {
         var rules = SampleRules();

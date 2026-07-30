@@ -194,13 +194,13 @@ public sealed class MachineHealthExperienceTests
             .And.NotContain("IReadOnlyList<string>")
             .And.Contain("public bool CanExecuteDirectly => false;");
         main.Should().Contain("new WindowsMachineHealthProbe().Observe()")
-            .And.Contain("正在只读读取 D 盘、内存、进程、电池和硬件配置")
+            .And.Contain("正在只读读取本机磁盘、内存、进程、电池和硬件配置")
             .And.NotContain("new WindowsMachineHealthProbe().Observe();");
         xaml.Should().Contain("AutomationProperties.AutomationId=\"HealthDimensionListView\"")
             .And.Contain("StringFormat=HealthDimension_{0}")
             .And.Contain("Property=\"AutomationProperties.Name\"")
             .And.Contain("Text=\"{Binding Result}\" TextWrapping=\"Wrap\"")
-            .And.Contain("Height=\"260\"")
+            .And.Contain("ScrollViewer.VerticalScrollBarVisibility=\"Auto\"")
             .And.Contain("AutomationProperties.AutomationId=\"HomeNavButton\"")
             .And.Contain("AutomationProperties.AutomationId=\"TimelineNavButton\"")
             .And.Contain("AutomationProperties.AutomationId=\"AgentNavButton\"");

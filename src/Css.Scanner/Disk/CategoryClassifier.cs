@@ -19,12 +19,15 @@ public sealed class CategoryClassifier
     public CategoryClassifier(ScanRules rules) => _rules = rules;
 
     /// <summary>Classifies a full tree of top-level nodes in place, marking unexpected roots.</summary>
-    public void Classify(IEnumerable<CategoryNode> topLevelNodes, string driveRoot)
+    public void Classify(
+        IEnumerable<CategoryNode> topLevelNodes,
+        string driveRoot,
+        bool markUnexpectedRoots = true)
     {
         var expected = new HashSet<string>(_rules.ExpectedRootDirs, StringComparer.OrdinalIgnoreCase);
         foreach (var node in topLevelNodes)
         {
-            node.IsUnexpectedRoot = !expected.Contains(node.Name);
+            node.IsUnexpectedRoot = markUnexpectedRoots && !expected.Contains(node.Name);
             node.Category = ClassifyPath(node.Path ?? node.Name);
             ReclassifyChildren(node);
         }

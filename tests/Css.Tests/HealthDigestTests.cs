@@ -144,6 +144,7 @@ public sealed class HealthDigestTests
         {
             xaml.Should().Contain($"AutomationProperties.AutomationId=\"{id}\"");
         }
+        xaml.Should().Contain("x:Name=\"HealthDigestHistoryItemsControl\"");
 
         main.IndexOf("await _snapshotStore.SaveAsync", StringComparison.Ordinal)
             .Should().BeLessThan(main.IndexOf("TrySaveHealthDigestAsync", StringComparison.Ordinal));

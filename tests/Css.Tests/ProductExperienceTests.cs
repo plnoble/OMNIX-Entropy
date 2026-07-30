@@ -192,6 +192,35 @@ public class ProductExperienceTests
     }
 
     [Fact]
+    public void Home_long_result_lists_are_bounded_and_vertically_scrollable()
+    {
+        var xaml = File.ReadAllText(
+            FindRepositoryFile("src", "Css.App", "MainWindow.xaml"));
+
+        xaml.Should().Contain("x:Name=\"HealthSummaryLayoutGrid\"")
+            .And.Contain("x:Name=\"KeyFindingsLayoutGrid\"");
+
+        var dimensionsTag = OpeningTag(xaml, "HealthDimensionListView");
+        dimensionsTag.Should()
+            .Contain("Grid.Row=\"1\"")
+            .And.Contain("ScrollViewer.VerticalScrollBarVisibility=\"Auto\"")
+            .And.NotContain("Height=\"260\"");
+
+        var historyTag = OpeningTag(xaml, "HealthDigestHistoryScrollViewer");
+        historyTag.Should()
+            .Contain("Grid.Row=\"3\"")
+            .And.Contain("VerticalScrollBarVisibility=\"Auto\"");
+        xaml.Should().Contain("x:Name=\"HealthDigestHistoryItemsControl\"")
+            .And.NotContain("x:Name=\"HealthDigestHistoryListBox\"");
+
+        var findingsTag = OpeningTag(xaml, "KeyFindingsListBox");
+        findingsTag.Should()
+            .Contain("Grid.Row=\"3\"")
+            .And.Contain("ScrollViewer.VerticalScrollBarVisibility=\"Auto\"")
+            .And.NotContain("MinHeight=\"240\"");
+    }
+
+    [Fact]
     public void Home_agent_next_action_uses_only_internal_pages_and_re_resolves_app_targets()
     {
         var code = File.ReadAllText(FindRepositoryFile("src", "Css.App", "MainWindow.xaml.cs"));
@@ -227,10 +256,20 @@ public class ProductExperienceTests
         script.Should().Contain("healthDimensionCount");
         script.Should().Contain("machineHealthRows");
         script.Should().Contain("lastHealthDimensionCount -ge 7");
+        script.Should().Contain("HomeDriveHealthPlanHeadlineTextBlock");
+        script.Should().Contain("HomeDriveHealthPlanProgressTextBlock");
+        script.Should().Contain("HomeDriveHealthPlanButton");
+        script.Should().Contain("RecommendationActionTakeawayTextBlock");
+        script.Should().Contain("qa-drive-health-plan.png");
         script.Should().Contain("HomeAgentResponseTitleTextBlock");
         script.Should().Contain("HomeAgentResponseBodyTextBlock");
         script.Should().Contain("HomeAgentResponseSafetyTextBlock");
         script.Should().Contain("HomeAgentResponseNavigateButton");
+        script.Should().Contain("[System.Windows.Automation.ScrollPattern]::Pattern");
+        script.Should().Contain("VerticallyScrollable");
+        script.Should().Contain("keyFindingScrollAfter");
+        script.Should().Contain("HealthDigestHistoryScrollViewer");
+        script.Should().Contain("historyScrollAfter");
         script.Should().Contain("RecommendationsListBox");
         script.Should().Contain("Save-WindowScreenshot");
         script.Should().NotContain("Save-DesktopScreenshot")
@@ -1608,7 +1647,7 @@ public class ProductExperienceTests
     [Fact]
     public void C_drive_page_chrome_marks_system_drive_as_automatic_and_hides_technical_report_by_default()
     {
-        var chrome = CDrivePageChromePresenter.Create(@"C:\");
+        var chrome = CDrivePageChromePresenter.Create(@"C:\", @"C:\");
 
         chrome.ScanTargetLabel.Should().Be("\u7cfb\u7edf\u76d8 C \u76d8");
         chrome.ScanTargetHint.Should().Contain("\u81ea\u52a8\u8bc6\u522b");
@@ -1616,6 +1655,68 @@ public class ProductExperienceTests
         chrome.TechnicalReportToggleText.Should().Be("\u663e\u793a\u6280\u672f\u62a5\u544a");
         chrome.TechnicalReportHint.Should().Contain("\u8fdb\u9636\u68c0\u67e5");
         chrome.IsTechnicalReportVisibleByDefault.Should().BeFalse();
+    }
+
+    [Fact]
+    public void Data_drive_chrome_and_scan_summaries_name_the_selected_drive()
+    {
+        var chrome = CDrivePageChromePresenter.Create(@"D:\", @"C:\");
+        var result = new DriveScanResult
+        {
+            Drive = @"D:\",
+            TotalBytes = 500,
+            FreeBytes = 200,
+            TopLevel =
+            [
+                new()
+                {
+                    Name = "Games",
+                    Path = @"D:\Games",
+                    SizeBytes = 300,
+                    Category = UsageCategory.Other
+                },
+                new()
+                {
+                    Name = "Temp",
+                    Path = @"D:\Temp",
+                    SizeBytes = 100,
+                    Category = UsageCategory.Temp
+                }
+            ]
+        };
+
+        chrome.ScanTargetLabel.Should().Be("D \u76d8");
+        chrome.ScanTargetHint.Should().Contain("\u5207\u6362");
+        var rootCause = CDriveRootCauseSummaryBuilder.Build(result);
+        rootCause.Headline.Should().StartWith("D \u76d8");
+        var dataDriveTemp = rootCause.Cards.Single(card =>
+            card.PrimaryText.StartsWith("Temp ", StringComparison.Ordinal));
+        dataDriveTemp.Action.Should().Be(CDriveRootCauseAction.None);
+        dataDriveTemp.AgentSuggestion.Should().Contain("不会自动处理");
+        HealthCheckSummaryBuilder.Build(result, [])
+            .Dimensions.Single(item => item.Name == "\u78c1\u76d8\u5065\u5eb7")
+            .Result.Should().StartWith("D \u76d8");
+    }
+
+    [Fact]
+    public void Disk_scan_target_is_a_visible_noneditable_beginner_control()
+    {
+        var xaml = File.ReadAllText(FindRepositoryFile("src", "Css.App", "MainWindow.xaml"));
+        var code = File.ReadAllText(FindRepositoryFile("src", "Css.App", "MainWindow.xaml.cs"));
+
+        xaml.Should().Contain("AutomationProperties.AutomationId=\"DriveRootComboBox\"")
+            .And.Contain("AutomationProperties.Name=\"{Binding SelectedItem.AccessibilityName, RelativeSource={RelativeSource Self}}\"")
+            .And.Contain("SelectionChanged=\"DriveRootComboBox_SelectionChanged\"")
+            .And.Contain("IsEditable=\"False\"")
+            .And.Contain("<ComboBox.ItemContainerStyle>")
+            .And.Contain("Property=\"AutomationProperties.Name\" Value=\"{Binding AccessibilityName}\"")
+            .And.Contain("Content=\"磁盘清理\"");
+        xaml.Should().NotContain("x:Name=\"DriveRootComboBox\" Visibility=\"Collapsed\"");
+        code.Should().Contain("DriveInfo.GetDrives()")
+            .And.Contain("DriveScanTargetPresenter.Create")
+            .And.Contain("_healthScanLoadGate.Invalidate()")
+            .And.Contain("DriveRootComboBox.IsEnabled = false")
+            .And.Contain("DriveRootComboBox.IsEnabled = true");
     }
 
     [Fact]
@@ -4987,6 +5088,18 @@ public class ProductExperienceTests
         var end = source.IndexOf(endMarker, start + startMarker.Length, StringComparison.Ordinal);
         end.Should().BeGreaterThan(start);
         return source[start..end];
+    }
+
+    private static string OpeningTag(string xaml, string controlName)
+    {
+        var nameToken = $"x:Name=\"{controlName}\"";
+        var nameIndex = xaml.IndexOf(nameToken, StringComparison.Ordinal);
+        nameIndex.Should().BeGreaterThanOrEqualTo(0);
+        var tagStart = xaml.LastIndexOf('<', nameIndex);
+        var tagEnd = xaml.IndexOf('>', nameIndex);
+        tagStart.Should().BeGreaterThanOrEqualTo(0);
+        tagEnd.Should().BeGreaterThan(nameIndex);
+        return xaml[tagStart..(tagEnd + 1)];
     }
 
     private static SoftwareProfile CreateCDriveMigrationProfile() =>

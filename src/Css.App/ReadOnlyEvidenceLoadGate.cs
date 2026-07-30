@@ -27,6 +27,12 @@ public sealed class ReadOnlyEvidenceLoadGate
             _hasCompletedLoad = true;
     }
 
+    public void Invalidate()
+    {
+        lock (_sync)
+            _hasCompletedLoad = false;
+    }
+
     private Task StartAsync(Func<Task<bool>> loader, bool forceRefresh)
     {
         ArgumentNullException.ThrowIfNull(loader);

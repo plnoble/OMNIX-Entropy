@@ -21,6 +21,7 @@ public sealed class HealthDigestEvidenceNavigationTests
                 "AutomationProperties.AutomationId=\"OpenHealthDigestEvidenceButton\"");
         handler.Should().Contain("_isOpeningHealthDigestEvidence")
             .And.Contain("OpenHealthDigestEvidenceButton.IsEnabled = false")
+            .And.Contain("SelectSystemDriveTarget()")
             .And.Contain("ShowPage(\"CDrive\")")
             .And.Contain("await EnsureHealthScanLoadedAsync()")
             .And.Contain("_healthScanLoadGate.HasCompletedLoad")
@@ -41,7 +42,7 @@ public sealed class HealthDigestEvidenceNavigationTests
             "_healthScanLoadGate.HasCompletedLoad",
             StringComparison.Ordinal);
         var successIndex = handler.IndexOf(
-            "\\u5f53\\u524d C \\u76d8\\u8bc1\\u636e\\u5df2\\u6253\\u5f00",
+            "\\u5f53\\u524d\\u7cfb\\u7edf\\u76d8\\u8bc1\\u636e\\u5df2\\u6253\\u5f00",
             StringComparison.Ordinal);
         loadIndex.Should().BeGreaterThanOrEqualTo(0);
         readinessIndex.Should().BeGreaterThan(loadIndex);
@@ -51,7 +52,7 @@ public sealed class HealthDigestEvidenceNavigationTests
             .And.Contain("!_isOpeningHealthDigestEvidence")
             .And.Contain("_lastHealthSummary is null")
             .And.Contain("\\u91cd\\u65b0\\u4f53\\u68c0\\u5e76\\u67e5\\u770b\\u5f53\\u524d\\u8bc1\\u636e")
-            .And.Contain("\\u67e5\\u770b\\u5f53\\u524d C \\u76d8\\u8bc1\\u636e");
+            .And.Contain("\\u67e5\\u770b\\u5f53\\u524d\\u7cfb\\u7edf\\u76d8\\u8bc1\\u636e");
     }
 
     private static string Read(params string[] segments) =>

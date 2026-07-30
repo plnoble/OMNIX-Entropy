@@ -1,5 +1,41 @@
 # Agent Handoff
 
+## Latest Update - 2026-07-30 Local 0.1.4 review and source commit
+
+- Current objective: preserve the reviewed 0.1.4 source state and obtain a separate user decision before any push, signing, installer, tag, or GitHub Release work.
+- What changed: ready-fixed-drive selector and selected-drive read-only scan scope; system-only Windows diagnostics; bounded homepage result scrolling; explicit 80% disk comfort target and Agent-led preview; complete stale-state reset; system-drive-only history labelling/navigation; source/release version 0.1.4; process-scoped multi-disk GUI smoke.
+- What is verified: focused review 26/26; final full Debug 1085/1085; Release 0 warnings/errors; source integrity 390 files, InvalidUtf8 0, ReplacementFiles 0, XAML 18/18; Debug `ProductVersion=0.1.4` and `FileVersion=0.1.4.0`; both PowerShell smoke parsers pass; real home smoke proves scroll movement, 80% target, selected low-risk preview, visible confirmation entry, and `noOperationExecuted=true`; real selector smoke lists C/D, selects D, clears current results, labels retained history as system-drive history, and captures `.omx/qa-multidisk-selector.png`; diff check has no errors.
+- What is not verified: no real full D-drive scan was allowed to traverse user data; no cleanup confirmation or operation executed; no installer was built, signed, launched, installed, or uninstalled; no push, tag, CI, GitHub Release, or installed-app update occurred.
+- Known risks: data-drive scans can take time depending on user data; only system-drive history is retained in 0.1.4; per-drive trends need a designed schema migration; public/installed 0.1.3 remains the latest available version.
+- Exact next recommended action: if the user wants 0.1.4 distributed, review the clean local commit, push it, wait for CI, then run the existing signed personal installer/release gates. Do not call 0.1.4 available in the updater before the public Release and remote asset verification succeed.
+
+## Latest Update - 2026-07-29 Beginner C-drive health plan
+
+- Current objective: preserve the completed working-tree answer to “how do I make C healthier?” without weakening local execution safety.
+- What changed: a read-only 80% comfort-target presenter; first-view target/safe-contribution/remaining-gap band; detailed three-step disk plan; strict counting of only executable, reversible low-risk cleanup evidence; automatic preferred-card selection for preview; one scroll surface for the complete right-hand recommendation workflow.
+- What is verified: focused 13/13; full Debug 1084/1084; Release 0 warnings/errors; source integrity 390 files and 18/18 XAML; diff check pass. Real WPF evidence showed a 19.1 GB target, 4.0 KB safe contribution, 19.1 GB gap, selected low-risk preview, visible “查看并确认移动到隔离区” entry, both existing home scroll surfaces, and `noOperationExecuted=true`. Screenshots: `.omx/qa-home-agent-next-action.png`, `.omx/qa-drive-health-plan.png`.
+- What is not verified: no confirmation was accepted and no cleanup was executed; no installed build/package contains this change; no commit, push, version bump, or release was performed.
+- Known risks: 80% is a transparent product comfort threshold rather than a Windows health guarantee; scanning and recommendation quality still depend on available evidence; installed 0.1.3 remains unchanged.
+- Exact next recommended action: review and commit the combined working-tree slices, then decide separately whether to publish a new release for in-app update.
+
+## Latest Update - 2026-07-29 Scrollable homepage results
+
+- Current objective: preserve the completed working-tree fix for clipped/non-scrollable homepage key findings and health history.
+- What changed: both homepage cards now use bounded grid rows; key findings retain native `ListBox` scrolling; the complete history summary, daily rows, and evidence button share one vertical `ScrollViewer` with a non-nested `ItemsControl`; the isolated WPF smoke creates overflow and proves both scroll positions move.
+- What is verified: focused 10/10; full Debug 1080/1080; Release 0 warnings/errors; source integrity 388 files and 18/18 XAML; parser and diff check pass. Real UIAutomation moved key findings 0% to 25% and history 0% to 100%, kept internal next-action navigation working, executed no operation, and captured `.omx/qa-home-agent-next-action.png`.
+- What is not verified: no installed build or package contains this change; no commit, push, version bump, or release was performed.
+- Known risks: the current worktree also contains the preceding completed multi-disk slice; installed 0.1.3 remains unchanged; very small unsupported windows can require more scrolling.
+- Exact next recommended action: review and commit the combined working-tree changes, then decide separately whether to publish a new release for in-app update.
+
+## Latest Update - 2026-07-29 Multi-disk read-only health scan
+
+- Current objective: preserve the completed working-tree implementation that lets beginners choose C/D/other ready fixed local disks for read-only health analysis without applying Windows-system cleanup rules to data drives.
+- What changed: visible non-editable fixed-drive selector with free-space/accessibility labels; Windows drive first; dynamic selected-drive summaries; stale-result invalidation; scan-time selector lock; system-only big-rock/unexpected-root policy; whole selected data-drive large/duplicate scope; neutral data-drive folder conclusions; reusable WPF selector smoke.
+- What is verified: focused 200/200; full Debug 1079/1079; Release 0 warnings/errors; source integrity 388 files and 18/18 XAML; smoke parser and diff check pass. Real WPF UIAutomation listed C/D, selected D, exposed the selected name and pending conclusion, and saved `.omx/qa-multidisk-selector.png`.
+- What is not verified: no real full C/D scan was started in this slice; no installed build, package, or updater acceptance was run; the worktree changes are not committed, pushed, versioned, or released.
+- Known risks: scanning a large data disk can take time despite cancellation and crawler bounds; removable/network disks are intentionally excluded; the installed 0.1.3 does not contain this slice.
+- Exact next recommended action: review and commit the working-tree slice, then obtain a separate decision for a new release. For runtime acceptance, select a small fixed data drive or allow a cancellable D scan and confirm the summary remains drive-specific and read-only.
+
 ## Latest Update - 2026-07-29 Public 0.1.3 released
 
 - Current objective: use the correctly installed 0.1.2 for the first true 0.1.3 in-app update and preserve its runtime receipt.

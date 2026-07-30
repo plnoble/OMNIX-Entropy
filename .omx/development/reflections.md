@@ -3,6 +3,38 @@
 Add an entry at the top of this file before declaring a meaningful task finished.
 Keep entries short and focused on reusable learning.
 
+## 2026-07-30 - A multi-disk UI needs scoped state, history, and tests
+
+- What worked: reviewing the combined slice as one user journey caught cross-feature problems that isolated tests missed: stale plan details, generic copy replacing a selected explanation, and system history appearing under a D-drive selection without an explicit label.
+- What caught real risk: the real selector screenshot. Unit tests proved policy neutrality, but the screenshot showed that retained C-drive history needed a visible “系统盘” scope.
+- Test lesson: UIAutomation should enumerate only windows owned by the target process. Searching the entire desktop made unrelated accessibility providers an availability dependency and produced repeatable `RPC_E_SERVERFAULT`.
+- Delivery lesson: source version 0.1.4 is not an update until signing, installer verification, push, CI, and GitHub Release gates complete.
+- Next improvement: design drive-keyed digest storage and filtering before offering D/E history trends; do not infer comparability by putting different volumes in one score timeline.
+
+## 2026-07-29 - Show the gap, not just the cleanup number
+
+- What worked: separating “space needed to reach 80%,” “space supported by executable reversible evidence,” and “remaining gap.” The resulting first screen makes it impossible for a 4 KB fixture cleanup to masquerade as a 19.1 GB solution.
+- What caught real risk: screenshots, not source checks. The first detailed homepage band crowded out result rows, and the first disk-page plan left the final preview entry outside the visible workflow.
+- UX lesson: the homepage should carry one target, one honest progress sentence, and one action. Detailed sequencing belongs on the destination page, where the entire workflow must share a scroll surface.
+- Safety lesson: “low risk” alone is not safe contribution; count it only when reversibility and an attached local operation support the claim.
+- Next improvement: attribute the remaining gap to ranked personal files and applications so “look at big files” becomes an evidence-backed shortlist rather than a generic second step.
+
+## 2026-07-29 - A scrollbar is useful only when the viewport is real
+
+- What worked: a failing source contract established the intended row allocation, while UIAutomation verified that each scrollbar could actually change position.
+- What caught real risk: the first screenshot showed that making one child list scrollable did not make the complete history workflow reachable; the evidence button still fell outside the card.
+- UX lesson: choose the semantic scroll region. Key findings are an interactive list, but health history is its summary, rows, and action together.
+- Waste: two layout iterations were needed because the first acceptance check focused on list scrollability instead of end-to-end action reachability.
+- Next improvement: centralize a WPF smoke helper that checks `VerticallyScrollable`, moves the viewport, and verifies the last required action can be brought into view.
+
+## 2026-07-29 - Multi-disk scanning is a policy change, not a dropdown change
+
+- What worked: tracing the selected root through system probes, anomaly classification, personal-file analysis, snapshots, summaries, lazy loading, and UI copy before exposing the control. The backend already accepted another root; the real work was preventing C-drive assumptions from escaping onto D/E.
+- What caught real risk: the adversarial `D:\Temp` contract. A folder name can be a classification clue, but on a data drive it cannot become cleanup authority or even a beginner-facing “safe cleanup” action.
+- UX lesson: accessibility has to live on the actual `ComboBox` and `ComboBoxItem`, not a decorative data-template panel. The real smoke caught what source presence and unit tests could not.
+- Waste: the first smoke used non-ASCII PowerShell literals and searched all process list items too broadly. ASCII control flow plus required-pattern filtering made the automation deterministic.
+- Next improvement: add an isolated, bounded D-drive fixture run that completes the scan and screenshots the drive-specific root-cause and large-file conclusions without touching a real user disk.
+
 ## 2026-07-29 - The installer and updater must share one directory contract
 
 - What worked: verifying the user's actual reinstall rather than assuming install success meant update readiness. The doubled `Install` was a product contract mismatch, and keeping the updater strict while fixing the installer preserved the security boundary.

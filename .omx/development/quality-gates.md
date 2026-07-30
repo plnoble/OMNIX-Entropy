@@ -1,5 +1,48 @@
 # Quality Gates
 
+## 2026-07-30 - 0.1.4 review pre-change gate
+
+| Category | Status | Evidence | Residual risk |
+| --- | --- | --- | --- |
+| Scope and consent | Pass | User explicitly requested review, commit, and a version bump. | Push, tag, installer creation, signing, release publication, and installed-product mutation remain outside this request. |
+| Evidence consistency | Pass | Drive switch/start/cancel/failure paths clear plan steps and safety copy; data-drive scans do not enter the system-drive timeline; the history action reselects the system drive. Focused source/unit contracts and final screenshots cover the boundaries. | Per-drive history is intentionally deferred and would require a schema/UX design. |
+| Beginner UX | Pass | Selected safe-card explanation remains specific; D-drive plans say “other disk”; history is labelled “系统盘体检历史”; screenshots show the first-view target and the D pending state without stale D results. | A real full D-drive scan was not run because its duration depends on user data; fixture and policy tests cover the behavior. |
+| Operation safety | Pass | The combined slice remains read-only until the existing explicit confirmation and `OperationPipeline`; no review change may add direct execution. | Real cleanup execution is intentionally not part of this gate. |
+| Version and delivery | Pass | `Css.App.csproj`, Debug `ProductVersion`, `FileVersion`, and `docs/release/0.1.4.zh-CN.md` report 0.1.4. | A local versioned commit is not a published or installable update; installed/public 0.1.3 remains unchanged. |
+| Tests and build | Pass | Focused review 26/26; final full Debug 1085/1085; Release 0 warnings/errors; source integrity 390 files, InvalidUtf8 0, ReplacementFiles 0, XAML 18/18; both smoke parsers and real WPF smokes pass; diff check has no errors. | Multi-disk smoke required one script fix after two external UIAutomation RPC faults; the final process-scoped run passed. |
+
+## 2026-07-29 - Beginner C-drive health-plan pre-change gate
+
+| Category | Status | Evidence | Residual risk |
+| --- | --- | --- | --- |
+| Scope and consent | Pass | User explicitly said the current product still does not explain how to make C healthier. | No release/version change is included. |
+| Evidence honesty | Pass | `DriveHealthPlanExperienceTests` covers full/safe-gap, no executable evidence, and already-comfortable states. Safe contribution requires low risk, reversible status, and an attached operation. | The 80% threshold is an explicit OMNIX comfort policy, not a Windows guarantee. |
+| Beginner UX | Pass | `.omx/qa-home-agent-next-action.png` shows target, safe contribution, gap, and one button before detail panels; `.omx/qa-drive-health-plan.png` shows the selected preview and its next entry. | Long recommendation collections still require ordinary scrolling by design. |
+| Operation safety | Pass | Runtime smoke selected the preferred low-risk card and exposed “查看并确认移动到隔离区” but never clicked it; JSON reports `noOperationExecuted=true`. | Destructive execution is intentionally outside this layout/decision slice. |
+| Tests and build | Pass | Focused 13/13; full Debug 1084/1084; Release 0 warnings/errors; source integrity 390 files and 18/18 XAML; real WPF smoke and diff check pass. | `git diff --check` reports only CRLF-to-LF notices for two already edited source files. |
+
+## 2026-07-29 - Homepage scrolling pre-change gate
+
+| Category | Status | Evidence | Residual risk |
+| --- | --- | --- | --- |
+| Scope and consent | Pass | User reported that the homepage history and key-finding regions cannot scroll and asked for correction. | No release/version change is included. |
+| Root-cause evidence | Pass | XAML inspection found unbounded `StackPanel` measurement; the first runtime iteration also proved that scrolling only the daily rows still clipped the complete history workflow. | None known for the reported two regions. |
+| Beginner UX | Pass | `.omx/qa-home-agent-next-action.png` shows independent scrollbars; UIAutomation moved key findings 0% to 25% and history 0% to 100%, with the evidence action inside the history surface. | At very small unsupported window sizes, content density can still require more scrolling. |
+| Interaction safety | Pass | The smoke generated a read-only plan, used its internal next action, confirmed `noOperationExecuted=true`, and removed the isolated fixture in `finally`. | No destructive operation path was exercised because this is a layout-only change. |
+| Tests and build | Pass | Focused 10/10; full Debug 1080/1080; Release 0 warnings/errors; source integrity 388 files and 18/18 XAML; PowerShell parser and diff check pass. | `git diff --check` reports only CRLF-to-LF notices for two already edited source files. |
+
+## 2026-07-29 - Multi-disk scan pre-change gate
+
+| Category | Status | Evidence | Residual risk |
+| --- | --- | --- | --- |
+| Scope and consent | Pass | User explicitly asked to enable scanning drives other than C. | No release/version bump is included unless separately requested. |
+| Read-only boundary | Pass | No handler or mutation authority was added. Data-drive folders cannot create cleanup operations, and a data folder named `Temp` gets no cleanup card action. | A future data-drive cleanup feature needs separate evidence and consent design. |
+| Target safety | Pass | `DriveScanTargetPresenter` includes only ready `DriveType.Fixed` disks, orders the Windows disk first, and exposes no typed path input. Focused presenter tests pass. | Removable and network drives are intentionally unavailable in V1. |
+| Evidence correctness | Pass | System big-rocks and unexpected-root policy run only on the Windows drive; data-drive large/duplicate analysis uses the selected root; summaries name the selected disk. Focused scan/product contracts pass 200/200. | A whole data-drive scan can be long, but remains cancellable and bounded by the existing crawler limits. |
+| Beginner UX | Pass | Stable selector/item automation names; real WPF smoke listed C/D with free space, selected D, exposed `D 盘，剩余 256.2 GB`, and saved `.omx/qa-multidisk-selector.png`. | Screenshot covers the 1500x1000 desktop layout, not every DPI/display combination. |
+| Stale-state control | Pass | Selection invalidates the read-only load gate, clears old conclusions, shows a selected-drive pending state, and is disabled during an active scan. Unit/source and real UIAutomation checks pass. | Selection is intentionally blocked until an active scan finishes or is cancelled. |
+| Tests and build | Pass | Focused 200/200; full Debug 1079/1079; Release 0 warnings/errors; integrity 388 files/18 XAML; smoke parser and `git diff --check` pass. | No packaged installer or installed-version acceptance was run because this slice is not released. |
+
 ## 2026-07-29 - Managed install-layout closure
 
 | Category | Status | Evidence | Residual risk |

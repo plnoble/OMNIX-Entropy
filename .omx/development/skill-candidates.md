@@ -1,5 +1,37 @@
 # Skill Candidates
 
+### 2026-07-30 - Scope WPF UIAutomation discovery to the target process
+
+- Trigger: a desktop smoke must find controls in a popup or secondary HWND and is tempted to call `AutomationElement.RootElement.FindAll(Descendants, ...)`.
+- Reusable lesson: enumerate root children matching the target process id, then search descendants inside only those windows. Whole-desktop discovery makes every unrelated accessibility provider part of the test and can fail with `RPC_E_SERVERFAULT`.
+- Evidence: the multi-disk ComboBox smoke failed twice at whole-desktop list-item enumeration and passed immediately after process-window scoping, while preserving C/D option and selection assertions.
+- Proposed form: add a reusable helper that gathers process-owned top-level windows and performs bounded, COM-fault-tolerant descendant lookup.
+- Promotion threshold: promote after a second popup-based WPF smoke adopts the helper.
+
+### 2026-07-29 - Frame maintenance advice as target, supported contribution, and gap
+
+- Trigger: a beginner-facing maintenance product has a score and a list of possible actions but users still cannot tell what to do or whether an action solves the problem.
+- Reusable lesson: define a transparent target, calculate the exact improvement required, count only evidence-backed safe contributions, and state the remaining gap. A small safe action should remain recommended without being presented as sufficient.
+- Evidence: OMNIX previously showed 86.4% used and 4 KB safe cleanup. The new plan says 19.1 GB is needed for the 80% comfort target, 4 KB is currently supported, and 19.1 GB still requires large-file/application review.
+- Proposed form: a generic decision-plan presenter with `Target`, `SupportedContribution`, `RemainingGap`, ordered actions, and a non-executing primary navigation action.
+- Promotion threshold: promote after a second maintenance domain uses the same framing.
+
+### 2026-07-29 - Prove WPF scrollability with a bounded semantic viewport
+
+- Trigger: a WPF card contains variable-height results and appears clipped or ignores the mouse wheel.
+- Reusable lesson: a `ListBox` under a vertical `StackPanel` is commonly measured at desired height, so an `Auto` scrollbar can exist in source without a usable viewport. Constrain the region with a `Grid` star row, avoid nested scrolling controls, and choose the whole semantic workflow as the scroll surface when its summary and action must move together.
+- Evidence: the first homepage layout made key findings scroll but still clipped the history action. A bounded history `ScrollViewer` plus non-scrolling `ItemsControl` moved 0% to 100%; the bounded key list moved 0% to 25%.
+- Proposed form: a reusable UIAutomation helper that requires `ScrollPattern.VerticallyScrollable`, invokes a bounded increment, checks percentage movement, and verifies the final action can be reached.
+- Promotion threshold: promote after a second WPF page needs the same viewport proof.
+
+### 2026-07-29 - Bind WPF accessibility metadata to the control container
+
+- Trigger: a WPF `ItemsControl`, `ComboBox`, or list uses a data template and must be verified by screen readers or UIAutomation.
+- Reusable lesson: placing `AutomationProperties.Name` on a decorative `StackPanel` inside a template does not guarantee that the actual `ComboBoxItem`/`ListItem` exposes a usable name or selection pattern. Bind the name on the item container and the parent control, then verify the runtime control pattern rather than only searching source.
+- Evidence: the multi-disk selector's first real smoke could not identify two selectable drive items even though the template panel had an accessibility name. An `ItemContainerStyle`, selected-value name binding, and `SelectionItemPattern`-qualified smoke produced stable C/D names and selection.
+- Proposed form: a reusable WPF accessibility smoke helper that enumerates required control patterns, names, enabled state, and selected value.
+- Promotion threshold: promote after another WPF control needs the same container-level correction.
+
 ### 2026-07-29 - Give append-only agent records a readability budget
 
 - Trigger: any project whose protocol requires agents to read state files before working, where those files are append-only.

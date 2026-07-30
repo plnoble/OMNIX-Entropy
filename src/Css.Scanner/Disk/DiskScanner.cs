@@ -36,15 +36,24 @@ public sealed class DiskScanner
             catch (Exception ex) { progress?.Report("规则加载失败: " + ex.Message); }
         }
 
-        progress?.Report("探测大块头系统文件...");
-        var bigRocks = _bigRocks.Probe(Environment.GetFolderPath(Environment.SpecialFolder.Windows));
+        var windowsDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Windows);
+        var isSystemDrive = DiskScanScopePolicy.IsSystemDrive(driveRoot, windowsDirectory);
+        var systemDriveRoot = Path.GetPathRoot(windowsDirectory) ?? driveRoot;
+        if (isSystemDrive)
+            progress?.Report("探测大块头系统文件...");
+        var bigRocks = isSystemDrive
+            ? _bigRocks.Probe(systemDriveRoot)
+            : [];
 
         progress?.Report("爬取目录...");
         var topLevel = await _crawler.CrawlTopLevelAsync(driveRoot, progress, ct);
 
         progress?.Report("分类...");
         var classifier = new CategoryClassifier(rules);
-        classifier.Classify(topLevel, driveRoot);
+        classifier.Classify(
+            topLevel,
+            driveRoot,
+            markUnexpectedRoots: isSystemDrive);
 
         return new DriveScanResult
         {

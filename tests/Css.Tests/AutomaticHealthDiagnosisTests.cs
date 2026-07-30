@@ -67,6 +67,22 @@ public sealed class AutomaticHealthDiagnosisTests
         await first;
     }
 
+    [Fact]
+    public async Task Changing_scan_target_invalidates_completed_read_only_evidence()
+    {
+        var gate = new ReadOnlyEvidenceLoadGate();
+        var calls = 0;
+
+        await gate.EnsureLoadedAsync(() => Task.FromResult(++calls > 0));
+        gate.HasCompletedLoad.Should().BeTrue();
+
+        gate.Invalidate();
+
+        gate.HasCompletedLoad.Should().BeFalse();
+        await gate.EnsureLoadedAsync(() => Task.FromResult(++calls > 0));
+        calls.Should().Be(2);
+    }
+
     [Theory]
     [InlineData("C盘为什么总是满", true)]
     [InlineData("哪些垃圾占了系统盘", true)]

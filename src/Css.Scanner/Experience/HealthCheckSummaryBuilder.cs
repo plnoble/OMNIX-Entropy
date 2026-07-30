@@ -29,6 +29,7 @@ public static class HealthCheckSummaryBuilder
             .Where(r => HealthFindingRiskPolicy.IsLowRiskClean(r.Action, r.Risk))
             .Select(r => r.EstimatedImpactBytes));
         var score = Math.Clamp(100 - (int)Math.Round(Math.Max(0, usedPercent - 50)), 0, 100);
+        var driveLabel = DriveScanTargetPresenter.DriveLabel(result.Drive);
 
         return new HealthCheckSummary
         {
@@ -37,6 +38,7 @@ public static class HealthCheckSummaryBuilder
             Dimensions = BuildDimensions(
                 score,
                 usedPercent,
+                driveLabel,
                 reclaimable,
                 machineHealth,
                 softwareProfiles,
@@ -52,7 +54,8 @@ public static class HealthCheckSummaryBuilder
 
     private static IReadOnlyList<HealthDimensionResult> BuildDimensions(
         int score,
-        double cDriveUsedPercent,
+        double driveUsedPercent,
+        string driveLabel,
         long reclaimableBytes,
         MachineHealthObservation? machineHealth,
         IReadOnlyList<SoftwareProfile>? softwareProfiles,
@@ -70,8 +73,8 @@ public static class HealthCheckSummaryBuilder
             new()
             {
                 Name = "磁盘健康",
-                Result = $"C 盘 {cDriveUsedPercent:0.0}%，可安全处理约 {FormatBytes(reclaimableBytes)}",
-                Rating = cDriveUsedPercent >= 85 ? "需要关注" : "有优化空间"
+                Result = $"{driveLabel} {driveUsedPercent:0.0}%，可安全处理约 {FormatBytes(reclaimableBytes)}",
+                Rating = driveUsedPercent >= 85 ? "需要关注" : "有优化空间"
             }
         };
 
