@@ -1,5 +1,14 @@
 # Agent Handoff
 
+## Latest Update - 2026-07-30 Public 0.1.4 release in progress
+
+- Current objective: publish a signed, independently verified `v0.1.4` from one pushed CI-passing revision, then record and push the completion evidence.
+- What changed: user authorization expanded from local commit to public push/release; release preflight records now bind the future package, manifest, tag, and Release target to the same preparation revision.
+- What is verified: reviewed 0.1.4 source gates remain green; host preflight found SignTool, Inno Setup, the existing eligible signer `5688958FEA0056861558E8DCF9D2381AF46074B2`, and authenticated `plnoble` GitHub CLI access.
+- What is not verified: preparation commit/push/CI, signed payload, setup, draft assets, download-back hashes, public Release, and latest endpoint are all still pending.
+- Known risks: timestamp and GitHub availability are external; personal signing provides no public SmartScreen reputation; no installer may be run as part of release automation.
+- Exact next recommended action: commit these preparation records, push `main`, wait for CI, then use only the guarded repository scripts to create and verify 0.1.4 artifacts.
+
 ## Latest Update - 2026-07-30 Local 0.1.4 review and source commit
 
 - Current objective: preserve the reviewed 0.1.4 source state and obtain a separate user decision before any push, signing, installer, tag, or GitHub Release work.

@@ -1,5 +1,16 @@
 # Current Development State
 
+## Active Slice - 2026-07-30 Public 0.1.4 release
+
+- Objective: push the reviewed 0.1.4 source, obtain passing GitHub CI, build and independently verify the existing personal-signer Windows installer, stage and download-back verify the four fixed GitHub assets, publish `v0.1.4`, and confirm the public latest endpoint.
+- Authorization: the user explicitly requested “推送发布”, authorizing push, tag/Release creation, local signing with the existing non-exportable personal publisher key, and public GitHub publication of 0.1.4. This does not authorize installer execution, certificate creation/export, trust-store mutation, antivirus changes, or `LocalMachine` changes.
+- Dependencies: clean 0.1.4 source, GitHub CLI host login, CI, `D:\Development\Inno Setup 6\ISCC.exe`, Windows SDK SignTool, existing signer `5688958FEA0056861558E8DCF9D2381AF46074B2`, approved RFC3161 timestamp service, and guarded release scripts.
+- Risks: publishing an artifact from a revision different from the Release target, accepting a stale or unsigned payload, exposing local secrets, calling a draft public before download-back verification, or implying installation without running the visible installer.
+- Impact scope: release records, one release-preparation commit, push, CI, ignored local artifacts, Authenticode signing/timestamping, tag `v0.1.4`, and four public GitHub Release assets. No product operation, installer launch, install/uninstall, or machine trust change.
+- Acceptance: release-preparation revision pushed; CI passes; portable and signed candidates match the committed 0.1.4 revision; App, worker, setup, and uninstaller share the expected signer and timestamps; installer verifier returns `CanStageGitHubRelease=true`; draft assets re-download and hash-match; downloaded setup independently verifies; public latest is non-draft/non-prerelease `v0.1.4`; final records are committed and pushed.
+- Status: in progress. Host preflight found the existing eligible RSA signer with private key and code-signing EKU, SignTool, Inno Setup, and valid GitHub CLI authentication. No artifact has been signed or published yet.
+- Exact next action: commit the release-preparation records, push `main`, and wait for CI before producing any signed artifact.
+
 ## Completed Slice - 2026-07-30 Review, commit, and version 0.1.4
 
 - Objective: review the combined multi-disk, homepage-scrolling, and beginner disk-health-plan working tree; fix release-blocking correctness or beginner-UX defects; set the source version to 0.1.4; verify; and create one local commit.

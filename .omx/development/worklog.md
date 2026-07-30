@@ -1,5 +1,12 @@
 # Development Worklog
 
+## 2026-07-30 - Began public 0.1.4 release
+
+- User explicitly requested push and publication after the reviewed local 0.1.4 commit.
+- Host-only read-only preflight found the existing personal publisher signer `5688958FEA0056861558E8DCF9D2381AF46074B2`, accessible non-exported private key, RSA/code-signing eligibility through 2029, Windows SDK SignTool, Inno Setup 6, and an authenticated `plnoble` GitHub CLI session.
+- Release scope excludes installer execution, install/uninstall, certificate creation/export, trust-store changes, antivirus changes, and `LocalMachine` actions.
+- Chosen sequence: commit release-preparation records; push and wait for CI; only then build/sign/verify; create draft; download all assets and independently verify; publish; recheck latest; record completion.
+
 ## 2026-07-30 - Began 0.1.4 combined-slice review
 
 - Confirmed `main` at `f372153`, source version 0.1.3, and the expected uncommitted multi-disk, homepage-scroll, and beginner health-plan files.

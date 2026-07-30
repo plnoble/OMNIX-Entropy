@@ -1,5 +1,12 @@
 # Decision Log
 
+## 2026-07-30 - Bind 0.1.4 artifacts to a pushed CI-passing release-preparation revision
+
+- Decision: create one records-only release-preparation commit after the reviewed 0.1.4 feature commit; push it and require passing CI before local signing. The channel manifest, Release target, signed payload revision, and tag must all identify that preparation revision.
+- Rejected alternative: sign from the earlier local commit while the records describing release authorization remain unpushed, or sign before CI.
+- Reason: one immutable revision must explain both product state and publication authorization, and GitHub Actions must verify exactly what the Release claims.
+- Consequence: the local development binary from `337e037` is not the release candidate; a fresh portable/signed package is built only after the preparation revision passes CI.
+
 ## 2026-07-30 - Keep health history system-drive scoped in 0.1.4
 
 - Decision: data-drive scans update the current page but do not enter the existing health-digest timeline; the timeline and its evidence action are explicitly labelled as system-drive history and the action reselects the system drive before loading current evidence.

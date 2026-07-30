@@ -1,5 +1,17 @@
 # Quality Gates
 
+## 2026-07-30 - 0.1.4 public release preflight
+
+| Category | Status | Evidence | Residual risk |
+| --- | --- | --- | --- |
+| Scope and consent | Pass | User explicitly requested “推送发布” after the reviewed local 0.1.4 commit. | Installer execution, certificate/trust changes, private-key export, antivirus changes, and `LocalMachine` actions remain unauthorized. |
+| Source readiness | Pass | Local `337e037` is clean and ahead of public 0.1.3 by one commit; Debug/full/Release/integrity/GUI gates passed before release authorization. | A release-preparation records commit will become the exact target and must pass CI before signing. |
+| Signing prerequisites | Pass | Host read-only inspection reports one eligible CurrentUser RSA code-signing certificate with private key/EKU, thumbprint `5688958FEA0056861558E8DCF9D2381AF46074B2`, valid through 2029; SignTool and Inno Setup exist. | RFC3161 availability remains external; signer must be selected explicitly. |
+| GitHub identity | Pass | Host `gh auth status` reports active `plnoble` login with `repo` and `workflow`; origin is fixed to `plnoble/OMNIX-Entropy`. | Network and GitHub availability remain external. |
+| CI and source publication | Warn | Not pushed yet. | Must pass before artifact signing. |
+| Signed payload and installer | Warn | Not built for the release target yet. | Must pass same-signer, timestamp, manifest, D-first, visible-directory, and no-silent-install gates. |
+| Draft download-back and public latest | Warn | No `v0.1.4` draft/public Release exists yet. | Must verify all four remote assets before publication and latest after publication. |
+
 ## 2026-07-30 - 0.1.4 review pre-change gate
 
 | Category | Status | Evidence | Residual risk |
