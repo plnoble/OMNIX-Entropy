@@ -3,6 +3,15 @@
 Add an entry at the top of this file before declaring a meaningful task finished.
 Keep entries short and focused on reusable learning.
 
+## 2026-08-01 - Public 0.1.5 release
+
+- What worked: one immutable source target bound CI, signed payload, setup, channel manifest, tag, and Release; the final records commit remained deliberately outside that product target.
+- What caught real risk: trust-context verification failed closed in the restricted environment and succeeded only after explicit approval against the unchanged bytes and strict verifier. Download-back hashing and independent setup verification proved GitHub transport separately from local signing.
+- Delivery lesson: `releases/latest` plus a successfully parsed public channel manifest is the actual updater availability receipt; a published page alone is not enough.
+- Process lesson: PowerShell release checks should collect `foreach` output before piping, and binary HTTP responses must be decoded before JSON parsing rather than assuming `Content` is a string.
+- Remaining risk: no installer or disposable Windows acceptance ran, and the personal certificate has no public SmartScreen reputation. Those limits should stay visible instead of being averaged into otherwise green cryptographic gates.
+- Next improvement: extend the guarded release script to emit one machine-readable receipt covering draft creation, all four download-back hashes, independent installer verification, public latest, and public manifest parsing.
+
 ## 2026-07-30 - A duplicate app card needs an exact identity and an outcome
 
 - What worked: treating Antigravity/OpenCode as one explanatory family but several independent operation targets. The user can understand the relationship without one ambiguous family-wide uninstall action.

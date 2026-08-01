@@ -1,5 +1,55 @@
 # Error Ledger
 
+## 2026-08-01 - Record patch reconstructed an inexact source line
+
+- Symptom: the first patch that closed the stale active-slice status failed verification without changing the file.
+- Wrong assumption: the long status line could be reconstructed from the earlier read.
+- Root cause: the patch omitted one existing `C-drive` qualifier, so the context was not exact.
+- Detection method: `apply_patch` rejected the edit; `Select-String -Context` exposed the exact line.
+- Fix: reread the local context and patch the exact text.
+- Prevention rule: copy exact nearby text before replacing a long record line; do not rebuild it from memory.
+- Skill candidate: no; existing editing guidance already covers exact context.
+
+## 2026-08-01 - Public release manifest arrived as bytes, not text
+
+- Symptom: the public `omnix-release.json` URL returned HTTP 200, but the first PowerShell parse printed empty manifest fields.
+- Wrong assumption: `Invoke-WebRequest.Content` would always be a string for a JSON-named Release asset.
+- Root cause: GitHub served the asset as `application/octet-stream`, and Windows PowerShell exposed `Content` as `System.Byte[]`.
+- Detection method: the blank parsed receipt conflicted with the known 931-byte asset; inspecting response headers and runtime content type identified the byte array.
+- Fix: decode byte content as UTF-8 before `ConvertFrom-Json`; the second receipt returned the exact 0.1.5 version, commit, setup hash/length, and signer.
+- Prevention rule: HTTP release verification must record content type and normalize byte/string bodies before semantic parsing.
+- Skill candidate: no; incorporate this into the proposed guarded release receipt.
+
+## 2026-08-01 - Download-back hash audit piped directly from `foreach`
+
+- Symptom: the first local four-asset hash comparison failed to parse with `EmptyPipeElement` before reading any asset.
+- Wrong assumption: a PowerShell `foreach` statement could be followed directly by `| Format-List` in the composed one-line command.
+- Root cause: Windows PowerShell statement grammar requires the loop output to be collected or wrapped before piping.
+- Detection method: immediate parser error; no remote or local artifact changed.
+- Fix: collect the loop results in `$rows = @(foreach (...) { ... })`, then pipe `$rows` and fail if any `Match` value is false.
+- Prevention rule: for Windows PowerShell release audits, collect `foreach` output explicitly before formatting or filtering it.
+- Skill candidate: no; the same rule is already documented in this ledger and `skill-candidates.md`.
+
+## 2026-07-30 - Signed-candidate verifier was first given a relative path
+
+- Symptom: `verify-signed-release-candidate.ps1` refused the signed 0.1.5 candidate before verification.
+- Wrong assumption: because the producer accepted a repository-relative artifact path, the independent verifier would accept the same form.
+- Root cause: the verifier intentionally requires a fully qualified local path as an additional trust boundary.
+- Detection method: deterministic verifier error before any package inspection or state change.
+- Fix: use the resolved absolute candidate path for all independent verifier calls.
+- Prevention rule: resolve and print artifact paths from producer receipts; pass those exact absolute paths to independent verifiers.
+- Skill candidate: no; this is a repository-specific command contract already documented by the verifier.
+
+## 2026-07-30 - Restricted signature verification lacked CurrentUser trust visibility
+
+- Symptom: the same signed candidate that reported valid App/worker signatures in host signing context reported “Package signature is not valid” in the restricted sandbox.
+- Wrong assumption: a read-only Authenticode check would observe the same CurrentUser Root/TrustedPublisher chain in both trust contexts.
+- Root cause: the restricted environment does not expose the host user's complete certificate trust context.
+- Detection method: host signer receipt was valid; restricted independent verifier failed only at signature validity after the absolute path passed.
+- Fix: require an explicitly approved host-context retry of the unchanged verifier against the unchanged candidate; never relax the verifier.
+- Prevention rule: release verification that depends on CurrentUser certificate trust must run in the same explicitly authorized host trust context, while hashes and package paths remain fixed.
+- Skill candidate: no; existing release records already require host-context trust verification.
+
 ## 2026-07-30 - Unregistered application evidence was called the main program
 
 - Symptom: the migration outcome called every C- or D-drive install-path record the “main program,” including entries without an official uninstall route that may be a portable copy or updater payload.

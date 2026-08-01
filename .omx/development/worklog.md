@@ -9,6 +9,14 @@
 - Updated source version and release notes to 0.1.5.
 - Local pre-commit gates pass: full Debug 1100/1100; Release 0 warnings/errors with 0.1.5 product/file versions; source integrity 395 files/18 XAML; script parsers pass; app-family and home/C-drive WPF smokes pass with no operation executed; diff and mutation-authority checks are clean.
 - Host release prerequisites pass: authenticated `plnoble` GitHub CLI with `repo`/`workflow`, fixed origin, SignTool found, and one eligible explicitly selected CurrentUser RSA code-signing certificate. Signing remains blocked until the pushed commit passes CI.
+- Pushed source commit `234bcd8`; GitHub CI run `30528588089` passed build, full tests, and source integrity on that exact revision.
+- Generated a fresh portable package and signed App/worker candidate for `234bcd8`; both signatures and timestamps were valid in host context and used the selected signer.
+- Independent verification is paused. A relative candidate path was correctly refused; the restricted absolute-path retry cannot see the CurrentUser trust chain. Host-context retry was denied because the approval system reported its current usage limit, so installer and Release work have not started.
+- After explicit user approval, the unchanged absolute-path host verifier passed the signed candidate: 110 payload files were verified with the expected signer; disposable-machine acceptance remains unclaimed.
+- Built and signed the 0.1.5 Inno setup without running it. Independent verification confirmed version 0.1.5, `D:\Software\OMNIX-Entropy\Install`, visible directory selection, no silent install, the expected signer/timestamp, and `CanStageGitHubRelease=true`.
+- Created a draft with exactly four assets, downloaded all four back, and matched every length and SHA-256. The downloaded setup independently passed the same installer verifier.
+- Published stable `v0.1.5`. Both the Release view and `releases/latest` report target `234bcd8f412d16f042079e241f158e99342c6121`, non-draft/non-prerelease state, and four assets. The public update manifest returned HTTP 200 and parsed as version 0.1.5 with the exact setup hash, length, and signer.
+- Public setup: 14,861,288 bytes; SHA-256 `B49B67F4D3922E81EAD8C80C9F3FBFC8A58EA340B6907975C51EB5C513732BEB`; signer `5688958FEA0056861558E8DCF9D2381AF46074B2`. No installer, maintenance operation, certificate export, or trust-store mutation ran.
 
 ## 2026-07-30 - Completed system cleanup and app-family decision slice
 

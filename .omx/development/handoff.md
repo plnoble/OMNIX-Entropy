@@ -1,5 +1,15 @@
 # Agent Handoff
 
+## Latest Update - 2026-08-01 Public 0.1.5 released
+
+- Current objective: preserve the completed 0.1.5 release evidence and obtain a user-run in-app update receipt from the currently installed version.
+- What changed: the reviewed C-drive impact guidance, known system-cleanup inventory, exact application-family explanations, and quantified migration outcomes are publicly available in `v0.1.5`.
+- What is verified: source target `234bcd8f412d16f042079e241f158e99342c6121`; GitHub CI `30528588089` passed; the target-bound 110-file payload and setup use signer `5688958FEA0056861558E8DCF9D2381AF46074B2`; installer policy returned `CanStageGitHubRelease=true`; all four draft assets matched after download-back; the downloaded setup independently passed; public latest and the public update manifest report stable 0.1.5 with the exact target, length, hash, and signer.
+- Public artifact: `https://github.com/plnoble/OMNIX-Entropy/releases/tag/v0.1.5`; setup length 14,861,288 bytes; SHA-256 `B49B67F4D3922E81EAD8C80C9F3FBFC8A58EA340B6907975C51EB5C513732BEB`.
+- What is not verified: no installer was launched, installed, or uninstalled; no user confirmation/UAC flow ran; disposable-machine behavioral acceptance remains absent.
+- Known risks: personal signing does not create public SmartScreen reputation; GitHub/timestamp availability remains external; family grouping remains explanation-only and known cleanup stores remain evidence until operation-specific safety gates pass.
+- Exact next recommended action: use the installed app's update window to check for 0.1.5, review the visible download/install confirmation, and report the resulting installed version. Do not automate or silently run the installer.
+
 ## Latest Update - 2026-07-30 System cleanup/app-family decisions complete
 
 - Current objective: preserve the completed working-tree implementation that turns material system-cleanup stores and duplicate application cards into beginner-readable, exact-entry decisions.

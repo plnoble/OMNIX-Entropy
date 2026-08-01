@@ -1,17 +1,18 @@
 # Quality Gates
 
-## 2026-07-30 - 0.1.5 release pre-change gate
+## 2026-08-01 - 0.1.5 release completion gate
 
 | Category | Status | Evidence | Residual risk |
 | --- | --- | --- | --- |
-| Scope and consent | Pass | User explicitly requested review, commit, version bump, and publication. | Installer execution, product operations, certificate/trust mutation, antivirus changes, and `LocalMachine` remain unauthorized. |
-| Working-tree ownership | Pass | `git status -sb` contains the continuous user-requested C-drive/app-family source, tests, smokes, and required development records; no unrelated file group was found. | Review must still identify behavioral defects within the intended scope. |
-| Safety boundary | Pass | Previous completion gate reports no added production delete/registry/process authority and both real WPF smokes executed no operation. | Re-run after review fixes and version changes. |
-| Version and channel | Pass | `Css.App.csproj`, Release ProductVersion/FileVersion, and `docs/release/0.1.5.zh-CN.md` report 0.1.5. | Public latest remains 0.1.4 until tag, package, and Release verification complete. |
-| Tests and build | Pass | Full Debug 1100/1100; Release 0 warnings/errors; source integrity 395 files/18 XAML; both scripts parse; both real WPF smokes pass with no operation executed; diff and mutation-authority checks pass. | Exact pushed-commit CI remains pending. |
-| GitHub identity | Pass | Host `gh auth status` reports active `plnoble` with `repo` and `workflow`; origin is fixed to `plnoble/OMNIX-Entropy`. | Network and GitHub availability remain external. |
-| Signing prerequisites | Pass | Read-only inspector reports `CanCreateSignedCandidate=true`, SignTool at the Windows Kits registered path, and one explicitly selected eligible CurrentUser RSA signer `5688958FEA0056861558E8DCF9D2381AF46074B2`. | Timestamp availability remains external; no signing occurs before CI passes. |
-| Delivery | Warn | Existing guarded process provides source-bound signing, installer verification, draft staging, download-back hashes, and latest-channel checks. | Commit/push/CI, signed payload, installer, draft assets, and public latest are pending. |
+| Scope and consent | Pass | User authorized review/version/publication and separately approved host-context read-only verification, use of the existing non-exportable signer, and GitHub Release publication. | Installer execution, product operations, certificate export/creation, trust mutation, antivirus changes, and `LocalMachine` remained unauthorized. |
+| Working-tree ownership | Pass | Product source was committed as `234bcd8`; the only remaining changes before this gate are required release records. | Final records commit intentionally follows the immutable Release target. |
+| Safety boundary | Pass | Review added no family-level uninstall or cleanup authority; both real WPF smokes executed no operation. Release work did not run the setup or any product maintenance operation. | Disposable-machine behavioral acceptance remains absent. |
+| Version and channel | Pass | Source/release notes report 0.1.5; public `releases/latest` reports stable `v0.1.5`, target `234bcd8`, four assets, non-draft and non-prerelease. | Installed clients still require a visible user-confirmed update. |
+| Tests and build | Pass | Local full Debug 1100/1100; Release 0 warnings/errors; integrity 395 files/18 XAML; GUI smokes pass. GitHub CI run `30528588089` passed on exact target `234bcd8`. | No disposable installed-runtime acceptance. |
+| Signed payload | Pass | Host independent verifier checked 110 target-bound payload files with signer `5688958FEA0056861558E8DCF9D2381AF46074B2`; App/worker signatures and GlobalSign timestamps were valid. | Personal signing does not provide public SmartScreen reputation. |
+| Installer policy | Pass | Independent verifier confirmed 0.1.5, default `D:\Software\OMNIX-Entropy\Install`, visible directory choice, no silent install, expected signer/timestamp, and `CanStageGitHubRelease=true`. | Installer behavior was not executed. |
+| Download-back | Pass | All four draft assets matched local lengths and SHA-256 values; the downloaded setup independently passed the installer verifier. | GitHub/CDN availability remains external. |
+| Delivery | Pass | Public Release `v0.1.5` is Latest and the public update manifest returned HTTP 200 with the exact commit, setup length/hash, and signer. | The first installed 0.1.4-to-0.1.5 update receipt depends on the user's visible confirmation. |
 
 ## 2026-07-30 - System cleanup and app-family completion gate
 
