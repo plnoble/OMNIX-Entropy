@@ -171,6 +171,15 @@ try {
     Invoke-Element $agentNav
     Start-Sleep -Milliseconds 500
 
+    $capabilitiesTab = Find-ByAutomationId $window 'AgentCapabilitiesTab' 1000
+    if ($null -eq $capabilitiesTab) {
+        throw 'AgentCapabilitiesTab was not found.'
+    }
+    $tabSelection = $capabilitiesTab.GetCurrentPattern(
+        [System.Windows.Automation.SelectionItemPattern]::Pattern)
+    $tabSelection.Select()
+    Start-Sleep -Milliseconds 350
+
     $settingsList = Find-ByAutomationId $window 'AgentWindowsSettingsListBox'
     if ($null -eq $settingsList) {
         throw 'AgentWindowsSettingsListBox was not found.'

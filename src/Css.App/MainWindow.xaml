@@ -426,6 +426,10 @@
                                                    Margin="10,0,0,0"
                                                    IsHitTestVisible="False"/>
                                     </Grid>
+                                    <Button x:Name="CommunityRulesButton"
+                                            AutomationProperties.AutomationId="CommunityRulesButton"
+                                            Content="扩展规则" Width="96" Height="34" Margin="8,0,0,0"
+                                            Click="OpenCommunityRules_Click"/>
                                     <Button x:Name="ScanSoftwareButton" AutomationProperties.AutomationId="ScanSoftwareButton" Content="重新扫描" Width="92" Height="34" Margin="8,0,0,0" Click="ScanSoftware_Click"/>
                                 </StackPanel>
                             </Grid>
@@ -482,6 +486,7 @@
 
                     <Border x:Name="AppDrawerPanel" Grid.Column="1" Style="{StaticResource SectionCardStyle}">
                         <ScrollViewer x:Name="AppDrawerScrollViewer"
+                                      AutomationProperties.AutomationId="AppDrawerScrollViewer"
                                       VerticalScrollBarVisibility="Auto"
                                       HorizontalScrollBarVisibility="Disabled">
                         <StackPanel>
@@ -498,25 +503,46 @@
                                        Foreground="#4B5563"
                                        TextWrapping="Wrap"
                                        Margin="0,5,0,0"/>
-                            <Separator Margin="0,14,0,12"/>
-                            <TextBlock Text="这些卡片是什么" Style="{StaticResource MetricTitleStyle}"/>
-                            <TextBlock x:Name="DrawerFamilySummaryTextBlock"
-                                       AutomationProperties.AutomationId="DrawerFamilySummaryTextBlock"
-                                       Text="-"
-                                       Foreground="#374151"
-                                       TextWrapping="Wrap"
-                                       Margin="0,6,0,6"/>
-                            <TextBlock x:Name="DrawerCurrentEntryTextBlock"
-                                       AutomationProperties.AutomationId="DrawerCurrentEntryTextBlock"
-                                       Text="-"
-                                       Foreground="#111827"
-                                       FontWeight="SemiBold"
-                                       TextWrapping="Wrap"
-                                       Margin="0,0,0,14"/>
+                            <Border Background="#F3F4F6" CornerRadius="8" Padding="14" Margin="0,14,0,14">
+                                <StackPanel>
+                                    <TextBlock Text="Computer Agent 建议" FontWeight="SemiBold" Foreground="#111827"/>
+                                    <TextBlock x:Name="DrawerAdviceTextBlock"
+                                               AutomationProperties.AutomationId="DrawerAdviceTextBlock"
+                                               Text="先选择应用。"
+                                               Foreground="#374151"
+                                               TextWrapping="Wrap"
+                                               Margin="0,8,0,0"/>
+                                </StackPanel>
+                            </Border>
+                            <StackPanel x:Name="DrawerFamilyContextPanel">
+                                <Separator Margin="0,14,0,12"/>
+                                <TextBlock Text="这些卡片是什么" Style="{StaticResource MetricTitleStyle}"/>
+                                <TextBlock x:Name="DrawerFamilySummaryTextBlock"
+                                           AutomationProperties.AutomationId="DrawerFamilySummaryTextBlock"
+                                           Text="-"
+                                           Foreground="#374151"
+                                           TextWrapping="Wrap"
+                                           Margin="0,6,0,6"/>
+                                <TextBlock x:Name="DrawerCurrentEntryTextBlock"
+                                           AutomationProperties.AutomationId="DrawerCurrentEntryTextBlock"
+                                           Text="-"
+                                           Foreground="#111827"
+                                           FontWeight="SemiBold"
+                                           TextWrapping="Wrap"
+                                           Margin="0,0,0,14"/>
+                            </StackPanel>
                             <TextBlock Text="装在哪里" Style="{StaticResource MetricTitleStyle}"/>
                             <TextBlock x:Name="DrawerLocationTextBlock" Text="-" FontSize="16" Foreground="#111827" Margin="0,6,0,14" TextWrapping="Wrap"/>
                             <TextBlock Text="占多少" Style="{StaticResource MetricTitleStyle}"/>
                             <TextBlock x:Name="DrawerSizeTextBlock" Text="-" FontSize="16" Foreground="#111827" Margin="0,6,0,14" TextWrapping="Wrap"/>
+                            <TextBlock Text="额外发现的缓存" Style="{StaticResource MetricTitleStyle}"/>
+                            <TextBlock x:Name="DrawerCommunityCacheSummaryTextBlock"
+                                       AutomationProperties.AutomationId="DrawerCommunityCacheSummaryTextBlock"
+                                       Text="扩展规则暂未发现额外缓存。"
+                                       FontSize="16"
+                                       Foreground="#111827"
+                                       Margin="0,6,0,14"
+                                       TextWrapping="Wrap"/>
                             <TextBlock Text="搬到 D 盘有没有用" Style="{StaticResource MetricTitleStyle}"/>
                             <TextBlock x:Name="DrawerStorageOutcomeTextBlock"
                                        AutomationProperties.AutomationId="DrawerStorageOutcomeTextBlock"
@@ -535,17 +561,6 @@
                                        Foreground="#111827"
                                        Margin="0,6,0,14"
                                        TextWrapping="Wrap"/>
-                            <Border Background="#F3F4F6" CornerRadius="8" Padding="14" Margin="0,0,0,14">
-                                <StackPanel>
-                                    <TextBlock Text="Computer Agent 建议" FontWeight="SemiBold" Foreground="#111827"/>
-                                    <TextBlock x:Name="DrawerAdviceTextBlock"
-                                               AutomationProperties.AutomationId="DrawerAdviceTextBlock"
-                                               Text="先选择应用。"
-                                               Foreground="#374151"
-                                               TextWrapping="Wrap"
-                                               Margin="0,8,0,0"/>
-                                </StackPanel>
-                            </Border>
                             <UniformGrid Columns="2">
                                 <Button x:Name="DrawerUninstallButton" AutomationProperties.AutomationId="DrawerUninstallButton" Content="&#x5378;&#x8f7d;&#x5e72;&#x51c0;&#x70b9;" Height="34" Margin="0,0,6,8" Click="PreviewUninstall_Click"/>
                                 <Button x:Name="DrawerMigrateButton" AutomationProperties.AutomationId="DrawerMigrateButton" Content="&#x8fc1;&#x79fb;&#x5230; D &#x76d8;" Height="34" Margin="6,0,0,8" Click="PreviewMigration_Click"/>
@@ -620,6 +635,8 @@
                                 <ListBox.ItemContainerStyle>
                                     <Style TargetType="ListBoxItem">
                                         <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                        <Setter Property="AutomationProperties.AutomationId" Value="{Binding AutomationId}"/>
+                                        <Setter Property="AutomationProperties.Name" Value="{Binding PrimaryText}"/>
                                     </Style>
                                 </ListBox.ItemContainerStyle>
                                 <ListBox.ItemTemplate>
@@ -1803,6 +1820,60 @@
                                        TextWrapping="Wrap"
                                        Foreground="#374151"
                                        Margin="0,16,0,0"/>
+                            <TextBlock AutomationProperties.AutomationId="AgentDecisionPromptTitleTextBlock"
+                                       Text="常用判断"
+                                       FontWeight="SemiBold"
+                                       Foreground="#111827"
+                                       Margin="0,16,0,0"/>
+                            <ItemsControl x:Name="AgentDecisionQuickChoicesItemsControl"
+                                          AutomationProperties.AutomationId="AgentDecisionQuickChoicesItemsControl"
+                                          Margin="0,8,0,0">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <WrapPanel/>
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Button AutomationProperties.AutomationId="{Binding Id, StringFormat=AgentDecisionQuickChoice_{0}}"
+                                                AutomationProperties.Name="{Binding Label}"
+                                                Content="{Binding Label}"
+                                                Tag="{Binding Question}"
+                                                Click="AgentSymptomQuickChoice_Click"
+                                                Height="32"
+                                                MinWidth="132"
+                                                Padding="12,0"
+                                                Margin="0,0,8,8"/>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                            <TextBlock AutomationProperties.AutomationId="AgentSymptomPromptTitleTextBlock"
+                                       Text="电脑哪里不正常？"
+                                       FontWeight="SemiBold"
+                                       Foreground="#111827"
+                                       Margin="0,8,0,0"/>
+                            <ItemsControl x:Name="AgentSymptomQuickChoicesItemsControl"
+                                          AutomationProperties.AutomationId="AgentSymptomQuickChoicesItemsControl"
+                                          Margin="0,8,0,0">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <WrapPanel/>
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Button AutomationProperties.AutomationId="{Binding Id, StringFormat=AgentSymptomQuickChoice_{0}}"
+                                                AutomationProperties.Name="{Binding Label}"
+                                                Content="{Binding Label}"
+                                                Tag="{Binding Question}"
+                                                Click="AgentSymptomQuickChoice_Click"
+                                                Height="32"
+                                                MinWidth="108"
+                                                Padding="12,0"
+                                                Margin="0,0,8,8"/>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
                             <Grid Margin="0,16,0,0">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
@@ -1811,7 +1882,7 @@
                                 <TextBox x:Name="AgentQuestionTextBox"
                                          AutomationProperties.AutomationId="AgentQuestionTextBox"
                                          AutomationProperties.Name="向 Computer Agent 提问"
-                                         Text="C盘为什么总是满？"
+                                         Text="C盘为什么还是这么满？"
                                          Height="36"
                                          VerticalContentAlignment="Center"/>
                                 <Button x:Name="AskComputerAgentButton"
@@ -1839,7 +1910,7 @@
                                            Foreground="#374151"
                                            TextWrapping="Wrap"
                                            Margin="0,5,0,0"/>
-                                <TextBlock Text="依据" FontWeight="SemiBold" Foreground="#111827" Margin="0,10,0,0"/>
+                                <TextBlock Text="Agent 的判断" FontWeight="SemiBold" Foreground="#111827" Margin="0,10,0,0"/>
                                 <ListBox x:Name="AgentConversationEvidenceListBox"
                                          AutomationProperties.AutomationId="AgentConversationEvidenceListBox"
                                          MaxHeight="90"

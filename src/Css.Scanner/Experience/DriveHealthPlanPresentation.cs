@@ -151,7 +151,7 @@ public static class DriveHealthPlanPresenter
             ? $"不是没有可调整项，但 {FormatBytes(safeCleanupBytes)} 只占改善目标的 {safeContributionPercent:0.0}%，单独处理意义不大；即使处理完仍差 {FormatBytes(remainingGapBytes)}。先找能贡献更多空间的应用、个人文件或数据来源；这 {safeRecommendations.Length} 项低风险清理可作为顺手处理。"
             : safeCleanupAvailable
                 ? $"不是没有可调整项：已找到 {safeRecommendations.Length} 项现在可以安全处理，约 {FormatBytes(safeCleanupBytes)}，可完成改善目标的 {safeContributionPercent:0.0}%；另有 {investigationCount} 项需要 Agent 先确认来源。处理后距离目标仍差 {FormatBytes(remainingGapBytes)}。"
-            : $"现在没有已确认可以直接处理的项目，但不是没有改善方向：有 {Math.Max(investigationCount, rootCauseCount)} 个占用来源需要继续确认。先不要删除；距离目标还差 {FormatBytes(remainingGapBytes)}。";
+            : $"现在没有已确认可以直接处理的项目，但不是没有改善方向：有 {Math.Max(investigationCount, rootCauseCount)} 条只读线索需要继续确认，不同线索可能指向同一批文件。先不要删除；距离目标还差 {FormatBytes(remainingGapBytes)}。";
 
         var firstStep = minorSafeCleanupWithLargerEvidence
             ? $"先找主要差额：距离目标仍差 {FormatBytes(remainingGapBytes)}，优先确认应用、个人文件和持续增长来源；这里先只读查看。"

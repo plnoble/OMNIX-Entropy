@@ -2,6 +2,8 @@ using Css.Core.Agent;
 using Css.Core.Apps;
 using Css.Core.Recommendations;
 using Css.Core.Software;
+using Css.Scanner.Disk;
+using Css.Scanner.Experience;
 using FluentAssertions;
 
 namespace Css.Tests;
@@ -61,6 +63,48 @@ public sealed class AgentConversationTests
         reply.NavigationTargetPage.Should().BeNull();
         reply.CanExecuteDirectly.Should().BeFalse();
         reply.UsedCloudAi.Should().BeFalse();
+    }
+
+    [Fact]
+    public void Decision_questions_request_only_the_read_only_evidence_they_need()
+    {
+        AgentConversationPresenter.QuestionNeedsFullHealthScan(
+                "怎样最安全地释放 10GB？",
+                null)
+            .Should().BeTrue();
+        AgentConversationPresenter.QuestionNeedsFullHealthScan(
+                "最近一周谁增长最快？",
+                null)
+            .Should().BeTrue();
+        AgentConversationPresenter.QuestionNeedsGrowthEvidence(
+                "最近一周谁增长最快？",
+                0)
+            .Should().BeTrue();
+        AgentConversationPresenter.QuestionNeedsGrowthEvidence(
+                "最近一周谁增长最快？",
+                1)
+            .Should().BeFalse();
+        AgentConversationPresenter.QuestionNeedsGrowthEvidence(
+                "怎样最安全地释放 10GB？",
+                0)
+            .Should().BeFalse();
+    }
+
+    [Fact]
+    public void Beginner_decision_prompts_are_compact_unique_and_navigation_only()
+    {
+        var prompts = AgentDecisionPromptCatalog.CreateDefault();
+
+        prompts.Should().HaveCount(3);
+        prompts.Select(prompt => prompt.Id).Should().OnlyHaveUniqueItems();
+        prompts.Select(prompt => prompt.Label).Should().OnlyHaveUniqueItems();
+        prompts.Select(prompt => AgentConversationPresenter.Answer(prompt.Question, null, []))
+            .Should().OnlyContain(reply => !reply.CanExecuteDirectly && !reply.UsedCloudAi);
+        prompts.Select(prompt => AgentConversationPresenter.Answer(prompt.Question, null, []).Intent)
+            .Should().Equal(
+                AgentQuestionIntent.CDrive,
+                AgentQuestionIntent.Growth,
+                AgentQuestionIntent.StoragePlan);
     }
 
     [Fact]
@@ -151,8 +195,8 @@ public sealed class AgentConversationTests
 
     [Theory]
     [InlineData("Wi-Fi 在哪里设置", "network")]
-    [InlineData("蓝牙耳机怎么配对", "bluetooth")]
-    [InlineData("电脑没有声音", "sound")]
+    [InlineData("打开蓝牙设置", "bluetooth")]
+    [InlineData("打开声音设置", "sound")]
     [InlineData("怎么改显示器分辨率", "display")]
     [InlineData("怎么设置电脑不睡眠", "power")]
     [InlineData("新应用默认保存到哪里", "default-save-locations")]
@@ -397,6 +441,235 @@ public sealed class AgentConversationTests
     }
 
     [Fact]
+    public void C_drive_question_names_largest_non_additive_sources_from_current_evidence()
+    {
+        var context = new AgentDecisionContext
+        {
+            DrivePlan = DrivePlan(
+                targetBytes: 20L * 1024 * 1024 * 1024,
+                safeBytes: 512L * 1024 * 1024),
+            StorageSources =
+            [
+                StorageSource("用户文件占用 82.0 GB", 82L * 1024 * 1024 * 1024),
+                StorageSource("程序和工具占用 38.0 GB", 38L * 1024 * 1024 * 1024),
+                StorageSource("旧缓存文件 512.0 MB", 512L * 1024 * 1024)
+            ],
+            ObservedSnapshotCount = 2
+        };
+
+        var reply = AgentConversationPresenter.Answer(
+            "C盘为什么还是这么满？",
+            CreateHealthSummary("C 盘已使用 92.0%"),
+            [],
+            decisionContext: context);
+
+        reply.Intent.Should().Be(AgentQuestionIntent.CDrive);
+        reply.Answer.Should().Contain("主要线索").And.Contain("不能直接相加");
+        reply.EvidenceLines.Should().Contain(line => line.Contains("用户文件占用 82.0 GB"));
+        reply.EvidenceLines.Should().Contain(line => line.Contains("程序和工具占用 38.0 GB"));
+        reply.NavigationTargetPage.Should().Be("CDrive");
+        reply.CanExecuteDirectly.Should().BeFalse();
+    }
+
+    [Fact]
+    public void Global_growth_question_ranks_current_evidence_and_admits_short_window()
+    {
+        var context = new AgentDecisionContext
+        {
+            ObservedSnapshotCount = 3,
+            GrowthSources =
+            [
+                GrowthSource("Antigravity", 2L * 1024 * 1024 * 1024, TimeSpan.FromDays(2), true),
+                GrowthSource("用户文件", 700L * 1024 * 1024, TimeSpan.FromDays(2), false)
+            ]
+        };
+
+        var reply = AgentConversationPresenter.Answer(
+            "最近一周谁增长最快？",
+            CreateHealthSummary("C 盘已使用 92.0%"),
+            [],
+            decisionContext: context);
+
+        reply.Intent.Should().Be(AgentQuestionIntent.Growth);
+        reply.Answer.Should().Contain("Antigravity").And.Contain("增长最快");
+        VisibleText(reply).Should().Contain("约 2 天").And.Contain("不是完整一周");
+        reply.NavigationTargetPage.Should().Be("CDrive");
+        reply.CanExecuteDirectly.Should().BeFalse();
+    }
+
+    [Fact]
+    public void D_drive_program_with_C_drive_family_data_explains_the_storage_split()
+    {
+        var mainProgram = new SoftwareProfile
+        {
+            Name = "Antigravity 2.4.3",
+            DisplayVersion = "2.4.3",
+            InstallPath = @"D:\Agent\Antigravity",
+            UninstallCommand = @"D:\Agent\Antigravity\uninstall.exe",
+            InstalledSizeBytes = 1200L * 1024 * 1024
+        };
+        var userData = new SoftwareProfile
+        {
+            Name = "Antigravity (User)",
+            CDriveDataSizeBytes = 352L * 1024 * 1024,
+            DataSizeBytes = 352L * 1024 * 1024,
+            CacheSizeBytes = 300L * 1024 * 1024,
+            CDriveWritePaths =
+            [
+                @"C:\Users\Me\AppData\Local\antigravity-updater",
+                @"C:\Users\Me\AppData\Roaming\Antigravity"
+            ]
+        };
+
+        var reply = AgentConversationPresenter.Answer(
+            "Antigravity 迁移到 D 盘后为什么缓存还在 C 盘？",
+            null,
+            [mainProgram, userData]);
+
+        reply.Intent.Should().Be(AgentQuestionIntent.ApplicationSpecific);
+        reply.Answer.Should().Contain("主程序在 D 盘")
+            .And.Contain("缓存和数据是另一回事")
+            .And.Contain("352.0 MB")
+            .And.Contain("不能保证");
+        reply.NextSteps.Should().Contain(line => line.Contains("软件自己的设置"));
+        reply.TargetAppName.Should().Be("Antigravity 2.4.3");
+        VisibleText(reply).Should().NotContain(@"C:\Users\Me");
+        reply.CanExecuteDirectly.Should().BeFalse();
+    }
+
+    [Fact]
+    public void Duplicate_family_uninstall_question_targets_only_the_exact_registered_entry()
+    {
+        var registered = new SoftwareProfile
+        {
+            Name = "OpenCode 1.14.41",
+            DisplayVersion = "1.14.41",
+            InstallPath = @"C:\Program Files\OpenCode",
+            UninstallCommand = @"""C:\Program Files\OpenCode\uninstall.exe"""
+        };
+        var portable = new SoftwareProfile
+        {
+            Name = "OpenCode",
+            DisplayVersion = "1.4.3",
+            InstallPath = @"D:\Development\OpenCode"
+        };
+        var dataOnly = new SoftwareProfile
+        {
+            Name = "OpenCode 1.18.4",
+            DisplayVersion = "1.18.4",
+            CDriveDataSizeBytes = 237L * 1024 * 1024,
+            CDriveWritePaths = [@"C:\Users\Me\AppData\Local\opencode-updater"]
+        };
+
+        var reply = AgentConversationPresenter.Answer(
+            "三个 OpenCode 中哪个可以卸载？",
+            null,
+            [registered, portable, dataOnly]);
+
+        reply.Intent.Should().Be(AgentQuestionIntent.Uninstall);
+        reply.Answer.Should().Contain("3 条")
+            .And.Contain("只有 OpenCode 1.14.41")
+            .And.Contain("官方卸载审核");
+        reply.EvidenceLines.Should().Contain(line => line.Contains("D 盘") && line.Contains("不可直接卸载"));
+        reply.EvidenceLines.Should().Contain(line => line.Contains("数据") && line.Contains("不是可卸载主程序"));
+        reply.TargetAppName.Should().Be("OpenCode 1.14.41");
+        reply.TargetAppHandoff.Should().Be(AgentApplicationHandoff.UninstallReview);
+        reply.CanExecuteDirectly.Should().BeFalse();
+    }
+
+    [Fact]
+    public void Requested_safe_release_plan_shows_confirmed_amount_and_remaining_gap()
+    {
+        var context = new AgentDecisionContext
+        {
+            DrivePlan = DrivePlan(
+                targetBytes: 18L * 1024 * 1024 * 1024,
+                safeBytes: 2L * 1024 * 1024 * 1024),
+            StorageSources =
+            [
+                StorageSource("用户文件占用 42.0 GB", 42L * 1024 * 1024 * 1024),
+                StorageSource("应用数据占用 16.0 GB", 16L * 1024 * 1024 * 1024)
+            ],
+            ObservedSnapshotCount = 2
+        };
+
+        var reply = AgentConversationPresenter.Answer(
+            "怎样最安全地释放 10GB？",
+            CreateHealthSummary("C 盘已使用 92.0%"),
+            [],
+            decisionContext: context);
+
+        reply.Intent.Should().Be(AgentQuestionIntent.StoragePlan);
+        reply.Answer.Should().Contain("10.0 GB")
+            .And.Contain("2.0 GB")
+            .And.Contain("还差 8.0 GB");
+        reply.EvidenceLines.Should().Contain(line => line.Contains("不能相加"));
+        reply.NextSteps.First().Should().Contain("低风险").And.Contain("隔离区");
+        reply.NavigationTargetPage.Should().Be("CDrive");
+        reply.CanExecuteDirectly.Should().BeFalse();
+    }
+
+    [Fact]
+    public void Scanner_decision_context_keeps_numeric_evidence_but_removes_raw_paths()
+    {
+        const string privatePath = @"C:\Users\Me\AppData\Local\PrivateCache";
+        var rootCause = new CDriveRootCauseSummary
+        {
+            Headline = "C 盘占用摘要",
+            Subheadline = "只读结果",
+            TechnicalReportAvailable = true,
+            Cards =
+            [
+                new CDriveRootCauseCard
+                {
+                    Title = "应用数据",
+                    PrimaryText = "发现 " + privatePath + " 占用 4.0 GB",
+                    Explanation = "这是应用数据线索。",
+                    AgentSuggestion = "先确认归属。",
+                    SizeText = "4.0 GB",
+                    Severity = 1,
+                    EvidenceBytes = 4L * 1024 * 1024 * 1024
+                }
+            ]
+        };
+        var growth = new GrowthFinding
+        {
+            Path = privatePath,
+            OwnerSoftware = privatePath,
+            PreviousBytes = 1024,
+            CurrentBytes = 4096,
+            SourceKind = GrowthSourceKind.Software,
+            ObservationInterval = TimeSpan.FromDays(1),
+            ObservedSnapshots = 2,
+            TrendGrowthBytes = 3072,
+            TrendWindow = TimeSpan.FromDays(1),
+            Reason = "Grew since previous scan."
+        };
+
+        var context = AgentDecisionContextBuilder.Build(rootCause, null, [growth], 2);
+        var visible = string.Join(
+            "\n",
+            context.StorageSources.SelectMany(source => new[]
+            {
+                source.PrimaryText,
+                source.Explanation,
+                source.Suggestion
+            }).Concat(context.GrowthSources.SelectMany(source => new[]
+            {
+                source.OwnerLabel,
+                source.OneTimeAction,
+                source.PreventionAction
+            })));
+
+        context.StorageSources.Single().EvidenceBytes.Should().Be(4L * 1024 * 1024 * 1024);
+        context.StorageSources.Single().PrimaryText.Should().Be("占用来源已隐藏");
+        context.GrowthSources.Single().LatestGrowthBytes.Should().Be(3072);
+        context.GrowthSources.Single().OwnerLabel.Should().Be("未知来源");
+        context.GrowthSources.Single().TargetAppName.Should().BeNull();
+        visible.Should().NotContain(privatePath).And.NotContain(@"C:\Users\Me");
+    }
+
+    [Fact]
     public void Stale_application_target_returns_path_free_recovery_guidance()
     {
         var reply = AgentConversationPresenter.TargetUnavailable();
@@ -419,6 +692,8 @@ public sealed class AgentConversationTests
         var automationIds = new[]
         {
             "AgentConversationScrollViewer",
+            "AgentDecisionPromptTitleTextBlock",
+            "AgentDecisionQuickChoicesItemsControl",
             "AgentQuestionTextBox",
             "AskComputerAgentButton",
             "AgentConversationResponsePanel",
@@ -438,6 +713,8 @@ public sealed class AgentConversationTests
         xaml.Should().Contain("Click=\"AgentConversationNavigate_Click\"");
         xaml.IndexOf("AgentConversationScrollViewer", StringComparison.Ordinal)
             .Should().BeGreaterThan(xaml.IndexOf("x:Name=\"AgentPage\"", StringComparison.Ordinal));
+        xaml.IndexOf("AgentDecisionQuickChoicesItemsControl", StringComparison.Ordinal)
+            .Should().BeLessThan(xaml.IndexOf("AgentSymptomQuickChoicesItemsControl", StringComparison.Ordinal));
         xaml.IndexOf("AgentConversationResponsePanel", StringComparison.Ordinal)
             .Should().BeLessThan(xaml.IndexOf("AgentNextStepTitleTextBlock", StringComparison.Ordinal));
         xaml.Should().Contain("AutomationProperties.AutomationId=\"CDrivePageScrollViewer\"");
@@ -449,13 +726,18 @@ public sealed class AgentConversationTests
                 "private async void AskComputerAgent_Click(object sender, RoutedEventArgs e)"),
             SourceMethodExtractor.Extract(
                 main,
+                "private async Task RunComputerAgentQuestionAsync(string question)"),
+            SourceMethodExtractor.Extract(
+                main,
                 "private void ApplyAgentConversationReply(AgentConversationReply reply)"),
             SourceMethodExtractor.Extract(
                 main,
                 "private async void AgentConversationNavigate_Click(object sender, RoutedEventArgs e)"));
         handlers.Should().Contain("AgentConversationPresenter.Answer");
-        handlers.Should().Contain("AgentConversationScrollViewer.ScrollToTop()");
-        handlers.Should().NotContain("AgentConversationResponsePanel.BringIntoView()");
+        handlers.Should().Contain("AgentDecisionContextBuilder.Build")
+            .And.Contain("decisionContext: decisionContext");
+        handlers.Should().Contain("AgentConversationResponsePanel.UpdateLayout()")
+            .And.Contain("AgentConversationResponsePanel.BringIntoView()");
         handlers.Should().Contain("ResolveAndOpenAppTargetAsync");
         handlers.Should().Contain("OpenAllowlistedWindowsSettings(reply.ShortcutId)");
         handlers.Should().Contain("OpenAllowlistedSystemTool(reply.ShortcutId)");
@@ -490,7 +772,9 @@ public sealed class AgentConversationTests
             .And.Contain("$candidate.Current.Name -eq $confirmationTitle")
             .And.Contain("$windowPattern.Close()")
             .And.Contain("externalToolStarted = $false")
-            .And.Contain("noOperationExecuted = $true")
+            .And.Contain("OMNIX_ENTROPY_QUARANTINE_ROOT")
+            .And.Contain("quarantineManifestCount")
+            .And.Contain("noOperationExecuted = ($quarantineManifestCount -eq 0)")
             .And.Contain("Save-WindowScreenshot $window $answerScreenshot")
             .And.Contain("Save-WindowScreenshot $confirmation $confirmationScreenshot");
         smoke.Should().NotContain("SafetyOperationPipeline")
@@ -499,6 +783,35 @@ public sealed class AgentConversationTests
             .And.NotContain("Directory.Delete")
             .And.NotContain("Find-ButtonByName $confirmation")
             .And.NotContain("Start-Process devmgmt");
+    }
+
+    [Fact]
+    public void Agent_decision_gui_smoke_is_isolated_path_free_and_non_executable()
+    {
+        var smoke = File.ReadAllText(FindRepositoryFile(
+            ".omx", "gui-agent-decision-workflows-smoke.ps1"));
+
+        smoke.Should().Contain("AgentDecisionQuickChoice_c-drive-full")
+            .And.Contain("AgentDecisionQuickChoice_fastest-growth")
+            .And.Contain("AgentDecisionQuickChoice_safe-release")
+            .And.Contain("AgentConversationAnswerTextBlock")
+            .And.Contain("OpenCode 1.14.41")
+            .And.Contain("352.0 MB")
+            .And.Contain("OMNIX_ENTROPY_CDRIVE_SCAN_ROOT")
+            .And.Contain("OMNIX_ENTROPY_SOFTWARE_FIXTURE")
+            .And.Contain("OMNIX_ENTROPY_QUARANTINE_ROOT")
+            .And.Contain("OMNIX_ENTROPY_UNINSTALL_EVIDENCE_ROOT")
+            .And.Contain("Get-DescendantText $window")
+            .And.Contain("noOperationExecuted = ($quarantineManifestCount -eq 0 -and -not $uninstallEvidenceCreated)")
+            .And.Contain("Save-WindowScreenshot $window $cDriveScreenshot")
+            .And.Contain("Save-WindowScreenshot $window $cacheScreenshot");
+        smoke.Should().NotContain("SafetyOperationPipeline")
+            .And.NotContain("Registry.SetValue")
+            .And.NotContain("File.Delete")
+            .And.NotContain("Directory.Delete")
+            .And.NotContain("Get-DescendantText $responsePanel")
+            .And.NotContain("Invoke-Element (Find-ByAutomationId $window 'AgentConversationNavigateButton'");
+        smoke.All(character => character <= 0x7F).Should().BeTrue();
     }
 
     private static HealthCheckSummary CreateHealthSummary(string diskResult) =>
@@ -523,6 +836,46 @@ public sealed class AgentConversationTests
                     Risk = Css.Core.Operations.RiskLevel.Low
                 }
             ]
+        };
+
+    private static AgentDrivePlanEvidence DrivePlan(long targetBytes, long safeBytes) =>
+        new()
+        {
+            Headline = "磁盘改善目标",
+            Progress = "先处理可回滚内容，再确认大项。",
+            Steps = ["先处理低风险项。", "再查看主要来源。", "最后防止继续增长。"],
+            TargetReleaseBytes = targetBytes,
+            SafeCleanupBytes = safeBytes,
+            RemainingGapBytes = Math.Max(0, targetBytes - safeBytes)
+        };
+
+    private static AgentStorageSourceEvidence StorageSource(string text, long bytes) =>
+        new()
+        {
+            PrimaryText = text,
+            Explanation = "这是只读占用线索。",
+            Suggestion = "先确认来源，不直接删除。",
+            EvidenceBytes = bytes
+        };
+
+    private static AgentGrowthSourceEvidence GrowthSource(
+        string owner,
+        long bytes,
+        TimeSpan interval,
+        bool sustained) =>
+        new()
+        {
+            OwnerLabel = owner,
+            LatestGrowthBytes = bytes,
+            TrendGrowthBytes = bytes,
+            ObservationInterval = interval,
+            TrendWindow = interval,
+            ObservedSnapshots = 3,
+            IsFirstObservation = false,
+            IsSustainedGrowth = sustained,
+            OneTimeAction = "现在：先确认内容类型。",
+            PreventionAction = "以后：支持时再把缓存位置改到 D 盘。",
+            TargetAppName = owner == "Antigravity" ? owner : null
         };
 
     private static string VisibleText(AgentConversationReply reply) =>

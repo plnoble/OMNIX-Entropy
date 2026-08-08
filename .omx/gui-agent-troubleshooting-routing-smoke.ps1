@@ -19,9 +19,11 @@ function Assert-ConfinedPath([string]$Path, [string]$Root) {
 $repo = Split-Path -Parent $PSScriptRoot
 $exe = Join-Path $repo 'src\Css.App\bin\Debug\net8.0-windows\Css.App.exe'
 $dataRoot = Join-Path $PSScriptRoot 'qa-agent-troubleshooting-data'
+$quarantineRoot = Join-Path $dataRoot 'Quarantine'
 $answerScreenshot = Join-Path $PSScriptRoot 'qa-agent-troubleshooting-routing.png'
 $confirmationScreenshot = Join-Path $PSScriptRoot 'qa-agent-tool-open-confirmation.png'
 $previousDataRoot = $env:OMNIX_ENTROPY_DATA_ROOT
+$previousQuarantineRoot = $env:OMNIX_ENTROPY_QUARANTINE_ROOT
 $process = $null
 $baselineMmcIds = @(Get-Process mmc -ErrorAction SilentlyContinue | ForEach-Object { $_.Id })
 
@@ -34,6 +36,7 @@ try {
     Remove-Item -LiteralPath $dataRoot -Recurse -Force -ErrorAction SilentlyContinue
     New-Item -ItemType Directory -Path $dataRoot -Force | Out-Null
     $env:OMNIX_ENTROPY_DATA_ROOT = $dataRoot
+    $env:OMNIX_ENTROPY_QUARANTINE_ROOT = $quarantineRoot
     $process = Start-Process -FilePath $exe -PassThru
 
     $root = [System.Windows.Automation.AutomationElement]::RootElement
@@ -60,8 +63,9 @@ try {
 
     $headline = Wait-Until -TimeoutSeconds 10 -Probe {
         $candidate = Find-ByAutomationId $window 'AgentConversationHeadlineTextBlock' 500
+        $driver = Get-UnicodeText @(0x9A71, 0x52A8)
         if ($null -ne $candidate -and -not $candidate.Current.IsOffscreen -and
-            $candidate.Current.Name.Contains((Get-UnicodeText @(0x8BBE, 0x5907, 0x7BA1, 0x7406, 0x5668)))) {
+            $candidate.Current.Name.Contains($driver)) {
             return $candidate
         }
         return $null
@@ -119,6 +123,12 @@ try {
     if ($newMmc.Count -ne 0) {
         throw 'Device Manager started even though the user cancelled the confirmation.'
     }
+    $quarantineManifestCount = @(
+        Get-ChildItem -LiteralPath $quarantineRoot -Recurse -File -Filter 'manifest.json' -ErrorAction SilentlyContinue
+    ).Count
+    if ($quarantineManifestCount -ne 0) {
+        throw 'A quarantine manifest was created by a read-only troubleshooting answer.'
+    }
 
     [PSCustomObject]@{
         troubleshootingAnswerVisible = $true
@@ -127,7 +137,8 @@ try {
         protectedToolConfirmationVisible = $true
         confirmationCancelled = $true
         externalToolStarted = $false
-        noOperationExecuted = $true
+        noOperationExecuted = ($quarantineManifestCount -eq 0)
+        quarantineManifestCount = $quarantineManifestCount
         answerScreenshot = $answerScreenshot
         confirmationScreenshot = $confirmationScreenshot
     } | ConvertTo-Json -Compress
@@ -137,6 +148,7 @@ finally {
         Stop-Process -Id $process.Id -Force
     }
     $env:OMNIX_ENTROPY_DATA_ROOT = $previousDataRoot
+    $env:OMNIX_ENTROPY_QUARANTINE_ROOT = $previousQuarantineRoot
     Assert-ConfinedPath $dataRoot $PSScriptRoot
     Remove-Item -LiteralPath $dataRoot -Recurse -Force -ErrorAction SilentlyContinue
 }

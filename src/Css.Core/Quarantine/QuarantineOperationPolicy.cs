@@ -33,6 +33,7 @@ public static class QuarantineOperationPolicy
     private static bool IsSupportedQuarantineKind(string kind) =>
         kind.Equals("clean.temp", StringComparison.OrdinalIgnoreCase)
         || kind.Equals("app.cache.quarantine", StringComparison.OrdinalIgnoreCase)
+        || kind.Equals("app.community-cache.quarantine", StringComparison.OrdinalIgnoreCase)
         || kind.Equals("uninstall.residue.quarantine", StringComparison.OrdinalIgnoreCase);
 
     public static QuarantineOperationPreparationResult PrepareForConfirmation(

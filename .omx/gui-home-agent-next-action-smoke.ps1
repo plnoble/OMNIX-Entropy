@@ -5,9 +5,14 @@ $exe = Join-Path $repoRoot 'src\Css.App\bin\Debug\net8.0-windows\Css.App.exe'
 $screenshotPath = Join-Path $PSScriptRoot 'qa-home-agent-next-action.png'
 $drivePlanScreenshotPath = Join-Path $PSScriptRoot 'qa-drive-health-plan.png'
 $driveOpportunityScreenshotPath = Join-Path $PSScriptRoot 'qa-drive-health-opportunities.png'
+$systemCleanupScreenshotPath = Join-Path $PSScriptRoot 'qa-system-cleanup-handling.png'
 $isolatedDataRoot = Join-Path $PSScriptRoot 'qa-home-agent-data'
+$quarantineRoot = Join-Path $isolatedDataRoot 'Quarantine'
 $scanRoot = Join-Path 'C:\tmp' ('OMNIX-HomeHealth-Smoke-' + [Guid]::NewGuid().ToString('N'))
+$knownTempRoot = [System.IO.Path]::GetFullPath([System.IO.Path]::GetTempPath()).TrimEnd('\')
+$knownTempFixture = Join-Path $knownTempRoot ('OMNIX-old-temp-' + [Guid]::NewGuid().ToString('N') + '.tmp')
 $previousDataRoot = $env:OMNIX_ENTROPY_DATA_ROOT
+$previousQuarantineRoot = $env:OMNIX_ENTROPY_QUARANTINE_ROOT
 $previousScanRoot = $env:OMNIX_ENTROPY_CDRIVE_SCAN_ROOT
 
 . (Join-Path $PSScriptRoot 'wpf-smoke-helpers.ps1')
@@ -75,6 +80,13 @@ try {
     Remove-Item -LiteralPath $isolatedDataRoot -Recurse -Force -ErrorAction SilentlyContinue
     Remove-Item -LiteralPath $scanRoot -Recurse -Force -ErrorAction SilentlyContinue
     New-Item -ItemType Directory -Path $isolatedDataRoot -Force | Out-Null
+    $knownTempParent = [System.IO.Path]::GetDirectoryName(
+        [System.IO.Path]::GetFullPath($knownTempFixture)).TrimEnd('\')
+    if (-not $knownTempParent.Equals($knownTempRoot, [StringComparison]::OrdinalIgnoreCase)) {
+        throw 'The known-temp fixture escaped the current-user temp directory.'
+    }
+    [System.IO.File]::WriteAllBytes($knownTempFixture, (New-Object byte[] 65536))
+    [System.IO.File]::SetLastWriteTimeUtc($knownTempFixture, [DateTime]::UtcNow.AddDays(-30))
     $fixtureTemp = Join-Path $scanRoot 'Temp'
     New-Item -ItemType Directory -Path $fixtureTemp -Force | Out-Null
     [System.IO.File]::WriteAllBytes(
@@ -89,6 +101,7 @@ try {
     }
 
     $env:OMNIX_ENTROPY_DATA_ROOT = $isolatedDataRoot
+    $env:OMNIX_ENTROPY_QUARANTINE_ROOT = $quarantineRoot
     $env:OMNIX_ENTROPY_CDRIVE_SCAN_ROOT = $scanRoot
 
     $process = Start-Process -FilePath $exe -PassThru
@@ -256,6 +269,29 @@ try {
         throw 'The impact-first next step did not navigate to the read-only source list.'
     }
 
+    $userTempCard = Wait-Until -TimeoutSeconds 5 -Probe {
+        $candidate = Find-ByAutomationId $window 'CDriveRootCauseCard_SystemCleanup_UserTemporaryFiles' 250
+        if ($null -ne $candidate -and -not $candidate.Current.IsOffscreen) {
+            return $candidate
+        }
+        return $null
+    }
+    if ($null -eq $userTempCard) {
+        throw 'The age-aware temp conclusion was not visible in the initial working area.'
+    }
+    $userTempText = Get-DescendantText $userTempCard
+    $oldFiles = Get-UnicodeText @(0x65E7, 0x6587, 0x4EF6)
+    $notWholeDirectory = Get-UnicodeText @(0x4E0D, 0x662F, 0x6574, 0x4E2A, 0x76EE, 0x5F55)
+    $quarantinePlan = Get-UnicodeText @(0x9694, 0x79BB, 0x65B9, 0x6848)
+    if (-not $userTempText.Contains($oldFiles) -or
+        -not $userTempText.Contains($notWholeDirectory) -or
+        -not $userTempText.Contains($quarantinePlan) -or
+        -not $userTempText.Contains('OMNIX')) {
+        throw 'The temp card did not explain age, scope, handler, and safe-plan boundary.'
+    }
+    Show-WpfWindowForSmoke $window
+    Save-WindowScreenshot $window $systemCleanupScreenshotPath
+
     $drivePlanScroll = Find-ByAutomationId $window 'CDriveRecommendationsScrollViewer' 1000
     $drivePlanScrollPattern = $drivePlanScroll.GetCurrentPattern(
         [System.Windows.Automation.ScrollPattern]::Pattern)
@@ -419,6 +455,12 @@ try {
     if ($null -eq $recommendations) {
         throw 'The Agent next action did not open the C-drive evidence page.'
     }
+    $quarantineManifestCount = @(
+        Get-ChildItem -LiteralPath $quarantineRoot -Recurse -File -Filter 'manifest.json' -ErrorAction SilentlyContinue
+    ).Count
+    if ($quarantineManifestCount -ne 0) {
+        throw 'A quarantine manifest was created during read-only home and cleanup review.'
+    }
 
     [PSCustomObject]@{
         fixtureScanRoot = $scanRoot
@@ -437,10 +479,13 @@ try {
         nextActionLabel = $nextActionLabel
         cDrivePageOpened = $true
         fixtureStillExists = (Test-Path -LiteralPath $fixtureTemp -PathType Container)
-        noOperationExecuted = $true
+        initialSystemCleanupVisible = $true
+        noOperationExecuted = ($quarantineManifestCount -eq 0)
+        quarantineManifestCount = $quarantineManifestCount
         screenshot = $screenshotPath
         drivePlanScreenshot = $drivePlanScreenshotPath
         driveOpportunityScreenshot = $driveOpportunityScreenshotPath
+        systemCleanupScreenshot = $systemCleanupScreenshotPath
     } | ConvertTo-Json -Compress
 }
 finally {
@@ -449,7 +494,9 @@ finally {
     }
 
     $env:OMNIX_ENTROPY_DATA_ROOT = $previousDataRoot
+    $env:OMNIX_ENTROPY_QUARANTINE_ROOT = $previousQuarantineRoot
     $env:OMNIX_ENTROPY_CDRIVE_SCAN_ROOT = $previousScanRoot
     Remove-Item -LiteralPath $isolatedDataRoot -Recurse -Force -ErrorAction SilentlyContinue
     Remove-Item -LiteralPath $scanRoot -Recurse -Force -ErrorAction SilentlyContinue
+    Remove-Item -LiteralPath $knownTempFixture -Force -ErrorAction SilentlyContinue
 }

@@ -36,6 +36,7 @@ public sealed class AppFamilyDecisionTests
 
         registeredDrawer.FamilySummary.Should().Contain("3 条")
             .And.Contain("不会合并卸载");
+        registeredDrawer.ShowFamilyContext.Should().BeTrue();
         registeredDrawer.CurrentEntrySummary.Should().Contain("1.14.41")
             .And.Contain("官方卸载入口");
         registeredDrawer.UninstallActionLabel.Should().Be("卸载这个版本");
@@ -83,6 +84,19 @@ public sealed class AppFamilyDecisionTests
             .And.Contain("352.0 MB")
             .And.Contain("仍可能增长");
         drawer.MigrationSummary.Should().Contain("不需要迁移");
+    }
+
+    [Fact]
+    public void Single_application_hides_family_explanation_to_keep_the_agent_conclusion_visible()
+    {
+        var profile = Profile(
+            "Single App",
+            @"D:\Software\Single",
+            uninstallCommand: null);
+
+        var drawer = AppPresentationBuilder.CreateDrawer(profile, [profile]);
+
+        drawer.ShowFamilyContext.Should().BeFalse();
     }
 
     [Fact]
@@ -161,6 +175,20 @@ public sealed class AppFamilyDecisionTests
             .And.Contain("DrawerFamilySummaryTextBlock.Text = drawer.FamilySummary;")
             .And.Contain("DrawerCurrentEntryTextBlock.Text = drawer.CurrentEntrySummary;")
             .And.Contain("DrawerStorageOutcomeTextBlock.Text = drawer.StorageOutcomeSummary;");
+    }
+
+    [Fact]
+    public void Family_gui_smoke_derives_no_operation_from_isolated_evidence_stores()
+    {
+        var smoke = File.ReadAllText(
+            FindRepositoryFile(".omx", "gui-app-family-decision-smoke.ps1"));
+
+        smoke.Should().Contain("OMNIX_ENTROPY_QUARANTINE_ROOT")
+            .And.Contain("OMNIX_ENTROPY_UNINSTALL_EVIDENCE_ROOT")
+            .And.Contain("quarantineManifestCount")
+            .And.Contain("uninstallEvidenceCreated")
+            .And.Contain("NoOperationExecuted = ($quarantineManifestCount -eq 0 -and -not $uninstallEvidenceCreated)")
+            .And.NotContain("OperationExecuted = $false");
     }
 
     private static SoftwareProfile Profile(

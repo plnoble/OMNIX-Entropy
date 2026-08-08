@@ -1,0 +1,219 @@
+<Window x:Class="Css.App.CommunityRuleCenterWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="OMNIX-Entropy 扩展规则"
+        Height="720"
+        Width="900"
+        MinHeight="620"
+        MinWidth="760"
+        Background="#F6F7F9"
+        WindowStartupLocation="CenterOwner"
+        AutomationProperties.Name="OMNIX-Entropy 扩展规则窗口">
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel>
+            <TextBlock Text="扩展规则" FontSize="28" FontWeight="SemiBold" Foreground="#111827"/>
+            <TextBlock Text="扩大应用缓存的发现范围；规则只负责发现，不会直接清理。"
+                       Foreground="#4B5563" FontSize="15" TextWrapping="Wrap" Margin="0,7,0,14"/>
+        </StackPanel>
+
+        <TabControl Grid.Row="1" x:Name="RuleCenterTabControl" AutomationProperties.AutomationId="RuleCenterTabControl">
+            <TabItem Header="状态">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                    <StackPanel Margin="18">
+                        <TextBlock x:Name="RuleCenterStatusHeadlineTextBlock"
+                                   AutomationProperties.AutomationId="RuleCenterStatusHeadlineTextBlock"
+                                   FontSize="22" FontWeight="SemiBold" Foreground="#111827" TextWrapping="Wrap"/>
+                        <TextBlock x:Name="RuleCenterStatusSummaryTextBlock"
+                                   AutomationProperties.AutomationId="RuleCenterStatusSummaryTextBlock"
+                                   Foreground="#374151" FontSize="16" TextWrapping="Wrap" Margin="0,8,0,18"/>
+                        <Separator/>
+                        <TextBlock Text="来源" FontWeight="SemiBold" Foreground="#111827" Margin="0,16,0,0"/>
+                        <TextBlock x:Name="RuleCenterSourceTextBlock"
+                                   AutomationProperties.AutomationId="RuleCenterSourceTextBlock"
+                                   Foreground="#374151" TextWrapping="Wrap" Margin="0,6,0,0"/>
+                        <TextBlock Text="许可证" FontWeight="SemiBold" Foreground="#111827" Margin="0,14,0,0"/>
+                        <TextBlock x:Name="RuleCenterLicenseTextBlock"
+                                   AutomationProperties.AutomationId="RuleCenterLicenseTextBlock"
+                                   Foreground="#374151" TextWrapping="Wrap" Margin="0,6,0,0"/>
+                        <TextBlock Text="版本" FontWeight="SemiBold" Foreground="#111827" Margin="0,14,0,0"/>
+                        <TextBlock x:Name="RuleCenterVersionTextBlock"
+                                   AutomationProperties.AutomationId="RuleCenterVersionTextBlock"
+                                   Foreground="#374151" TextWrapping="Wrap" Margin="0,6,0,0"/>
+                        <Border Background="#ECFDF5" BorderBrush="#A7F3D0" BorderThickness="1" CornerRadius="6" Padding="12" Margin="0,18,0,0">
+                            <TextBlock x:Name="RuleCenterSafetyTextBlock"
+                                       AutomationProperties.AutomationId="RuleCenterSafetyTextBlock"
+                                       Text="安全边界：扩展规则不会创建清理操作，不会删除文件，也不会修改注册表。"
+                                       Foreground="#166534" FontWeight="SemiBold" TextWrapping="Wrap"/>
+                        </Border>
+                        <Separator Margin="0,18,0,14"/>
+                        <TextBlock x:Name="RuleCenterRollbackSummaryTextBlock"
+                                   AutomationProperties.AutomationId="RuleCenterRollbackSummaryTextBlock"
+                                   Foreground="#374151" TextWrapping="Wrap"/>
+                        <CheckBox x:Name="RuleCenterRollbackCheckBox"
+                                  AutomationProperties.AutomationId="RuleCenterRollbackCheckBox"
+                                  Content="我确认回到上一个已验证版本"
+                                  Margin="0,12,0,8"/>
+                        <Button x:Name="RuleCenterRollbackButton"
+                                AutomationProperties.AutomationId="RuleCenterRollbackButton"
+                                Content="回到上一个版本" Width="160" Height="36" HorizontalAlignment="Left"
+                                Click="Rollback_Click"/>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <TabItem Header="只读预览">
+                <Grid Margin="18">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="120"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <TextBlock x:Name="RuleCenterPreviewSummaryTextBlock"
+                               AutomationProperties.AutomationId="RuleCenterPreviewSummaryTextBlock"
+                               Foreground="#374151" FontSize="15" TextWrapping="Wrap" Margin="0,0,0,12"/>
+                    <ListBox Grid.Row="1" x:Name="RuleCenterPreviewListBox"
+                             AutomationProperties.AutomationId="RuleCenterPreviewListBox"
+                             SelectionChanged="PreviewList_SelectionChanged"
+                             HorizontalContentAlignment="Stretch"
+                             ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                        <ListBox.ItemContainerStyle>
+                            <Style TargetType="ListBoxItem">
+                                <Setter Property="AutomationProperties.Name" Value="{Binding VisibleText}"/>
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                            </Style>
+                        </ListBox.ItemContainerStyle>
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding VisibleText}" Foreground="#1F2937" TextWrapping="Wrap" Padding="8,7"/>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                    <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,10,0,0">
+                        <Button x:Name="RuleCenterIgnoreRuleButton"
+                                AutomationProperties.AutomationId="RuleCenterIgnoreRuleButton"
+                                Content="不再显示这条规则" Width="166" Height="34" IsEnabled="False"
+                                Click="IgnoreRule_Click"/>
+                        <Button x:Name="RuleCenterTechnicalDetailsButton"
+                                AutomationProperties.AutomationId="RuleCenterTechnicalDetailsButton"
+                                Content="查看技术详情" Width="138" Height="34" Margin="8,0,0,0" IsEnabled="False"
+                                Click="ToggleTechnicalDetails_Click"/>
+                    </StackPanel>
+                    <ListBox Grid.Row="3" x:Name="RuleCenterTechnicalDetailsListBox"
+                             AutomationProperties.AutomationId="RuleCenterTechnicalDetailsListBox"
+                             Height="100" Visibility="Collapsed" Margin="0,10,0,0"/>
+                    <TextBlock Grid.Row="4" Text="已忽略的规则" FontWeight="SemiBold" Foreground="#111827" Margin="0,14,0,6" VerticalAlignment="Top"/>
+                    <ListBox Grid.Row="4" x:Name="RuleCenterIgnoredRulesListBox"
+                             AutomationProperties.AutomationId="RuleCenterIgnoredRulesListBox"
+                             DisplayMemberPath="VisibleText" Margin="0,38,0,0"
+                             SelectionChanged="IgnoredRulesList_SelectionChanged">
+                        <ListBox.ItemContainerStyle>
+                            <Style TargetType="ListBoxItem">
+                                <Setter Property="AutomationProperties.Name" Value="{Binding VisibleText}"/>
+                            </Style>
+                        </ListBox.ItemContainerStyle>
+                    </ListBox>
+                    <Button Grid.Row="5" x:Name="RuleCenterRestoreRuleButton"
+                            AutomationProperties.AutomationId="RuleCenterRestoreRuleButton"
+                            Content="恢复显示所选规则" Width="166" Height="34" HorizontalAlignment="Left"
+                            Margin="0,10,0,0" IsEnabled="False" Click="RestoreRule_Click"/>
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="导入 / 更新">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                    <Grid Margin="18">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="170"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <Button Grid.Row="0" Grid.Column="0" x:Name="RuleCenterChooseFileButton"
+                                AutomationProperties.AutomationId="RuleCenterChooseFileButton"
+                                Content="选择本地规则文件" Width="156" Height="34" HorizontalAlignment="Left"
+                                Click="ChooseFile_Click"/>
+                        <TextBlock Grid.Row="0" Grid.Column="1" x:Name="RuleCenterSelectedFileTextBlock"
+                                   AutomationProperties.AutomationId="RuleCenterSelectedFileTextBlock"
+                                   Text="尚未选择文件" Foreground="#4B5563" TextTrimming="CharacterEllipsis"
+                                   VerticalAlignment="Center" Margin="8,0,0,0"/>
+
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="来源名称" VerticalAlignment="Center" Margin="0,12,12,0"/>
+                        <TextBox Grid.Row="1" Grid.Column="1" x:Name="RuleCenterSourceNameTextBox"
+                                 AutomationProperties.AutomationId="RuleCenterSourceNameTextBox" Height="32" Margin="0,12,0,0"/>
+                        <TextBlock Grid.Row="2" Grid.Column="0" Text="下载 / 来源 HTTPS 地址" VerticalAlignment="Center" Margin="0,10,12,0"/>
+                        <TextBox Grid.Row="2" Grid.Column="1" x:Name="RuleCenterSourceUriTextBox"
+                                 AutomationProperties.AutomationId="RuleCenterSourceUriTextBox" Height="32" Margin="0,10,0,0"/>
+                        <TextBlock Grid.Row="3" Grid.Column="0" Text="版本" VerticalAlignment="Center" Margin="0,10,12,0"/>
+                        <TextBox Grid.Row="3" Grid.Column="1" x:Name="RuleCenterVersionTextBox"
+                                 AutomationProperties.AutomationId="RuleCenterVersionTextBox" Height="32" Margin="0,10,0,0"/>
+                        <TextBlock Grid.Row="4" Grid.Column="0" Text="许可证名称" VerticalAlignment="Center" Margin="0,10,12,0"/>
+                        <TextBox Grid.Row="4" Grid.Column="1" x:Name="RuleCenterLicenseNameTextBox"
+                                 AutomationProperties.AutomationId="RuleCenterLicenseNameTextBox" Height="32" Margin="0,10,0,0"/>
+                        <TextBlock Grid.Row="5" Grid.Column="0" Text="许可证 HTTPS 地址" VerticalAlignment="Center" Margin="0,10,12,0"/>
+                        <TextBox Grid.Row="5" Grid.Column="1" x:Name="RuleCenterLicenseUriTextBox"
+                                 AutomationProperties.AutomationId="RuleCenterLicenseUriTextBox" Height="32" Margin="0,10,0,0"/>
+                        <TextBlock Grid.Row="6" Grid.Column="0" Text="SHA-256 校验值" VerticalAlignment="Center" Margin="0,10,12,0"/>
+                        <TextBox Grid.Row="6" Grid.Column="1" x:Name="RuleCenterSha256TextBox"
+                                 AutomationProperties.AutomationId="RuleCenterSha256TextBox" Height="32" Margin="0,10,0,0"/>
+
+                        <StackPanel Grid.Row="7" Grid.ColumnSpan="2" Margin="0,16,0,0">
+                            <CheckBox x:Name="RuleCenterLicenseCheckBox"
+                                      AutomationProperties.AutomationId="RuleCenterLicenseCheckBox"
+                                      Content="我已查看来源和许可证，并接受这份规则数据的许可证"/>
+                            <CheckBox x:Name="RuleCenterActivationCheckBox"
+                                      AutomationProperties.AutomationId="RuleCenterActivationCheckBox"
+                                      Content="我确认启用这个版本；它只扩大只读发现范围"
+                                      Margin="0,8,0,0"/>
+                        </StackPanel>
+                        <WrapPanel Grid.Row="8" Grid.ColumnSpan="2" Margin="0,16,0,0">
+                            <Button x:Name="RuleCenterActivateFileButton"
+                                    AutomationProperties.AutomationId="RuleCenterActivateFileButton"
+                                    Content="导入所选文件" Width="142" Height="36" Click="ActivateFile_Click"/>
+                            <Button x:Name="RuleCenterDownloadButton"
+                                    AutomationProperties.AutomationId="RuleCenterDownloadButton"
+                                    Content="从 HTTPS 地址下载" Width="170" Height="36" Margin="8,0,0,0"
+                                    Click="Download_Click"/>
+                            <Button x:Name="RuleCenterCancelOperationButton"
+                                    AutomationProperties.AutomationId="RuleCenterCancelOperationButton"
+                                    Content="取消当前操作" Width="142" Height="36" Margin="8,0,0,0"
+                                    IsEnabled="False" Click="CancelOperation_Click"/>
+                        </WrapPanel>
+                        <TextBlock Grid.Row="9" Grid.ColumnSpan="2"
+                                   Text="不会自动发现更新；只有点击导入或下载并通过校验后，活动版本才会改变。"
+                                   Foreground="#6B7280" TextWrapping="Wrap" Margin="0,14,0,0"/>
+                    </Grid>
+                </ScrollViewer>
+            </TabItem>
+        </TabControl>
+
+        <TextBlock Grid.Row="2" x:Name="RuleCenterOperationStatusTextBlock"
+                   AutomationProperties.AutomationId="RuleCenterOperationStatusTextBlock"
+                   Text="准备就绪。" Foreground="#374151" TextWrapping="Wrap" Margin="0,14,0,0"/>
+
+        <Button Grid.Row="3" x:Name="RuleCenterCloseButton"
+                AutomationProperties.AutomationId="RuleCenterCloseButton"
+                Content="关闭" Width="110" Height="38" HorizontalAlignment="Right" Margin="0,14,0,0"
+                IsCancel="True" Click="Close_Click"/>
+    </Grid>
+</Window>

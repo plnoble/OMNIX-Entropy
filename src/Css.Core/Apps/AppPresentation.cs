@@ -35,10 +35,12 @@ public sealed class AppDrawerViewModel
 {
     public required string Name { get; init; }
     public required string CategorySummary { get; init; }
+    public required bool ShowFamilyContext { get; init; }
     public required string FamilySummary { get; init; }
     public required string CurrentEntrySummary { get; init; }
     public required string InstallLocationSummary { get; init; }
     public required string SizeSummary { get; init; }
+    public required string CommunityCacheSummary { get; init; }
     public required string StorageOutcomeSummary { get; init; }
     public required string ResidencySummary { get; init; }
     public required string SystemFootprintSummary { get; init; }
@@ -307,6 +309,7 @@ public static class AppPresentationBuilder
             AppTileStatus.System => "\u7cfb\u7edf\u7ec4\u4ef6",
             AppTileStatus.Attention => CDriveAttentionTag(profile),
             AppTileStatus.Warning when profile.RecentGrowthBytes > 0 => "最近变大",
+            AppTileStatus.Warning when HasCommunityCacheEvidence(profile) => "发现缓存",
             AppTileStatus.Warning when IsResident(profile) => "\u540e\u53f0\u5e38\u9a7b",
             AppTileStatus.Warning => "\u6709\u5efa\u8bae",
             _ => "\u6b63\u5e38"
@@ -368,10 +371,12 @@ public static class AppPresentationBuilder
         {
             Name = profile.Name,
             CategorySummary = CategorySummary(profile),
+            ShowFamilyContext = family.RelatedEntryCount > 1,
             FamilySummary = family.Summary,
             CurrentEntrySummary = family.CurrentEntrySummary,
             InstallLocationSummary = LocationSummary(profile),
             SizeSummary = SizeSummary(profile),
+            CommunityCacheSummary = CommunityCacheSummary(profile),
             StorageOutcomeSummary = CreateStorageOutcomeSummary(profile, family),
             ResidencySummary = ResidencySummary(profile),
             SystemFootprintSummary = CreateSystemFootprintSummary(profile),
@@ -473,6 +478,8 @@ public static class AppPresentationBuilder
         if (HasCDriveFootprint(profile))
             return AppTileStatus.Attention;
         if (profile.RecentGrowthBytes > 0)
+            return AppTileStatus.Warning;
+        if (HasCommunityCacheEvidence(profile))
             return AppTileStatus.Warning;
         if (IsResident(profile) || profile.DataSizeBytes >= 1024L * 1024 * 1024)
             return AppTileStatus.Warning;
@@ -580,6 +587,43 @@ public static class AppPresentationBuilder
         return string.Join("；", program, data, cache, growth) + "。";
     }
 
+    private static string CommunityCacheSummary(SoftwareProfile profile)
+    {
+        var evidence = profile.CommunityCacheEvidence
+            .Where(item => item.FileCount > 0 || item.SizeBytes > 0)
+            .ToArray();
+        if (evidence.Length == 0)
+            return "扩展规则暂未发现额外缓存。";
+
+        // Different community rules may cover the same files, so never sum them.
+        var largestSize = evidence.Max(item => item.SizeBytes);
+        var ruleText = evidence.Length == 1 ? "1 条规则" : $"{evidence.Length} 条规则";
+        var staleSize = evidence.Max(item => item.StaleSizeBytes);
+        var staleDays = evidence
+            .Where(item => item.StaleSizeBytes > 0)
+            .Select(item => item.StaleThresholdDays)
+            .DefaultIfEmpty(0)
+            .Min();
+        var staleText = staleSize > 0
+            ? $"；其中 {staleDays} 天以上的文件至少 {FormatBytes(staleSize)}"
+            : string.Empty;
+        var eligible = evidence
+            .Select(item => item.CandidateAssessment)
+            .Where(item => item?.Disposition == CommunityRuleCandidateDisposition.EligibleForSafePreview)
+            .Cast<CommunityRuleCandidateAssessment>()
+            .ToArray();
+        var refused = evidence.Count(item =>
+            item.CandidateAssessment?.Disposition == CommunityRuleCandidateDisposition.Refused);
+        var decisionText = eligible.Length > 0
+            ? $"其中 {eligible.Length} 条已通过第一轮筛选，可进入安全预演"
+            : refused == evidence.Length
+                ? "安全检查已拒绝晋级，只保留查看"
+                : "目前仍需观察，没有直接处理权限";
+
+        return $"扩展规则只读发现：至少 {FormatBytes(largestSize)}（{ruleText}）{staleText}。"
+            + $"{decisionText}；可能重叠，暂不能直接清理。";
+    }
+
     private static string ResidencySummary(SoftwareProfile profile)
     {
         if (!IsResident(profile))
@@ -656,6 +700,51 @@ public static class AppPresentationBuilder
             };
         }
 
+        if (HasCommunityCacheEvidence(profile))
+        {
+            var assessments = profile.CommunityCacheEvidence
+                .Select(item => item.CandidateAssessment)
+                .Where(item => item is not null)
+                .Cast<CommunityRuleCandidateAssessment>()
+                .ToArray();
+            var eligible = assessments
+                .Where(item => item.Disposition == CommunityRuleCandidateDisposition.EligibleForSafePreview)
+                .ToArray();
+            if (eligible.Length > 0)
+            {
+                return new AgentRecommendation
+                {
+                    Text = $"有 {eligible.Sum(item => item.EligibleFiles.Count)} 个旧缓存文件通过第一轮筛选。下一步先看安全预演，目前不会清理。",
+                    Reason = "这些文件位于已批准的用户缓存区、时间较旧且应用未运行；执行前仍需重新核验身份并准备隔离回滚。",
+                    Risk = RiskLevel.Low,
+                    RequiresUserConfirmation = false,
+                    Action = RecommendationAction.Observe
+                };
+            }
+
+            if (assessments.Length > 0
+                && assessments.All(item => item.Disposition == CommunityRuleCandidateDisposition.Refused))
+            {
+                return new AgentRecommendation
+                {
+                    Text = $"这批扩展规则发现没有通过安全检查，我已停止晋级。{assessments[0].Summary}只保留查看。",
+                    Reason = assessments[0].Explanation,
+                    Risk = RiskLevel.Low,
+                    RequiresUserConfirmation = false,
+                    Action = RecommendationAction.Observe
+                };
+            }
+
+            return new AgentRecommendation
+            {
+                Text = "先预览这批扩展规则发现的缓存，确认用途后再决定；目前不会直接清理。",
+                Reason = "社区规则扩大了只读发现范围，但规则可能重叠，也不能单独证明文件可以安全删除。",
+                Risk = RiskLevel.Low,
+                RequiresUserConfirmation = false,
+                Action = RecommendationAction.Observe
+            };
+        }
+
         if (IsResident(profile) || profile.DataSizeBytes >= 1024L * 1024 * 1024)
         {
             return new AgentRecommendation
@@ -724,12 +813,22 @@ public static class AppPresentationBuilder
         var uninstallReason = CanReviewUninstall(profile)
             ? "只运行当前这条记录的官方卸载器，再扫描它的残留。"
             : "当前这条记录没有可验证的官方卸载入口，不会直接删除目录。";
+        var hasTrustedCache = profile.CachePaths.Count > 0 || profile.CacheSizeBytes > 0;
+        var hasEligibleCommunityCache = profile.CommunityCacheEvidence.Any(item =>
+            item.CandidateAssessment?.Disposition == CommunityRuleCandidateDisposition.EligibleForSafePreview);
+        var cacheReason = hasTrustedCache
+            ? "只生成低风险缓存方案，执行前仍需确认。"
+            : HasCommunityCacheEvidence(profile)
+                ? hasEligibleCommunityCache
+                    ? "已通过第一轮筛选；下一步进入安全预演、重新核验并准备隔离回滚。"
+                    : "扩展规则目前只是只读发现，还不能直接清理；请先查看 Agent 的判断。"
+                : "暂未识别可生成安全方案的缓存位置。";
 
         return
         [
             new() { Kind = AppActionKind.Uninstall, Label = uninstallLabel, IsEnabled = CanReviewUninstall(profile), Reason = uninstallReason },
             new() { Kind = AppActionKind.Migration, Label = "\u8fc1\u79fb\u5230 D \u76d8", IsEnabled = CanReviewMigration(profile), Reason = MigrationActionReason(profile) },
-            new() { Kind = AppActionKind.CacheCleanup, Label = "\u6e05\u7406\u7f13\u5b58", IsEnabled = profile.CachePaths.Count > 0 || profile.CacheSizeBytes > 0, Reason = "\u53ea\u751f\u6210\u4f4e\u98ce\u9669\u7f13\u5b58\u65b9\u6848\uff0c\u6267\u884c\u524d\u4ecd\u9700\u786e\u8ba4\u3002" },
+            new() { Kind = AppActionKind.CacheCleanup, Label = "\u6e05\u7406\u7f13\u5b58", IsEnabled = hasTrustedCache || hasEligibleCommunityCache, Reason = cacheReason },
             new() { Kind = AppActionKind.StartupControl, Label = "\u7ba1\u7406\u81ea\u542f\u52a8", IsEnabled = HasStartupControlSignals(profile), Reason = "\u4f1a\u5148\u751f\u6210\u786e\u8ba4\u65b9\u6848\uff0c\u4e0d\u4f1a\u76f4\u63a5\u6539\u7cfb\u7edf\u3002" },
             new() { Kind = AppActionKind.TechnicalDetails, Label = "\u6280\u672f\u8be6\u60c5", IsEnabled = true, Reason = "\u5c55\u5f00\u8def\u5f84\u3001\u670d\u52a1\u3001\u81ea\u542f\u52a8\u548c\u8ba1\u5212\u4efb\u52a1\u660e\u7ec6\u3002" }
         ];
@@ -979,6 +1078,19 @@ public static class AppPresentationBuilder
             details.AddRange(profile.ScheduledTasks.Select(value => "Scheduled task name hint: " + value));
         }
         details.AddRange(profile.CDriveWritePaths.Select(value => "C drive path: " + value));
+        foreach (var evidence in profile.CommunityCacheEvidence.Take(16))
+        {
+            details.Add($"Community rule pack: {evidence.RulePackSource}; version {evidence.RulePackVersion}; SHA-256 {evidence.RulePackSha256}");
+            details.Add($"Community rule evidence: {evidence.RuleName}; files {evidence.FileCount}; bytes {evidence.SizeBytes}; lower bound {evidence.IsSizeLowerBound}; execution authorized {evidence.IsExecutionAuthorized}");
+            details.Add($"Community candidate set: complete {evidence.CandidateFilesComplete}; exact files {evidence.CandidateFiles.Count}; registry targets {evidence.RegistryTargetCount}; remove-self {evidence.IncludesRemoveSelf}");
+            if (evidence.CandidateAssessment is not null)
+                details.Add($"Community candidate decision: {evidence.CandidateAssessment.Disposition}; reasons {string.Join(",", evidence.CandidateAssessment.Reasons)}; execution authorized {evidence.CandidateAssessment.IsExecutionAuthorized}");
+            if (!string.IsNullOrWhiteSpace(evidence.Warning))
+                details.Add("Community rule warning: " + evidence.Warning);
+            details.AddRange(evidence.SamplePaths
+                .Take(3)
+                .Select(path => "Community rule sample: " + path));
+        }
         details.AddRange(profile.SystemFootprints
             .Take(24)
             .Select(FormatSystemFootprint));
@@ -1096,6 +1208,9 @@ public static class AppPresentationBuilder
     private static bool IsOnDrive(string? path, string driveLetter) =>
         !string.IsNullOrWhiteSpace(path) &&
         path.StartsWith(driveLetter + ":\\", StringComparison.OrdinalIgnoreCase);
+
+    private static bool HasCommunityCacheEvidence(SoftwareProfile profile) =>
+        profile.CommunityCacheEvidence.Any(item => item.FileCount > 0 || item.SizeBytes > 0);
 
     private static string FormatBytes(long bytes)
     {

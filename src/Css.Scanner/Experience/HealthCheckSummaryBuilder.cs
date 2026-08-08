@@ -29,12 +29,14 @@ public static class HealthCheckSummaryBuilder
             .Where(r => HealthFindingRiskPolicy.IsLowRiskClean(r.Action, r.Risk))
             .Select(r => r.EstimatedImpactBytes));
         var knownCleanupCandidateBytes = SaturatingSum(result.SystemCleanupOpportunities
-            .Where(item => item.IsAccessible && item.SizeBytes > 0)
-            .Select(item => item.SizeBytes));
+            .Where(item => item.IsAccessible && CleanupCandidateBytes(item) > 0)
+            .Select(CleanupCandidateBytes));
         var knownCleanupIsLowerBound = result.SystemCleanupOpportunities.Any(item =>
             item.IsAccessible
-            && item.SizeBytes > 0
+            && CleanupCandidateBytes(item) > 0
             && item.IsSizeLowerBound);
+        var knownCleanupScanIncomplete = result.SystemCleanupOpportunities.Any(item =>
+            item.IsAccessible && item.IsSizeLowerBound);
         var score = Math.Clamp(100 - (int)Math.Round(Math.Max(0, usedPercent - 50)), 0, 100);
         var driveLabel = DriveScanTargetPresenter.DriveLabel(result.Drive);
 
@@ -49,6 +51,7 @@ public static class HealthCheckSummaryBuilder
                 reclaimable,
                 knownCleanupCandidateBytes,
                 knownCleanupIsLowerBound,
+                knownCleanupScanIncomplete,
                 machineHealth,
                 softwareProfiles,
                 growthFindings,
@@ -68,6 +71,7 @@ public static class HealthCheckSummaryBuilder
         long reclaimableBytes,
         long knownCleanupCandidateBytes,
         bool knownCleanupIsLowerBound,
+        bool knownCleanupScanIncomplete,
         MachineHealthObservation? machineHealth,
         IReadOnlyList<SoftwareProfile>? softwareProfiles,
         IReadOnlyList<GrowthFinding> growthFindings,
@@ -87,6 +91,9 @@ public static class HealthCheckSummaryBuilder
                 Result = $"{driveLabel} {driveUsedPercent:0.0}%，可安全处理约 {FormatBytes(reclaimableBytes)}"
                     + (knownCleanupCandidateBytes > 0
                         ? $"；待确认临时/系统缓存{(knownCleanupIsLowerBound ? "至少 " : "约 ")}{FormatBytes(knownCleanupCandidateBytes)}"
+                        : string.Empty)
+                    + (knownCleanupScanIncomplete
+                        ? "；部分缓存位置扫描未完成，结果可能低估"
                         : string.Empty),
                 Rating = driveUsedPercent >= 85 ? "需要关注" : "有优化空间"
             }
@@ -196,23 +203,42 @@ public static class HealthCheckSummaryBuilder
         }
 
         var knownCleanup = result.SystemCleanupOpportunities
-            .Where(item => item.IsAccessible && item.SizeBytes > 0)
-            .OrderByDescending(item => item.SizeBytes)
+            .Where(item => item.IsAccessible && CleanupCandidateBytes(item) > 0)
+            .OrderByDescending(CleanupCandidateBytes)
             .FirstOrDefault();
         if (knownCleanup is not null && findings.Count < 5)
         {
             var handling = knownCleanup.Handling == CleanupHandling.WindowsManaged
-                ? "应交给 Windows 清理机制复查"
-                : "需先检查文件年龄和占用状态";
+                ? "由 Windows 清理机制处理，OMNIX 只负责带你复查"
+                : knownCleanup.ReviewAgeDays > 0
+                    ? $"OMNIX 只先筛选 {knownCleanup.ReviewAgeDays} 天以上旧文件，不把整个目录当垃圾"
+                    : knownCleanup.HasAgeFilteredLocations
+                        ? "不同位置按各自条件筛选，OMNIX 不把整个目录当垃圾"
+                        : "OMNIX 需先检查占用状态";
             findings.Add(new HealthFinding
             {
-                Text = $"{knownCleanup.Title} {(knownCleanup.IsSizeLowerBound ? "至少 " : "约 ")}{FormatBytes(knownCleanup.SizeBytes)}；{handling}，当前不算作可安全处理空间",
+                Text = $"{knownCleanup.Title} {(knownCleanup.IsSizeLowerBound ? "至少 " : "约 ")}{FormatBytes(CleanupCandidateBytes(knownCleanup))}；{handling}，当前不算作可安全处理空间",
                 Kind = HealthFindingKind.SystemCleanup,
                 Action = RecommendationAction.Observe,
                 Risk = knownCleanup.Handling == CleanupHandling.WindowsManaged
                     ? RiskLevel.Medium
                     : RiskLevel.Low
             });
+        }
+        else if (findings.Count < 5)
+        {
+            var incompleteCleanup = result.SystemCleanupOpportunities
+                .FirstOrDefault(item => item.IsAccessible && item.IsSizeLowerBound);
+            if (incompleteCleanup is not null)
+            {
+                findings.Add(new HealthFinding
+                {
+                    Text = $"{incompleteCleanup.Title} 扫描未完成，当前不能判断这里没有旧文件；先保留，之后重新扫描",
+                    Kind = HealthFindingKind.SystemCleanup,
+                    Action = RecommendationAction.Observe,
+                    Risk = RiskLevel.None
+                });
+            }
         }
 
         var largeFiles = personalStorage.Findings
@@ -292,6 +318,13 @@ public static class HealthCheckSummaryBuilder
 
         return findings;
     }
+
+    private static long CleanupCandidateBytes(SystemCleanupOpportunity opportunity) =>
+        opportunity.Handling == CleanupHandling.WindowsManaged
+            ? opportunity.SizeBytes
+            : opportunity.ReviewAgeDays > 0 || opportunity.HasAgeFilteredLocations
+                ? opportunity.ReviewableSizeBytes
+                : opportunity.SizeBytes;
 
     private static int RecommendationPriority(Recommendation recommendation)
     {

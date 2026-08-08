@@ -82,7 +82,7 @@ public sealed class SoftwareSystemFootprintTests
     }
 
     [Fact]
-    public void Application_drawer_places_beginner_summary_before_agent_advice()
+    public void Application_drawer_places_agent_first_and_system_summary_before_actions()
     {
         var xaml = File.ReadAllText(
             FindRepositoryFile("src", "Css.App", "MainWindow.xaml"));
@@ -90,10 +90,12 @@ public sealed class SoftwareSystemFootprintTests
             FindRepositoryFile("src", "Css.App", "MainWindow.xaml.cs"));
 
         xaml.Should().Contain("AutomationProperties.AutomationId=\"DrawerSystemFootprintTextBlock\"");
+        xaml.IndexOf("DrawerAdviceTextBlock", StringComparison.Ordinal)
+            .Should().BeLessThan(xaml.IndexOf("DrawerResidencyTextBlock", StringComparison.Ordinal));
         xaml.IndexOf("DrawerResidencyTextBlock", StringComparison.Ordinal)
             .Should().BeLessThan(xaml.IndexOf("DrawerSystemFootprintTextBlock", StringComparison.Ordinal));
         xaml.IndexOf("DrawerSystemFootprintTextBlock", StringComparison.Ordinal)
-            .Should().BeLessThan(xaml.IndexOf("DrawerAdviceTextBlock", StringComparison.Ordinal));
+            .Should().BeLessThan(xaml.IndexOf("DrawerUninstallButton", StringComparison.Ordinal));
         main.Should().Contain("DrawerSystemFootprintTextBlock.Text = drawer.SystemFootprintSummary;");
         main.Should().Contain("DrawerSystemFootprintTextBlock.Text = empty.SystemFootprintSummary;");
     }

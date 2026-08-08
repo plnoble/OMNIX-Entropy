@@ -1,5 +1,104 @@
 # Decision Log
 
+## 2026-08-02 - Audit original scenarios before adding more operation code
+
+- Decision: treat existing official-uninstall, installer-routing/report, and migration/closure pipelines as reusable verified foundations, then close the original Phase 7-9 user scenarios with evidence and beginner presentation before adding any new mutation authority.
+- Rejected alternative: infer that a phase is complete because similarly named classes exist, or rebuild a second uninstall/migration path to match the plan wording.
+- Reason: the repository already contains deep safety machinery, but product completeness is determined by what a beginner can understand and safely accomplish. Scenario contracts reveal missing composition without multiplying privileged paths.
+- Consequence: system-cleanup evidence/handling clarity is the next implementation slice; uninstall/install/migration first receive a capability matrix and targeted gaps only.
+
+## 2026-08-02 - Triage symptoms before opening Windows pages
+
+- Decision: distinguish a reported symptom from an explicit request to open a Windows setting or tool. A symptom first receives a beginner triage conclusion with checked evidence, unknowns, urgency, and one allowlisted next step; an explicit open request keeps the direct shortcut flow.
+- Rejected alternative: treat every network, sound, Bluetooth, display, driver, or blue-screen keyword as sufficient reason to open a page, or add broad diagnostic scripts that claim a root cause.
+- Reason: the current routing is safe but transfers the decision back to a user who already said they do not understand computers. The Agent should frame the next observation without pretending unavailable local evidence exists.
+- Consequence: Phase 8 adds a pure symptom catalog/presenter and concise quick choices, but no new mutation authority. Any destination must resolve through the existing settings/system-tool catalogs.
+
+## 2026-08-02 - Give community exact files their own operation plan
+
+- Decision: keep rule-derived exact files in `app.community-cache.quarantine` with their own pack/profile/file binding and specialized revalidation handler, while leaving `app.cache.quarantine` for trusted cache directories.
+- Rejected alternative: append community paths to `SoftwareProfile.CachePaths` or reuse the directory plan because both eventually enter quarantine.
+- Reason: the evidence shapes and stale-state risks differ. A community rule proves only bounded exact candidate files and must never inherit whole-directory authority.
+- Consequence: trusted cache behavior is unchanged; community candidates can advance only through complete exact evidence, double rescan, identity binding, confirmation, quarantine, timeline, and restore.
+
+## 2026-08-02 - Reload and verify rule bytes at every operation boundary
+
+- Decision: resolve the current active SHA through `LoadActiveCatalog()` rather than reading only the stored status descriptor before preview/confirmation/execution.
+- Rejected alternative: trust `active-state.json` because activation originally verified the pack.
+- Reason: the content-addressed file can later disappear, be redirected, corrupt, or change independently of the state pointer.
+- Consequence: any pack-byte or parse failure stops the old operation even when the descriptor still contains the expected SHA.
+
+## 2026-08-02 - Keep eligibility separate from operation authority
+
+- Decision: `EligibleForSafePreview` means only that exact evidence passed the first conservative policy; it does not create an `OperationDescriptor`, enable cleanup, or authorize quarantine.
+- Rejected alternative: let eligible community findings flow directly into the existing trusted app-cache directory plan.
+- Reason: community rules prove a plausible relationship, not OMNIX ownership or current execution safety. Rule pack, profile, process, and file identity may also change after scanning.
+- Consequence: Phase 7 must build a separate exact-file preview, revalidate every binding at confirmation time, and route any accepted action through the existing pipeline, quarantine, timeline, and restore systems.
+
+## 2026-08-02 - Retain bounded actionable evidence all-or-nothing
+
+- Decision: if exact community candidates exceed the retention cap, clear the whole actionable set and mark it incomplete while retaining only aggregate read-only evidence.
+- Rejected alternative: retain the first N files as an apparently executable subset or treat the cap as a size lower bound.
+- Reason: a partial set cannot faithfully represent the user-reviewed rule result, and cap exhaustion concerns identity completeness rather than whether total matched size was counted.
+- Consequence: large rules remain visible but cannot advance until a narrower complete rescan can bind every selected file.
+
+## 2026-08-02 - Keep rule-data management separate from rule cleanup authority
+
+- Decision: let the rule center write only immutable pack state and managed ignore preferences, while parser, matcher, resolver, profile evidence, and preview surfaces remain mutation-free and non-executable.
+- Rejected alternative: prohibit every file write anywhere under the Winapp2 namespace, or let imported rules directly populate trusted cache paths and cleanup plans.
+- Reason: import, rollback, and preference persistence legitimately need bounded atomic writes to OMNIX-owned data, but that authority says nothing about whether a discovered computer file is safe to remove.
+- Consequence: authority tests exclude only the explicit pack/preference storage classes and separately test their confined writes; all discovery and presentation code retains zero operation, registry, process, and filesystem-mutation authority. Phase 6 must add a separate candidate policy, and Phase 7 remains the first possible operation-planning phase.
+
+## 2026-08-02 - Put the community rule center behind one application-page tool
+
+- Decision: expose status, preview, import/update, rollback, and exclusions in one modal opened from application management rather than adding a new sidebar destination.
+- Rejected alternative: expose raw rules as a primary page, place source/license controls inside every app drawer, or hide provenance in settings.
+- Reason: community rules explain application-cache evidence but are occasional administration, while beginners need the Agent conclusion and application grid to remain the primary experience.
+- Consequence: provenance and consent remain visible when needed without making the main interface denser; raw paths and hashes stay secondary, and ordinary application scanning still works when no pack is active.
+
+## 2026-08-01 - Put Agent conclusions before technical dimensions and hide irrelevant family context
+
+- Decision: show the selected application's Agent recommendation immediately after identity/category; show same-family explanation only when more than one related record exists.
+- Rejected alternative: preserve the old fixed order where every application spends the first viewport on family, location, size, residency, and system-footprint text before telling the beginner what to do.
+- Reason: real screenshot acceptance showed the Agent body behind the taskbar even when UIAutomation reported it onscreen. A single application has no ambiguity that needs a family explanation.
+- Consequence: beginners get the action-oriented conclusion first; OpenCode/Antigravity-style duplicate records still retain exact version/source/uninstall identity; technical dimensions and action buttons remain available below.
+
+## 2026-08-01 - Keep community cache evidence structurally separate from cleanup eligibility
+
+- Decision: store rule observations in `SoftwareProfile.CommunityCacheEvidence`; never copy samples into `CachePaths` or observations into `CacheSizeBytes`, and aggregate overlapping rules by the largest observation rather than a sum.
+- Rejected alternative: reuse the existing cache fields for convenience or enable `清理缓存` when a community rule resolves files.
+- Reason: existing cache fields participate in executable plan eligibility, while a community path match proves discovery coverage but not safe deletion, ownership freshness, or overlap independence.
+- Consequence: Agent and technical detail gain useful cache evidence, but rule-only findings remain disabled until a future OMNIX policy independently proves exact cleanup candidates.
+
+## 2026-08-01 - Activate community rules through an immutable content pointer
+
+- Decision: store validated pack bytes under their SHA-256 and atomically replace only a small active-state pointer; retain the former active descriptor as the one rollback target.
+- Rejected alternative: overwrite `active.ini`, move active/previous file pairs as a multi-file transaction, silently poll upstream, or trust a downloaded manifest without user-reviewed source/license/hash metadata.
+- Reason: immutable content means a failed parse, copy, cancellation, or state write cannot damage the known-good bytes, while expected active/previous hashes prevent a stale confirmation page from rolling back the wrong versions.
+- Consequence: runtime import/update is optional and auditable, does not redistribute third-party data in the installer, and still grants no cleanup authority. A later UI must expose the descriptor and require explicit consent before calling this API.
+
+## 2026-08-01 - Prune rule scans by possible path match and preserve lower-bound honesty
+
+- Decision: enumerate only directories that can still satisfy an attributed target pattern; check time/count limits during both file and directory enumeration; skip reparse points; reject non-direct or escaped entries; report any truncation, rejection, skip, or access failure as a lower bound.
+- Rejected alternative: recursively walk the entire software profile root and filter only files, follow links for completeness, or present a partial byte count as exact.
+- Reason: large application data roots make broad traversal slow and expose unrelated private paths, while links and provider-returned escapes can cross the proven ownership boundary.
+- Consequence: evidence resolution remains bounded and useful for Agent diagnosis, but it cannot authorize cleanup and must explicitly disclose incomplete totals.
+
+## 2026-08-01 - Require literal-anchored path evidence for wildcard attribution
+
+- Decision: a Winapp2 path may identify a `SoftwareProfile` only when the target is equal to or below a known profile path. A wildcard segment may participate only when it contains literal characters, such as `Chrome*`; wildcard-only segments and broad fixed parent paths cannot establish ownership.
+- Rejected alternative: match by display name, treat a shared vendor directory as one product, truncate every wildcard to its parent, or enumerate the filesystem during attribution.
+- Reason: real Winapp2 data relies heavily on product-prefixed wildcards, while name and vendor-parent matches create sibling-product false positives.
+- Consequence: the matcher recognizes common real rules without granting broad directories or similarly named applications cleanup authority. Matching remains pure, read-only, and explicitly non-executable.
+
+## 2026-08-01 - Treat Winapp2 as untrusted evidence, never as cleanup authority
+
+- Decision: borrow FluentCleaner's broad Winapp2-compatible discovery model through an isolated read-only catalog, but require OMNIX ownership, path, process, risk, confirmation, quarantine, rollback, and timeline checks before any candidate can become an operation.
+- Rejected alternative: import FluentCleaner's direct deletion engine, registry cleaning, custom PowerShell, automatic cleanup, or bulk technical checkbox UI.
+- Reason: broad community rules can reveal application caches that OMNIX currently misses, but FluentCleaner deletes files/registry data directly and open reports describe aggressive false positives and system/user-state damage. A rule match is evidence, not proof of safe disposal.
+- License consequence: FluentCleaner code is MIT while Winapp2 data is CC BY-SA 4.0. Keep parser code and rule data as distinct components, record source/version/hash/license, and do not bundle the database until OMNIX licensing and redistribution terms are explicitly resolved.
+- Product consequence: first implementation is diagnosis-only. Beginner UI shows app ownership, estimated size, plain-language consequence, and exclusion controls; raw rules and dry-run targets live under technical detail.
+
 ## 2026-07-30 - Release the combined beginner-decision slice as 0.1.5
 
 - Decision: use the next patch version, 0.1.5, for the combined C-drive priority, known-cleanup inventory, and exact app-family decision changes.
@@ -207,3 +306,29 @@
 ## Archived History
 
 Entries before 2026-07-22 were moved verbatim to [decisions-archive-part1.md](archive/decisions-archive-part1.md), [decisions-archive-part2.md](archive/decisions-archive-part2.md).
+
+## 2026-08-02 - Mixed cleanup policies retain an explicit age-filter signal
+
+- Decision: store `HasAgeFilteredLocations` independently from the aggregate `ReviewAgeDays` label and use `ReviewableSizeBytes` whenever any location applies an age filter.
+- Rejected: set a mixed aggregate to zero days and then display the whole aggregate size, or invent one positive age threshold that does not apply to every candidate.
+- Consequence: mixed locations can use honest per-location policies while the beginner UI says the conditions differ and never promotes recent files from the filtered location.
+
+## 2026-08-02 - Phase 9 closure reuses existing guarded workflows
+
+- Decision: close Phase 9 through scenario audits and focused missing fixes; do not add parallel uninstall, installer, or migration executors when exact-entry, final-consent, rollback, and monitoring infrastructure already exists.
+- Rejected: family-level uninstall, generic forced migration, or a new direct cleanup path added only to make the UI look more actionable.
+- Consequence: Phase 10 can compose beginner decisions over one authoritative safety boundary, while final release acceptance still reruns the real GUI and broad gates.
+
+## 2026-08-02 - Agent decisions consume sanitized evidence, not scanner authority
+
+- Decision: introduce one path-free `AgentDecisionContext` between Scanner evidence and Core conversation presentation. It carries numeric amounts, observation windows, beginner summaries, and exact optional application identity, but no raw filesystem path or operation descriptor.
+- Decision: treat root-cause cards as overlapping location clues, growth as window-bound comparison evidence, and low-risk reversible bytes as the only amount that can be called currently safe. Never sum root clues or promise that an application supports moving cache because its program is on D.
+- Decision: duplicate-family questions may explain every record, but only one unique exact entry that passes the existing drawer action policy can receive an uninstall-review handoff. Family identity never becomes execution identity.
+- Rejected: adding another scanner, letting Agent text construct an operation, family-level uninstall, automatic cache redirection, or claiming a one-week trend from a shorter window.
+- Consequence: the Agent becomes more decisive for beginners while all real changes still enter the established local confirmation, snapshot, quarantine, rollback, and stale-evidence gates.
+## 2026-08-08 - Release the completed Phase 1-10 program as 0.2.0
+
+- Decision: use 0.2.0 for the unified rules, community Rule Lab, reversible cache handling, system diagnosis, application-family, install/migration, and Agent decision work rather than presenting this broad capability increase as another 0.1.x patch.
+- Rationale: the release adds multiple new user-facing capability families while preserving compatibility with the existing personal GitHub update channel and D-first installer contract; semantic minor-version progression communicates that scope honestly.
+- Rejected alternative: 0.1.6 would understate the product change, while 1.0.0 would overstate maturity for a beginner-facing maintenance assistant that remains conservative and personally distributed.
+- Consequence: one pushed 0.2.0 revision must bind CI, signed payload, installer, tag, channel manifest, and GitHub Release. Public 0.1.5 remains latest until every remote verification gate passes.

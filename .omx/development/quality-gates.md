@@ -1,5 +1,195 @@
 # Quality Gates
 
+## 2026-08-02 - Beginner symptom-triage completion gate
+
+| Category | Status | Evidence | Residual risk |
+| --- | --- | --- | --- |
+| Goal alignment | Pass | Six beginner symptom choices now lead to conclusions instead of immediately handing the user a technical Windows page. | Rules do not diagnose unsupported root causes. |
+| Evidence honesty | Pass | Every triage states checked observations, unknown evidence, urgency, and exactly one next step; negation and clause-local routing have focused contracts. | The first slice uses user-reported symptoms rather than active network/audio/device probes. |
+| Execution authority | Pass | Presenter and quick-choice handlers have no operation, registry, service, process, installer, or filesystem-mutation authority; destinations resolve through existing exact allowlists. | Opening a tool still requires the existing protected confirmation and user cancellation remains possible. |
+| Frontend and accessibility | Pass | Stable AutomationIds, source order, work-area geometry, scrolling, screenshot pixel check, and direct visual review prove all choices and the conclusion are usable. | Smaller unsupported windows can require scrolling after the conclusion grows. |
+| Testing and verification | Pass | Focused 81/81; full Debug 1181/1181; Release 0 warnings/errors; integrity 425/19; both scripts parse; both real smokes pass with no external tool or operation. | No real system fault was induced. |
+| Delivery | N/A | No version, commit, push, signing, installer, installed-product, or Release action. | Unified release remains after original Phase 10 closure. |
+
+## 2026-08-02 - Phase 8 Agent capability audit pre-change gate
+
+| Category | Status | Evidence | Residual risk |
+| --- | --- | --- | --- |
+| Goal alignment | Pass | Phase 8 targets the approved Marvis-inspired diagnosis/decision role for beginners after operation primitives are safety-bounded. | Exact highest-value gap is pending repository audit. |
+| Execution authority | Pass | New diagnosis must remain read-only or hand off to an existing typed plan and confirmation; arbitrary scripts/registry/service/process actions are excluded. | Each current Agent route needs source-level authority tracing. |
+| Evidence honesty | Warn | Existing health, runtime, crash, hardware, and history models distinguish unavailable states. | Symptom routing may combine evidence with different freshness/completeness. |
+| Frontend and accessibility | Warn | Existing Agent page and navigation have established UIAutomation patterns. | Current density, scrolling, first-view conclusion, and empty/error states require audit. |
+| Testing and verification | Warn | Phase 7 baseline is full Debug 1155/1155, Release clean, integrity 423/19, and real WPF proof. | Phase 8 red contracts and GUI scenario are not yet defined. |
+| Delivery | N/A | Unified publication remains Phase 10; public 0.1.5 is unchanged. | Combined worktree remains intentionally uncommitted. |
+
+## 2026-08-02 - Phase 7 exact-file closure completion gate
+
+| Category | Status | Evidence | Residual risk |
+| --- | --- | --- | --- |
+| Security and privacy | Pass | Exact profile/pack/file bindings, no beginner path leakage, no direct core mutation authority, and no real user files processed. | User-imported rule quality remains external evidence. |
+| Data and consistency | Pass | Pack bytes are reloaded/hash-verified; profile and full file set are rescanned before and after confirmation; batches are all-or-nothing and capped at 64. | Files/processes can still race, so final identity revalidation stops rather than adapts. |
+| Destructive-operation safety | Pass | Only low-risk unconfirmed descriptors reach identity preparation; execution uses the existing pipeline, compensated quarantine, timeline, and restore. | GUI acceptance cancels; isolated integration proves actual mutation/restore. |
+| Frontend and accessibility | Pass | Stable IDs, button `BringIntoView`, strict work-area geometry, nonblank pixel checks, and direct review show a concise preview and exact-file confirmation. | Technical path list remains intentionally behind the confirmation detail expander. |
+| Testing and verification | Pass | Related 51/51; full Debug 1155/1155; Release 0 warnings/errors; integrity 423/19; diff/authority/PowerShell gates pass. | No real third-party pack was imported or executed. |
+| Operations and release | N/A | No version, commit, push, signing, installer, installed-product, or Release action. | Unified release remains Phase 10. |
+
+## 2026-08-02 - Phase 7 community exact-file preview pre-change gate
+
+| Category | Status | Evidence | Residual risk |
+| --- | --- | --- | --- |
+| Goal alignment | Pass | Phase 7 advances only Phase 6 eligible exact files into a user-confirmed reversible preview. | UI wording and exact action shape require red contracts. |
+| Execution boundary | Warn | Existing `SafetyOperationPipeline`, confirmation, quarantine, timeline, and restore infrastructure is identified. | Community evidence has not yet been integrated; direct UI/quarantine calls must remain forbidden. |
+| Evidence freshness | Warn | Planned bindings include active pack SHA, exact profile identity, inactive process state, current file identity, and complete candidate assessment. | Revalidation points and stale-result behavior need implementation tests. |
+| Reversibility | Warn | Existing quarantine policy supports identity binding and compensated batch behavior. | New operation kind must be explicitly allowlisted without widening other kinds. |
+| Frontend and accessibility | Warn | Existing app drawer provides the relevant beginner action surface. | Preview, refusal, button state, AutomationIds, first-view placement, and real screenshot are pending. |
+| Delivery | N/A | No version, commit, push, signing, installer, installed-product, or GitHub Release action; unified release remains Phase 10. | Public 0.1.5 remains unchanged. |
+
+## 2026-08-02 - Phase 6 candidate-promotion completion gate
+
+| Category | Status | Evidence | Residual risk |
+| --- | --- | --- | --- |
+| Security and privacy | Pass | Candidate policy accepts only conservative exact files under approved Local/Roaming cache roots; ordinary UI omits exact candidate paths. | Third-party rules remain untrusted evidence. |
+| Data and consistency | Pass | Exact candidate retention is all-or-nothing; incomplete/capped/missing evidence cannot become eligible. | Assessment becomes stale after pack/profile/process/file changes. |
+| Destructive-operation safety | Pass | Static authority checks report zero operation, quarantine, registry, process, or file-mutation authority; UI action remains disabled. | Phase 7 will introduce the first operation-planning boundary. |
+| Frontend and accessibility | Pass | Two real WPF smokes show the decision/refusal reason in the first working area with stable automation and no operation. | Eligible-state screenshot awaits Phase 7 fixture. |
+| Testing and verification | Pass | Focused 27/27; full Debug 1146/1146; Release 0 warnings/errors; integrity 420/19; PowerShell and leak/authority checks pass. | No real third-party pack was imported or downloaded. |
+| Operations and release | N/A | No version, commit, push, package, signing, installer, or release action occurred. | Unified release is intentionally deferred to Phase 10. |
+
+## 2026-08-02 - Phase 6 candidate-promotion pre-change gate
+
+| Category | Status | Evidence | Residual risk |
+| --- | --- | --- | --- |
+| Goal alignment | Pass | Phase 6 turns broad community observations into explicit preview-only/refused/eligible decisions before any operation planning. | Exact policy interfaces and user copy still need red contracts. |
+| Execution boundary | Pass | Design is pure classification and cannot create `OperationDescriptor`, mutate files, or call quarantine. | Static authority tests are pending. |
+| Path/ownership safety | Warn | Planned policy rejects protected/system/install roots, escaped/reparse evidence, broad directory intent, and missing exact file identity. | Existing path policies must be traced and reused rather than duplicated inconsistently. |
+| Live-use/evidence honesty | Warn | Planned policy rejects active ownership, warnings, young files, and incomplete/lower-bound evidence. | Process association and evidence-completeness inputs need explicit contracts. |
+| Exclusions | Pass | Phase 5 ignore preferences are applied before enrichment; Phase 6 will also model global protected-path exclusions. | User-facing distinction between hidden and safety-refused items still needs presentation tests. |
+| Delivery | N/A | No version, commit, push, signing, installer, installed-product, or GitHub Release action; unified release remains Phase 10. | Public 0.1.5 remains unchanged. |
+
+## 2026-08-02 - Phase 5 rule-center completion gate
+
+- Pass - Product fit: one secondary application-page modal contains status, preview, import/update, rollback, and exclusions without adding primary navigation density.
+- Pass - Consent/supply chain: exact source/license/version/SHA-256 plus two confirmations are required before local activation or manual HTTPS transport; no discovery/background updater or bundled third-party data exists.
+- Pass - Execution boundary: rule findings cannot create operations, delete files, modify registry, or enable cache cleanup; ignore/restore touches only OMNIX-managed preferences.
+- Pass - Evidence/UX: conservative largest-observation summary, no overlap sum, paths/hash behind technical detail, stable AutomationIds, and explicit accessible list-item names.
+- Pass - Regression/build: focused 10/10; full Debug 1136/1136; Release 0 warnings/errors.
+- Pass - Integrity/authority: 418 source files valid UTF-8, 0 replacements, 19/19 XAML; diff check has no errors; authority, resolver mutation, bundled data, and PowerShell parse counts are zero.
+- Pass - GUI: isolated real WPF smoke proves provenance/safety first view, ranked preview, ignore/restore round-trip, screenshots, and `OperationExecuted=false`.
+- N/A - Delivery: no version, commit, push, signing, installer, installed-product, or GitHub Release action; unified release remains Phase 10.
+
+## 2026-08-01 - Phase 5 rule-center pre-change gate
+
+| Category | Status | Evidence | Residual risk |
+| --- | --- | --- | --- |
+| Goal alignment | Pass | Closes the missing user-facing source/license/import/rollback and preview controls from Phases 3-4. | Detailed workflow and modal capacity still need red contracts. |
+| Consent/supply chain | Pass | Design reuses exact descriptor-bound consent, HTTPS-only pinned transport, strict parse/hash, immutable activation, and stale-safe rollback. | File picker and URL input must not trigger access before final confirmation. |
+| Execution boundary | Pass | Rule Lab is preview/exclusion only and cannot create an operation or enable rule-only cache cleanup. | Static/runtime authority contracts are pending. |
+| Beginner UX | Pass | One secondary application-page entry keeps primary navigation quiet; ordinary view shows source/license/version and conclusions, paths remain technical. | Real modal screenshot and keyboard/scroll acceptance are pending. |
+| Cancellation/data integrity | Pass | Planned preview cancellation is read-only; activation/update cancellation already leaves active state intact. | WPF orchestration and stale UI receipt tests are pending. |
+
+## 2026-08-01 - Phase 4 profile/Agent integration completion gate
+
+- Pass - Evidence boundary: community observations use a separate model and never populate `CachePaths`/`CacheSizeBytes`; rule-only cleanup remains disabled.
+- Pass - Evidence honesty: source/version/hash/warning/lower-bound/sample details survive enrichment; beginner aggregate uses the largest overlapping observation and says `至少`/`可能重叠`.
+- Pass - Privacy/UX: ordinary tile/drawer/Agent copy contains no path or hash; technical detail is bounded; Agent appears first and single-entry family text collapses.
+- Pass - Runtime failure: absent or invalid optional stores preserve the ordinary software inventory and report a plain-language summary.
+- Pass - Regression/build: full Debug 1125/1125; Release 0 warnings/errors.
+- Pass - Integrity/authority: 411 source files valid UTF-8, 0 replacements, 18/18 XAML; diff check passes; new evidence/enricher authority search reports `AuthorityHits=0`.
+- Pass - GUI: isolated WPF smoke validates tile, Agent, summary, disabled cleanup, real screen working-area geometry, screenshot, and `OperationExecuted=false`.
+- N/A - Delivery: no version, commit, push, signing, installer, installed-product, or GitHub Release action; unified release remains Phase 10.
+
+## 2026-08-01 - Phase 4 profile/Agent integration pre-change gate
+
+| Category | Status | Evidence | Residual risk |
+| --- | --- | --- | --- |
+| Goal alignment | Pass | Converts FluentCleaner-inspired coverage into the beginner application experience requested by the user. | Import/consent UI remains separate from evidence presentation. |
+| Execution boundary | Pass | Design adds a separate evidence list and explicitly does not modify `CachePaths` or create `OperationDescriptor`. | Contracts and real UI action state are pending. |
+| Privacy/UX | Pass | Beginner summary omits paths; bounded samples appear only after technical-detail expansion. | WPF order/screenshot proof pending. |
+| Performance | Pass | Design bounds profiles, rules per profile, total resolutions, per-rule duration, and total duration with cancellation/progress. | Real-machine timing is not yet measured. |
+| Data integrity | Pass | A central `SoftwareProfile` copy constructor will replace one ad hoc clone and preserve new evidence. | Other future clone sites must adopt it deliberately. |
+| Size honesty | Pass | Presentation uses the maximum observed rule size and explicit lower-bound wording, avoiding overlap sums. | Multiple disjoint rules may understate total, intentionally. |
+
+## 2026-08-01 - Phase 3 rule-pack management completion gate
+
+- Pass - Consent: source URI, license URI, version, and SHA-256 must match explicit source/license activation confirmation before local creation or network access.
+- Pass - Supply chain: HTTPS-only manual transport, bounded content, exact hash, strict UTF-8/full parse, no discovery/background loop, and no bundled third-party bytes.
+- Pass - Atomicity/rollback: immutable SHA-256 files plus atomic bounded state replacement; one prior descriptor; stale expected-hash rollback refusal; corrupt/missing content fails closed.
+- Pass - Cancellation: an in-progress copy cancellation removes staging bytes and leaves the known-good state file byte-identical.
+- Pass - Regression: full Debug passed 1119/1119; Release completed with 0 warnings/errors.
+- Pass - Integrity: 407 source files valid UTF-8, 0 replacement files, and 18/18 XAML parsed.
+- Pass - Authority: expected-zero search found no maintenance operation, registry, process-launch, directory-delete, periodic-timer, or delayed-background authority in the Winapp2 surfaces.
+- N/A - GUI: source/license/import/update/rollback UI is intentionally deferred to the Phase 4 beginner presentation surface.
+- N/A - Release: unified publication remains Phase 10 after all planned capabilities and acceptance gates.
+
+## 2026-08-01 - Phase 3 rule-pack store pre-change gate
+
+| Category | Status | Evidence | Residual risk |
+| --- | --- | --- | --- |
+| Goal alignment | Pass | Optional verified rule updates are the next Phase 1-10 capability and directly support FluentCleaner-inspired coverage. | Beginner UI arrives in Phase 4. |
+| Licensing | Pass | Design stores only user-imported/runtime bytes and preserves source/license metadata; no CC BY-SA data enters source or installer. | Redistribution remains prohibited until separately reviewed. |
+| Activation safety | Pass | Design validates hash and full parse before atomically changing an immutable-content pointer. | Filesystem implementation and failure tests are pending. |
+| Consent | Pass | Source URI, license URI, version, and expected hash must match the reviewed descriptor. | UI receipt is pending Phase 4. |
+| Rollback | Pass | Previous descriptor remains in state and rollback uses expected hashes to reject stale confirmation. | Corruption/cancellation contracts are pending. |
+| Execution boundary | Pass | Rule-pack management changes only OMNIX-owned data and cannot create maintenance operations. | Static authority tests must be updated to distinguish data persistence from cleanup authority. |
+
+## 2026-08-01 - Phase 2 bounded Winapp2 resolver completion gate
+
+- Pass - Objective and boundaries: read-only evidence resolution only; no operation or third-party data activation. Evidence: `current.md` and source authority contracts.
+- Pass - Path safety: canonical deepest-root ownership, direct-child containment, volume-root rejection, reparse skipping, and unrelated-branch pruning. Evidence: `Winapp2EvidenceResolverTests`.
+- Pass - Resource safety: target/root/directory/file/match/sample/time limits, cancellation, progress, and lower-bound reasons. Evidence: focused 11/11.
+- Pass - Regression: `dotnet test ComputerSecuritySoftware.slnx --configuration Debug --no-restore -p:NuGetAudit=false` passed 1111/1111.
+- Pass - Build: Release completed with 0 warnings and 0 errors.
+- Pass - Integrity: 403 source files valid UTF-8, 0 replacement files, and 18/18 XAML parsed.
+- Pass - Authority boundary: expected-zero search for mutation, network, process, registry, and `OperationDescriptor` references returned `AuthorityHits=0`.
+- N/A - GUI acceptance: this phase adds no UI or user-visible workflow.
+- N/A - Release: the active goal requires one unified release after all phases.
+
+## 2026-08-01 - Phase 2 bounded evidence pre-change gate
+
+| Category | Status | Evidence | Residual risk |
+| --- | --- | --- | --- |
+| Goal alignment | Pass | Phase 2 directly advances the requested Phase 1-10 plan from compatible rules to useful cache evidence. | User-visible value arrives after Phase 4 presentation. |
+| Read-only authority | Pass | Design exposes inventory evidence only and keeps filesystem access in `Css.Scanner`; no operation, mutation, registry, process, or network surface is planned. | Static and runtime contracts must prove the boundary. |
+| Traversal safety | Warn | Planned deepest-owner selection, canonical containment, reparse skipping, and hard limits cover broad traversal risk. | Fake and real fixtures must prove escape/reparse behavior. |
+| Evidence honesty | Warn | Planned result distinguishes exact totals from access/limit lower bounds and reports exclusions, samples, progress, and cancellation. | Implementation and contracts are pending. |
+| Privacy | Pass | Result keeps bounded sample paths rather than every matched path. | Technical-detail UI must remain secondary in Phase 5. |
+| Delivery | N/A | Unified version and release remain deferred until all phases and the full completion audit pass. | Public 0.1.5 remains unchanged. |
+
+## 2026-08-01 - Read-only Winapp2 catalog completion gate
+
+| Category | Status | Evidence | Residual risk |
+| --- | --- | --- | --- |
+| Scope and consent | Pass | User authorized development; implementation is limited to rules, pure attribution, tests, and records. | No user-visible integration is included. |
+| Third-party boundary | Pass | Production implementation is independently written; no FluentCleaner code or Winapp2 data is bundled. Descriptor requires source, version, license, license URI, source URI, and expected SHA-256. | OMNIX still needs an explicit license decision before distributing a rule pack. |
+| Input trust | Pass | Six contracts cover SHA mismatch, missing metadata, malformed/empty/invalid-UTF-8/oversized/over-target/duplicate input and preserve evidence. | Future update/download storage needs atomic replacement and rollback contracts. |
+| Attribution safety | Pass | Path matcher requires equal/descendant ownership, accepts only literal-anchored wildcard segments, rejects name-only, broad-parent, sibling, and wildcard-only authority. | Path relationship is not proof of safe deletion or current ownership. |
+| Execution boundary | Pass | Models report `IsExecutionAuthorized=false`; source scan reports 0 operation, delete, registry API, process, or HTTP authority hits. | A later resolver/presenter must retain the same boundary. |
+| Real compatibility | Pass | Disposable local probe parsed Winapp2 260730 as 3,721 rules, 11,110 file targets, 3,368 registry targets, 17 warnings, 0 unknown-key diagnostics, execution false. | Probe data remains outside the product and is not a committed test dependency. |
+| Tests and build | Pass | Focused 6/6; full Debug 1106/1106; Release 0 warnings/errors; integrity 399 files/18 XAML; changed-file whitespace and diff checks pass. | Existing unrelated test files do not satisfy a repository-wide whitespace-format gate; no GUI or installed-runtime acceptance is applicable to this backend-only slice. |
+| Delivery | N/A | Worktree is uncommitted; version remains 0.1.5 and no package, push, signer, installer, or Release action ran. | Installed/public 0.1.5 does not contain this work. |
+
+## 2026-08-01 - Read-only Winapp2 catalog pre-change gate
+
+| Category | Status | Evidence | Residual risk |
+| --- | --- | --- | --- |
+| Scope and consent | Pass | User said `开始开发` immediately after accepting the FluentCleaner assessment. Slice is limited to parser/catalog/evidence tests. | UI, network updates, executable cleanup, versioning, and release are not included. |
+| Third-party boundary | Pass | Implementation will be independently written from the public format behavior; no FluentCleaner source or Winapp2 database is copied or bundled. | Compatible behavior still needs clear source/license metadata for any future imported pack. |
+| Safety authority | Pass | Design returns read-only evidence and path attribution only; no `OperationDescriptor`, filesystem mutation, registry mutation, process launch, or cleanup handler is in scope. | A later integration must preserve this boundary explicitly. |
+| Input trust | Warn | Planned metadata pins source/version/license/hash and parser limits size, lines, entries, and targets. | Contracts must prove malformed, oversized, and hash-mismatched inputs fail closed. |
+| Attribution | Warn | Planned matching requires canonical path overlap with a `SoftwareProfile` path; name similarity is not sufficient. | Wildcards and environment-variable expansion can still be ambiguous and must remain review evidence. |
+| Delivery | N/A | No version, package, commit, push, installer, or Release is requested. | User-visible benefit requires a later presentation/integration slice. |
+
+## 2026-08-01 - FluentCleaner reference-analysis gate
+
+| Category | Status | Evidence | Residual risk |
+| --- | --- | --- | --- |
+| Scope and consent | Pass | User requested source download, code/function review, and optimization assessment. Review clone stayed under `C:\tmp`; no product implementation or machine maintenance ran. | Implementation still requires a separately accepted scope. |
+| Source grounding | Pass | Analysis pinned FluentCleaner commit `be347511ae8c639bdc9ca1cfc38dec02fe92c7c5` and inspected parser, engine, UI, Rule Lab, updates, automation, AI/custom scripts, CI, and issue evidence. | FluentCleaner evolves quickly; a future implementation must pin its own reviewed source/rule versions. |
+| License boundary | Warn | FluentCleaner source declares MIT; upstream Winapp2 data declares CC BY-SA 4.0; OMNIX has no repository license file. | Bundling or transforming the database is deferred until attribution/share-alike and OMNIX licensing are decided. |
+| Safety boundary | Pass | Recommendation keeps third-party rules read-only and rejects direct deletion, registry cleaning, custom script execution, unattended cleanup, and unsigned live updates. | Imported rules can still be wrong; policy, ownership, path, process, confirmation, quarantine, and rollback checks remain mandatory. |
+| Product fit | Pass | Proposed value is broader app-cache diagnosis, impact ordering, progress/cancel, exclusions, and technical dry-run detail while retaining beginner conclusions. | Exact coverage and performance need fixtures and a bounded prototype. |
+| Delivery | Pass | Only protocol records changed; product source, version 0.1.5, installer, installed machine, certificates, and GitHub Release are unchanged. | No user-visible improvement exists until a later implementation is authorized and released. |
+
 ## 2026-08-01 - 0.1.5 release completion gate
 
 | Category | Status | Evidence | Residual risk |
@@ -329,6 +519,40 @@
 Open issues:
 
 - None.
+
+### 2026-08-02 - Phase 9 capability closure gate
+
+| Category | Status | Evidence | Notes |
+| --- | --- | --- | --- |
+| Security and privacy | Pass | Focused install/migration 225/225; cleanup read-only authority contracts; home smoke `noOperationExecuted=true` | No installer, uninstall, cleanup, migration, registry, or service mutation ran. |
+| Data, API, and consistency | Pass | Mixed `0+7` probe/card/home regression; independent re-review | Per-location candidate totals no longer inflate recent files; duplicate-family actions remain exact-entry only. |
+| Code quality and maintainability | Pass | Existing guarded workflows reused; `git diff --check` passed | No parallel mutation pipeline was introduced. |
+| Testing and verification | Warn | Cleanup 194/194; install/migration 225/225; real home WPF pass; prior install/migration screenshots reviewed | Fresh install/migration GUI rerun was denied by exhausted platform host-approval quota and remains a final release gate. |
+| Frontend, accessibility, and UX | Pass | Stable cleanup card AutomationId; untouched initial viewport smoke; nonblank screenshot | Mixed-policy copy explains that locations use different conditions. |
+| Operations, dependencies, and release | Warn | Public/product version still 0.1.5; worktree uncommitted | Unified Phase 1-10 review, build, signing, and GitHub Release remain pending. |
+
+### 2026-08-02 - Phase 10 Agent decision gate
+
+| Category | Status | Evidence | Notes |
+| --- | --- | --- | --- |
+| Security and privacy | Pass | `AgentDecisionContextBuilder` path-like text fallback; exact-family target tests; presenter authority contracts | Agent remains local, navigation-only, and cannot create or execute operations. |
+| Data, API, and consistency | Pass | Five decision contracts; numeric target/gap assertions; snapshot/window caveats; non-additive source copy | Root clues, growth bytes, and safe reversible bytes remain separate quantities. |
+| Code quality and maintainability | Pass | One Core context plus one Scanner adapter; existing App/drive/growth presenters reused | No duplicate scanner or mutation handler was added. |
+| Testing and verification | Pass | Agent 54/54; related 235/235; final full Debug 1208/1208; Release build 0 warnings/errors; Release command-surface 2/2; integrity 427/19; diff/script/authority checks pass | Static and automated local gates pass. Full Release lifecycle tests are intentionally inapplicable because the fake worker is excluded from Release. |
+| Frontend, accessibility, and UX | Pass | Stable quick-choice/response AutomationIds and order contracts; real isolated smoke passed five decisions and four directly inspected nonblank screenshots | No fixture path was visible; the first smoke's decorative-container lookup was replaced by full-window inspection. |
+| Operations, dependencies, and release | Warn | Source is prepared for 0.2.0 while public latest remains 0.1.5; package, signing, CI and GitHub actions remain pending | Continue through the guarded personal release flow; do not run the installer. |
+
+### 2026-08-08 - 0.2.0 unified release preflight
+
+| Category | Status | Evidence | Notes |
+| --- | --- | --- | --- |
+| Scope and consent | Pass | Active user goal explicitly requires one unified Phase 1-10 release; GUI authorization remained isolated and non-operational | Installer execution, trust-store changes, certificate creation/export, antivirus changes, and system maintenance remain outside scope. |
+| Security and privacy | Pass | Credential-pattern audit 0; Agent direct-authority contracts; GUI whole-window fixture-path check; `noOperationExecuted=true` | Community data is not bundled and Agent does not gain mutation authority. |
+| Data, API, and consistency | Pass | Exact rule/app/file identity tests; non-additive storage evidence; stale-state refusals; product source version 0.2.0 | Public channel remains 0.1.5 until publication completes. |
+| Code quality and maintainability | Pass | Existing pipeline/quarantine/timeline/update abstractions reused; no new privileged path; `git diff --check` passes | One Debug-only fake worker remains intentionally excluded from Release. |
+| Testing and verification | Pass | Debug 1208/1208; Release build 0 warnings/errors; Release command-surface 2/2; integrity 427 files and 19/19 XAML | Release full lifecycle suite is intentionally inapplicable under the recorded project rule. |
+| Frontend, accessibility, and UX | Pass | Stable AutomationIds, static placement contracts, real five-decision smoke, four directly inspected screenshots | First attempted smoke exposed and then fixed a decorative-container automation dependency. |
+| Operations, dependencies, and release | Warn | `ProductVersion=0.2.0`, `FileVersion=0.2.0.0`, release notes present, credential audit clean | Commit, push, CI, signing, installer, draft download-back, public latest, and final record commit remain pending. |
 
 
 ## Archived History

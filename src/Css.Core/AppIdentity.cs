@@ -15,7 +15,9 @@ public sealed record AppStoragePaths(
     string DatabasePath,
     string QuarantineRoot,
     string MigrationRollbackRoot,
-    string InstallRoutingMemoryPath);
+    string InstallRoutingMemoryPath,
+    string Winapp2RulePackRoot,
+    string Winapp2RulePreferencesPath);
 
 public static class AppStoragePathResolver
 {
@@ -42,7 +44,9 @@ public static class AppStoragePathResolver
             Path.Combine(dataRoot, "data.db"),
             quarantineRoot,
             Path.Combine(dataRoot, "MigrationRollback"),
-            Path.Combine(dataRoot, "install-routing-memory.json"));
+            Path.Combine(dataRoot, "install-routing-memory.json"),
+            Path.Combine(dataRoot, "RulePacks", "Winapp2"),
+            Path.Combine(dataRoot, "RulePacks", "winapp2-preferences.json"));
     }
 
     private static string? CleanRoot(string? value)

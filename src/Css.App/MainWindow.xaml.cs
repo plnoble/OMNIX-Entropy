@@ -19,11 +19,13 @@ using Css.Core.Software;
 using Css.Core.Startup;
 using Css.Core.Timeline;
 using Css.Core.Uninstall;
+using Css.Rules.Winapp2;
 using Css.Scanner.Disk;
 using Css.Scanner.Experience;
 using Css.Scanner.Persistence;
 using Css.Scanner.Recovery;
 using Css.Scanner.Software;
+using Css.Scanner.Winapp2;
 using Css.InstallGuard.Installers;
 using Css.InstallGuard.Routing;
 using Css.Win32.Migration;
@@ -70,7 +72,9 @@ public partial class MainWindow : Window
     private InstallerPackageEvidence? _lastInstallerPackageEvidence;
     private InstallerRoutingCapability? _lastInstallerCapability;
     private IReadOnlyList<SoftwareProfile> _softwareProfiles = [];
+    private string _communityRuleEvidenceSummary = "扩展缓存规则未启用，不影响基础扫描。";
     private IReadOnlyList<GrowthFinding> _latestGrowthFindings = [];
+    private CDriveRootCauseSummary? _latestRootCauseSummary;
     private IReadOnlyCollection<string> _personalStorageEvidencePaths = [];
     private IReadOnlyDictionary<string, MigrationClosureSummaryViewModel> _migrationClosureBySoftware =
         new Dictionary<string, MigrationClosureSummaryViewModel>(StringComparer.OrdinalIgnoreCase);
@@ -93,6 +97,7 @@ public partial class MainWindow : Window
         InitializeDriveOptions();
         ApplyCDrivePageChrome();
         ShowPage("Home");
+        LoadAgentSymptomPrompts();
         LoadAgentSkills();
         LoadSystemToolShortcuts();
         LoadWindowsSettingsShortcuts();
@@ -139,6 +144,7 @@ public partial class MainWindow : Window
         _lastHealthSummary = null;
         _driveHealthPlan = null;
         _latestGrowthFindings = [];
+        _latestRootCauseSummary = null;
         _personalStorageEvidencePaths = [];
         _latestObservedSnapshotCount = 0;
 
@@ -215,6 +221,20 @@ public partial class MainWindow : Window
     private async void ScanSoftware_Click(object sender, RoutedEventArgs e)
     {
         await RefreshSoftwareInventoryAsync();
+    }
+
+    private async void OpenCommunityRules_Click(object sender, RoutedEventArgs e)
+    {
+        var window = new CommunityRuleCenterWindow(
+            new Winapp2RulePackStore(DefaultWinapp2RulePackRoot()),
+            new Winapp2RulePreferenceStore(DefaultWinapp2RulePreferencesPath()),
+            _softwareProfiles)
+        {
+            Owner = this
+        };
+        window.ShowDialog();
+        if (window.InventoryRefreshRequested)
+            await RefreshSoftwareInventoryAsync();
     }
 
     private void PickInstaller_Click(object sender, RoutedEventArgs e)
@@ -1118,15 +1138,28 @@ public partial class MainWindow : Window
             return;
         }
 
-        var plan = AppCacheCleanupPlanBuilder.Create(
+        if (profile.CachePaths.Count > 0)
+        {
+            var plan = AppCacheCleanupPlanBuilder.Create(
+                profile,
+                CurrentUserDataRoots(),
+                Directory.Exists,
+                IsReparsePoint,
+                EstimateExistingPathSize);
+            ApplyDrawerActionHost(AppDrawerActionHostPresenter.ShowCacheCleanup(drawer, plan));
+            _pendingDrawerOperation = plan.Operation;
+            _pendingDrawerTargetAppName = plan.CanContinue ? profile.Name : null;
+            return;
+        }
+
+        var communityPlan = CommunityRuleCacheCleanupPlanBuilder.Create(
             profile,
-            CurrentUserDataRoots(),
-            Directory.Exists,
-            IsReparsePoint,
-            EstimateExistingPathSize);
-        ApplyDrawerActionHost(AppDrawerActionHostPresenter.ShowCacheCleanup(drawer, plan));
-        _pendingDrawerOperation = plan.Operation;
-        _pendingDrawerTargetAppName = plan.CanContinue ? profile.Name : null;
+            GetActiveCommunityRulePackSha256() ?? string.Empty);
+        ApplyDrawerActionHost(AppDrawerActionHostPresenter.ShowCommunityCacheCleanup(
+            drawer,
+            communityPlan));
+        _pendingDrawerOperation = communityPlan.Operation;
+        _pendingDrawerTargetAppName = null;
     }
 
     private async void PreviewStartupControl_Click(object sender, RoutedEventArgs e)
@@ -1186,7 +1219,11 @@ public partial class MainWindow : Window
             StatusTextBlock.Text = state.StatusText;
 
         if (state.IsVisible)
+        {
             DrawerActionPreviewPanel.BringIntoView();
+            if (DrawerActionPreviewPrimaryButton.Visibility == Visibility.Visible)
+                DrawerActionPreviewPrimaryButton.BringIntoView();
+        }
     }
 
     private async void DrawerActionPreviewPrimary_Click(object sender, RoutedEventArgs e)
@@ -1195,6 +1232,9 @@ public partial class MainWindow : Window
         {
             case "CacheCleanup":
                 await ExecutePendingAppCacheCleanupAsync();
+                break;
+            case "CommunityCacheCleanup":
+                await ExecutePendingCommunityRuleCacheCleanupAsync();
                 break;
             case "StartupSettings":
                 OpenAllowlistedWindowsSettings(AppStartupSettingsHandoffPresenter.StartupSettingsShortcutId);
@@ -1492,6 +1532,143 @@ public partial class MainWindow : Window
         }
     }
 
+    private async Task ExecutePendingCommunityRuleCacheCleanupAsync()
+    {
+        var operation = _pendingDrawerOperation;
+        var pipelineAttempted = false;
+        var stateSynchronized = false;
+        if (operation is null
+            || !operation.Kind.Equals(
+                CommunityRuleCacheCleanupPlanBuilder.OperationKind,
+                StringComparison.OrdinalIgnoreCase))
+        {
+            ApplyDrawerActionHost(AppDrawerActionHostPresenter.CacheCleanupRefused(
+                "旧缓存文件方案已经失效，请重新选择应用并生成方案。"));
+            return;
+        }
+
+        DrawerActionPreviewPrimaryButton.IsEnabled = false;
+        StatusTextBlock.Text = "正在重新扫描应用并核对扩展规则版本...";
+        try
+        {
+            var activeSha256 = GetActiveCommunityRulePackSha256();
+            var currentProfiles = await ScanSoftwareProfilesAsync();
+            SetSoftwareProfiles(currentProfiles);
+            if (string.IsNullOrWhiteSpace(activeSha256)
+                || !CommunityRuleCacheCleanupPlanBuilder.TryResolveBoundProfile(
+                    operation,
+                    currentProfiles,
+                    out var currentProfile)
+                || currentProfile is null)
+            {
+                ApplyDrawerActionHost(AppDrawerActionHostPresenter.CacheCleanupRefused(
+                    "规则包或应用登记身份已经变化，旧方案已停止。"));
+                return;
+            }
+
+            var candidatePolicy = QuarantineOperationPolicy.ValidateCandidate(operation);
+            var currentPolicy = CommunityRuleCacheCleanupPlanBuilder.ValidateForExecution(
+                operation,
+                currentProfile,
+                activeSha256);
+            if (!candidatePolicy.Success || !currentPolicy.Success)
+            {
+                ApplyDrawerActionHost(AppDrawerActionHostPresenter.CacheCleanupRefused(
+                    currentPolicy.Error ?? candidatePolicy.Error ?? "旧缓存文件证据已经变化，请重新扫描。"));
+                return;
+            }
+
+            var quarantinePreparation = QuarantineOperationPolicy.PrepareForConfirmation(
+                operation,
+                DefaultQuarantineRoot(),
+                _quarantineIdentityReader);
+            if (!quarantinePreparation.Success || quarantinePreparation.Operation is null)
+            {
+                ApplyDrawerActionHost(AppDrawerActionHostPresenter.CacheCleanupRefused(
+                    "至少一个旧缓存文件无法绑定当前身份，请重新扫描。"));
+                return;
+            }
+            var preparedOperation = quarantinePreparation.Operation;
+            var confirmation = CleanupConfirmationPresenter.Create(
+                preparedOperation,
+                DefaultQuarantineRoot());
+            var confirmationWindow = new CleanupConfirmationWindow(confirmation)
+            {
+                Owner = this
+            };
+            if (confirmationWindow.ShowDialog() != true)
+            {
+                StatusTextBlock.Text = "已取消旧缓存文件处理，没有移动任何文件。";
+                return;
+            }
+
+            StatusTextBlock.Text = "正在做确认后的最后一次规则、应用和文件复核...";
+            var confirmedSha256 = GetActiveCommunityRulePackSha256();
+            var confirmedProfiles = await ScanSoftwareProfilesAsync();
+            SetSoftwareProfiles(confirmedProfiles);
+            if (string.IsNullOrWhiteSpace(confirmedSha256)
+                || !CommunityRuleCacheCleanupPlanBuilder.TryResolveBoundProfile(
+                    preparedOperation,
+                    confirmedProfiles,
+                    out var confirmedProfile)
+                || confirmedProfile is null)
+            {
+                ApplyDrawerActionHost(AppDrawerActionHostPresenter.CacheCleanupRefused(
+                    "确认后规则包或应用登记身份发生变化，旧方案已停止。"));
+                return;
+            }
+
+            var confirmedPolicy = CommunityRuleCacheCleanupPlanBuilder.ValidateForExecution(
+                preparedOperation,
+                confirmedProfile,
+                confirmedSha256);
+            if (!confirmedPolicy.Success)
+            {
+                ApplyDrawerActionHost(AppDrawerActionHostPresenter.CacheCleanupRefused(
+                    confirmedPolicy.Error ?? "确认后精确文件集合发生变化，旧方案已停止。"));
+                return;
+            }
+
+            var descriptor = QuarantineOperationPolicy.ConfirmForExecution(preparedOperation);
+            var handler = new CommunityRuleCacheCleanupOperationHandler(
+                _quarantineService,
+                _timelineStore,
+                confirmedProfile,
+                GetActiveCommunityRulePackSha256,
+                _quarantineIdentityReader);
+            var pipeline = new SafetyOperationPipeline(handler.ExecuteAsync);
+            pipelineAttempted = true;
+            var result = await pipeline.ExecuteAsync(descriptor);
+            await RefreshCacheCleanupStateAfterAttemptAsync();
+            stateSynchronized = true;
+            if (!result.Success)
+            {
+                ApplyDrawerActionHost(AppDrawerActionHostPresenter.CacheCleanupRefused(
+                    "本地安全管线没有完整完成；请到后悔药中心复查记录。"));
+                return;
+            }
+
+            ApplyDrawerActionHost(AppDrawerActionHostPresenter.CacheCleanupCompleted(
+                result.Summary ?? "旧缓存文件已移动到隔离区。"));
+            StatusTextBlock.Text = "旧缓存文件已移动到隔离区，可以在后悔药中心还原。";
+        }
+        catch
+        {
+            if (pipelineAttempted && !stateSynchronized)
+            {
+                await RefreshCacheCleanupStateAfterAttemptAsync();
+                stateSynchronized = true;
+            }
+            ApplyDrawerActionHost(AppDrawerActionHostPresenter.CacheCleanupRefused(
+                "处理过程中出现异常，未确认完成；请重新扫描并查看后悔药中心。"));
+        }
+        finally
+        {
+            if (DrawerActionPreviewPrimaryButton.Visibility == Visibility.Visible)
+                DrawerActionPreviewPrimaryButton.IsEnabled = true;
+        }
+    }
+
     private async void ReviewUninstallResidue_Click(object sender, RoutedEventArgs e)
     {
         await ReviewSelectedUninstallResidueAsync();
@@ -1614,6 +1791,14 @@ public partial class MainWindow : Window
         AgentStartupServicePlanSafetyTextBlock.Text = startupServicePlan.SafetyLine;
     }
 
+    private void LoadAgentSymptomPrompts()
+    {
+        AgentDecisionQuickChoicesItemsControl.ItemsSource =
+            AgentDecisionPromptCatalog.CreateDefault();
+        AgentSymptomQuickChoicesItemsControl.ItemsSource =
+            AgentSymptomPromptCatalog.CreateDefault();
+    }
+
     private async void OpenAgentBackgroundApp_Click(object sender, RoutedEventArgs e)
     {
         var targetAppName = (sender as FrameworkElement)?.Tag?.ToString();
@@ -1634,11 +1819,30 @@ public partial class MainWindow : Window
 
     private async void AskComputerAgent_Click(object sender, RoutedEventArgs e)
     {
-        var question = AgentQuestionTextBox.Text;
+        await RunComputerAgentQuestionAsync(AgentQuestionTextBox.Text);
+    }
+
+    private async void AgentSymptomQuickChoice_Click(object sender, RoutedEventArgs e)
+    {
+        if ((sender as FrameworkElement)?.Tag is not string question
+            || string.IsNullOrWhiteSpace(question))
+        {
+            StatusTextBlock.Text = "这条问题入口暂时不可用，没有执行任何处理。";
+            return;
+        }
+
+        AgentQuestionTextBox.Text = question;
+        await RunComputerAgentQuestionAsync(question);
+    }
+
+    private async Task RunComputerAgentQuestionAsync(string question)
+    {
         ApplicationCrashObservation? applicationCrashObservation = null;
         ApplicationRuntimeObservation? applicationRuntimeObservation = null;
         ApplicationGrowthObservation? applicationGrowthObservation = null;
         AskComputerAgentButton.IsEnabled = false;
+        AgentDecisionQuickChoicesItemsControl.IsEnabled = false;
+        AgentSymptomQuickChoicesItemsControl.IsEnabled = false;
         try
         {
             if (AgentConversationPresenter.QuestionNeedsSoftwareInventory(question, _lastHealthSummary))
@@ -1650,6 +1854,14 @@ public partial class MainWindow : Window
             if (AgentConversationPresenter.QuestionNeedsFullHealthScan(question, _lastHealthSummary))
             {
                 StatusTextBlock.Text = "Computer Agent 正在自动完成只读电脑体检，请稍候...";
+                await EnsureHealthScanLoadedAsync();
+            }
+
+            if (AgentConversationPresenter.QuestionNeedsGrowthEvidence(
+                    question,
+                    _latestObservedSnapshotCount))
+            {
+                StatusTextBlock.Text = "Computer Agent 正在建立只读增长基线，请稍候...";
                 await EnsureHealthScanLoadedAsync();
             }
 
@@ -1708,6 +1920,11 @@ public partial class MainWindow : Window
                     await ObserveApplicationRuntimeAsync(applicationRuntimeTarget);
             }
 
+            var decisionContext = AgentDecisionContextBuilder.Build(
+                _latestRootCauseSummary,
+                _driveHealthPlan,
+                _latestGrowthFindings,
+                _latestObservedSnapshotCount);
             var reply = AgentConversationPresenter.Answer(
                 question,
                 _lastHealthSummary,
@@ -1715,12 +1932,15 @@ public partial class MainWindow : Window
                 _latestMachineHealthObservation,
                 applicationCrashObservation,
                 applicationRuntimeObservation,
-                applicationGrowthObservation: applicationGrowthObservation);
+                applicationGrowthObservation: applicationGrowthObservation,
+                decisionContext: decisionContext);
             ApplyAgentConversationReply(reply);
         }
         finally
         {
             AskComputerAgentButton.IsEnabled = true;
+            AgentDecisionQuickChoicesItemsControl.IsEnabled = true;
+            AgentSymptomQuickChoicesItemsControl.IsEnabled = true;
         }
     }
 
@@ -1739,7 +1959,8 @@ public partial class MainWindow : Window
                 ? Visibility.Visible
                 : Visibility.Collapsed;
         AgentConversationResponsePanel.Visibility = Visibility.Visible;
-        AgentConversationScrollViewer.ScrollToTop();
+        AgentConversationResponsePanel.UpdateLayout();
+        AgentConversationResponsePanel.BringIntoView();
         StatusTextBlock.Text = "Computer Agent 已根据当前本地摘要回答；没有执行系统修改。";
     }
 
@@ -2034,6 +2255,10 @@ public partial class MainWindow : Window
                 OpenAllowlistedSystemTool(SystemToolShortcutCatalog.RecycleBinId);
                 return;
 
+            case CDriveRootCauseAction.OpenStorageSettings:
+                OpenAllowlistedWindowsSettings("storage");
+                return;
+
             case CDriveRootCauseAction.OpenCDriveApps:
                 await OpenAgentAppCatalogFilterAsync(AppCatalogFilter.CDrive);
                 return;
@@ -2252,6 +2477,9 @@ public partial class MainWindow : Window
         OpenHealthDigestEvidenceButton.IsEnabled = false;
         ReportTextBox.Text = "扫描中，请稍候...";
         CDriveRootCauseListBox.ItemsSource = null;
+        _latestRootCauseSummary = null;
+        _latestGrowthFindings = [];
+        _latestObservedSnapshotCount = 0;
         RecommendationsListBox.ItemsSource = null;
         ResetDriveHealthPlanPresentation(
             "正在计算改善目标...",
@@ -2419,6 +2647,7 @@ public partial class MainWindow : Window
         _latestGrowthFindings = session.GrowthFindings;
         SetSoftwareProfiles(_softwareProfiles, refreshAgent: false);
         var rootCauseSummary = CDriveRootCauseSummaryBuilder.Build(session.Result);
+        _latestRootCauseSummary = rootCauseSummary;
         CDriveSummaryHeadlineTextBlock.Text = rootCauseSummary.Headline;
         CDriveSummarySubheadlineTextBlock.Text = rootCauseSummary.Subheadline;
         CDriveRootCauseListBox.ItemsSource = rootCauseSummary.Cards;
@@ -2888,10 +3117,44 @@ public partial class MainWindow : Window
         }
     }
 
-    private Task<IReadOnlyList<SoftwareProfile>> ScanSoftwareProfilesAsync() =>
-        _softwareFixtureScanner is null
+    private async Task<IReadOnlyList<SoftwareProfile>> ScanSoftwareProfilesAsync()
+    {
+        var profiles = await (_softwareFixtureScanner is null
             ? _softwareScanner.ScanAsync()
-            : _softwareFixtureScanner.ScanAsync();
+            : _softwareFixtureScanner.ScanAsync());
+        var rulePackStore = new Winapp2RulePackStore(DefaultWinapp2RulePackRoot());
+        try
+        {
+            if (rulePackStore.GetStatus() is null)
+            {
+                _communityRuleEvidenceSummary = "扩展缓存规则未启用，不影响基础扫描。";
+                return profiles;
+            }
+
+            var catalog = rulePackStore.LoadActiveCatalog();
+            var preferences = new Winapp2RulePreferenceStore(
+                DefaultWinapp2RulePreferencesPath()).Load();
+            var enrichment = await Task.Run(() =>
+                new Winapp2SoftwareProfileEnricher().Enrich(
+                    profiles,
+                    catalog,
+                    new Winapp2SoftwareProfileEnrichmentOptions
+                    {
+                        IgnoredRuleKeys = preferences.IgnoredRuleKeys()
+                    }));
+            _communityRuleEvidenceSummary = enrichment.BeginnerSummary;
+            return enrichment.Profiles;
+        }
+        catch (Exception exception) when (exception is IOException
+            or InvalidDataException
+            or UnauthorizedAccessException
+            or InvalidOperationException
+            or ArgumentException)
+        {
+            _communityRuleEvidenceSummary = "扩展缓存规则暂时无法读取；基础应用扫描结果仍然保留。";
+            return profiles;
+        }
+    }
 
     private async Task<bool> RefreshMigrationClosureAsync(
         bool refreshUi,
@@ -2972,10 +3235,14 @@ public partial class MainWindow : Window
             ? "发布者未知"
             : profile.Publisher;
         DrawerCategorySummaryTextBlock.Text = drawer.CategorySummary;
+        DrawerFamilyContextPanel.Visibility = drawer.ShowFamilyContext
+            ? Visibility.Visible
+            : Visibility.Collapsed;
         DrawerFamilySummaryTextBlock.Text = drawer.FamilySummary;
         DrawerCurrentEntryTextBlock.Text = drawer.CurrentEntrySummary;
         DrawerLocationTextBlock.Text = drawer.InstallLocationSummary;
         DrawerSizeTextBlock.Text = drawer.SizeSummary;
+        DrawerCommunityCacheSummaryTextBlock.Text = drawer.CommunityCacheSummary;
         DrawerStorageOutcomeTextBlock.Text = drawer.StorageOutcomeSummary;
         DrawerResidencyTextBlock.Text = drawer.ResidencySummary;
         DrawerSystemFootprintTextBlock.Text = drawer.SystemFootprintSummary;
@@ -3051,7 +3318,8 @@ public partial class MainWindow : Window
             .ToList();
         AppsSummaryTextBlock.Text =
             AppCatalogSummaryPresenter.Create(_softwareProfiles, filtered.Count).Text +
-            BuildMigrationClosureCatalogSummary();
+            BuildMigrationClosureCatalogSummary() + " " +
+            _communityRuleEvidenceSummary;
 
         if (filtered.Count == 0)
         {
@@ -3079,10 +3347,12 @@ public partial class MainWindow : Window
         DrawerTitleTextBlock.Text = empty.Title;
         DrawerPublisherTextBlock.Text = empty.SupportingText;
         DrawerCategorySummaryTextBlock.Text = empty.CategorySummary;
+        DrawerFamilyContextPanel.Visibility = Visibility.Collapsed;
         DrawerFamilySummaryTextBlock.Text = "选择应用后，这里会解释同名卡片是不是不同版本、不同安装位置或只有数据线索。";
         DrawerCurrentEntryTextBlock.Text = "尚未选择具体记录。";
         DrawerLocationTextBlock.Text = empty.InstallLocationSummary;
         DrawerSizeTextBlock.Text = empty.SizeSummary;
+        DrawerCommunityCacheSummaryTextBlock.Text = "选择应用后，这里会显示扩展规则的只读缓存发现。";
         DrawerStorageOutcomeTextBlock.Text = "选择应用后，Agent 会分别说明主程序和 C 盘数据能否搬走。";
         DrawerResidencyTextBlock.Text = empty.ResidencySummary;
         DrawerSystemFootprintTextBlock.Text = empty.SystemFootprintSummary;
@@ -4131,6 +4401,27 @@ public partial class MainWindow : Window
     {
         return AppStoragePathResolver.Resolve().DatabasePath;
     }
+
+    private static string DefaultWinapp2RulePackRoot() =>
+        AppStoragePathResolver.Resolve().Winapp2RulePackRoot;
+
+    private static string? GetActiveCommunityRulePackSha256()
+    {
+        try
+        {
+            return new Winapp2RulePackStore(DefaultWinapp2RulePackRoot())
+                .LoadActiveCatalog()
+                .Descriptor
+                .ExpectedSha256;
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    private static string DefaultWinapp2RulePreferencesPath() =>
+        AppStoragePathResolver.Resolve().Winapp2RulePreferencesPath;
 
     private static string DefaultInstallRoutingMemoryPath()
     {

@@ -75,38 +75,9 @@ public static class SoftwareGrowthProfileEnricher
     }
 
     private static SoftwareProfile CloneWithGrowth(SoftwareProfile source, long recentGrowthBytes) =>
-        new()
+        new(source)
         {
-            Name = source.Name,
-            Publisher = source.Publisher,
-            SignatureSubject = source.SignatureSubject,
-            Category = source.Category,
-            CategoryAssessment = source.CategoryAssessment,
-            DisplayVersion = source.DisplayVersion,
-            InventorySource = source.InventorySource,
-            InstallPath = source.InstallPath,
-            UninstallCommand = source.UninstallCommand,
-            DisplayIconPath = source.DisplayIconPath,
-            DisplayIconIndex = source.DisplayIconIndex,
-            ReinstallSource = source.ReinstallSource,
-            IsWindowsInstaller = source.IsWindowsInstaller,
-            WindowsInstallerProductCode = source.WindowsInstallerProductCode,
-            InstallDate = source.InstallDate,
-            InstalledSizeBytes = source.InstalledSizeBytes,
-            DataSizeBytes = source.DataSizeBytes,
-            CDriveDataSizeBytes = source.CDriveDataSizeBytes,
-            CacheSizeBytes = source.CacheSizeBytes,
-            RecentGrowthBytes = recentGrowthBytes,
-            DataPaths = source.DataPaths,
-            CachePaths = source.CachePaths,
-            LogPaths = source.LogPaths,
-            CDriveWritePaths = source.CDriveWritePaths,
-            RunningProcesses = source.RunningProcesses,
-            StartupEntries = source.StartupEntries,
-            Services = source.Services,
-            ScheduledTasks = source.ScheduledTasks,
-            BackgroundComponents = source.BackgroundComponents,
-            SystemFootprints = source.SystemFootprints
+            RecentGrowthBytes = recentGrowthBytes
         };
 
     private static bool TryCanonicalPath(string? path, out string canonical)

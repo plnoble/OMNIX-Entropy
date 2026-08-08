@@ -1,3 +1,5 @@
+using System.Globalization;
+using System.Text.RegularExpressions;
 using Css.Core.Apps;
 using Css.Core.Recommendations;
 using Css.Core.Software;
@@ -9,6 +11,8 @@ public enum AgentQuestionIntent
 {
     Empty,
     CDrive,
+    Growth,
+    StoragePlan,
     SystemDiagnosis,
     MachineHealth,
     HardwareInfo,
@@ -91,6 +95,21 @@ public static class AgentConversationPresenter
     private static readonly string[] RestoreWords = ["后悔", "还原", "恢复", "隔离区", "撤销"];
     private static readonly string[] ApplicationWords = ["软件", "应用", "程序", "装在哪", "占用最多"];
     private static readonly string[] CacheWords = ["缓存", "清理"];
+    private static readonly string[] GlobalGrowthWords =
+    [
+        "谁增长最快", "哪个增长最快", "什么增长最快", "哪个软件增长最快",
+        "增长最快的是谁", "增长最快的软件", "增长排行榜", "增长榜",
+        "最近谁在增长", "最近一周谁", "最近一周增长最快", "这周谁"
+    ];
+    private static readonly string[] SafeReleaseWords =
+    [
+        "安全释放", "最安全地释放", "最安全释放", "安全腾出", "最安全地腾出",
+        "释放空间", "腾出空间", "空出空间", "清出空间"
+    ];
+    private static readonly string[] FamilySelectionWords =
+    [
+        "哪个", "哪一个", "多个", "同名", "几个", "三个", "两个", "版本"
+    ];
     private static readonly string[] AppGrowthWords =
     [
         "越来越大", "变大", "占用变多", "越占越多", "一直增长", "不断增长", "还在增长", "继续增长",
@@ -137,6 +156,8 @@ public static class AgentConversationPresenter
 
         var intent = Answer(question, health, []).Intent;
         return intent is AgentQuestionIntent.CDrive
+            or AgentQuestionIntent.Growth
+            or AgentQuestionIntent.StoragePlan
             or AgentQuestionIntent.Applications
             or AgentQuestionIntent.StartupAndBackground
             or AgentQuestionIntent.Migration
@@ -159,13 +180,25 @@ public static class AgentConversationPresenter
         HealthCheckSummary? health) =>
         health is null
         && Answer(question, null, []).Intent is
-            AgentQuestionIntent.CDrive or AgentQuestionIntent.SystemDiagnosis;
+            AgentQuestionIntent.CDrive
+            or AgentQuestionIntent.Growth
+            or AgentQuestionIntent.StoragePlan
+            or AgentQuestionIntent.SystemDiagnosis;
+
+    public static bool QuestionNeedsGrowthEvidence(
+        string? question,
+        int observedSnapshotCount) =>
+        observedSnapshotCount <= 0
+        && Answer(question, null, []).Intent == AgentQuestionIntent.Growth;
 
     public static bool QuestionNeedsCDriveScan(
         string? question,
         HealthCheckSummary? health) =>
         health is null
-        && Answer(question, null, []).Intent == AgentQuestionIntent.CDrive;
+        && Answer(question, null, []).Intent is
+            AgentQuestionIntent.CDrive
+            or AgentQuestionIntent.Growth
+            or AgentQuestionIntent.StoragePlan;
 
     public static bool QuestionNeedsMachineObservation(
         string? question,
@@ -265,7 +298,8 @@ public static class AgentConversationPresenter
         MachineHealthObservation? machineHealth = null,
         ApplicationCrashObservation? applicationCrashObservation = null,
         ApplicationRuntimeObservation? applicationRuntimeObservation = null,
-        ApplicationGrowthObservation? applicationGrowthObservation = null)
+        ApplicationGrowthObservation? applicationGrowthObservation = null,
+        AgentDecisionContext? decisionContext = null)
     {
         var profiles = (softwareProfiles ?? []).ToList();
         var normalized = Normalize(question);
@@ -274,6 +308,25 @@ public static class AgentConversationPresenter
         if (IsNonDiagnosticConversation(normalized))
             return CapabilityReply();
 
+        var symptomTriage = AgentSymptomTriagePresenter.TryCreate(normalized);
+        if (symptomTriage is not null)
+            return SymptomTriageReply(symptomTriage);
+
+        if (TryParseRequestedReleaseBytes(normalized, out var requestedReleaseBytes))
+            return StoragePlanReply(health, decisionContext, requestedReleaseBytes);
+        if (ContainsAny(normalized, GlobalGrowthWords))
+            return GrowthRankingReply(decisionContext, normalized);
+
+        var familyMention = ResolveFamilyMention(normalized, profiles);
+        if (familyMention.Profiles.Count > 1
+            && ContainsAny(normalized, UninstallWords)
+            && ContainsAny(normalized, FamilySelectionWords))
+        {
+            return FamilyUninstallReply(familyMention);
+        }
+        if (familyMention.Profiles.Count > 0 && LooksLikeCacheLocationSplit(normalized))
+            return FamilyCacheLocationReply(familyMention);
+
         var mention = ResolveProfileMention(normalized, profiles);
         if (mention.IsAmbiguous)
             return AmbiguousApplicationReply();
@@ -281,6 +334,7 @@ public static class AgentConversationPresenter
             return ApplicationReply(
                 normalized,
                 mention.Profile,
+                profiles,
                 applicationCrashObservation,
                 applicationRuntimeObservation,
                 applicationGrowthObservation);
@@ -306,12 +360,27 @@ public static class AgentConversationPresenter
         if (ContainsAny(normalized, MachineHealthWords))
             return MachineHealthReply(health, machineHealth);
         if (ContainsAny(normalized, CDriveWords))
-            return CDriveReply(health, profiles);
+            return CDriveReply(health, profiles, decisionContext);
         if (ContainsAny(normalized, ApplicationWords))
             return ApplicationsReply(profiles);
 
         return GeneralReply(health, profiles);
     }
+
+    private static AgentConversationReply SymptomTriageReply(AgentSymptomTriage triage) =>
+        Reply(
+            AgentQuestionIntent.Troubleshooting,
+            triage.Headline,
+            triage.Summary + " 下面只给一个查看动作，不会自动修改任何设置。",
+            [
+                "已检查：" + triage.CheckedSummary,
+                "仍未知：" + triage.UnknownSummary,
+                "紧急程度：" + triage.UrgencySummary
+            ],
+            [triage.PrimaryNextStep],
+            navigationLabel: triage.NavigationLabel,
+            shortcutKind: triage.ShortcutKind,
+            shortcutId: triage.ShortcutId);
 
     public static AgentConversationReply ExplainSkill(
         AgentSkillCategory category,
@@ -449,7 +518,9 @@ public static class AgentConversationPresenter
             return "registry-editor";
         if (ContainsAny(question, ["设备管理器", "驱动问题", "驱动异常", "设备异常", "设备驱动"]))
             return "device-manager";
-        if (ContainsAny(question, ["事件查看器", "蓝屏", "闪退", "崩溃日志", "错误日志"]))
+        if (ContainsAny(question, ["事件查看器", "闪退", "崩溃日志", "错误日志"])
+            || (ContainsAny(question, ["蓝屏"])
+                && !ContainsAny(question, ["不是蓝屏", "并非蓝屏", "没有蓝屏", "没蓝屏"])))
             return "event-viewer";
         if (ContainsAny(question, ["磁盘管理", "分区管理", "改盘符"]))
             return "disk-management";
@@ -512,7 +583,8 @@ public static class AgentConversationPresenter
 
     private static AgentConversationReply CDriveReply(
         HealthCheckSummary? health,
-        IReadOnlyList<SoftwareProfile> profiles)
+        IReadOnlyList<SoftwareProfile> profiles,
+        AgentDecisionContext? decisionContext)
     {
         if (health is null)
         {
@@ -535,6 +607,17 @@ public static class AgentConversationPresenter
         var growthCount = health.KeyFindings.Count(item =>
             item.Kind == HealthFindingKind.SustainedGrowth);
         var candidates = AgentActionCandidateCatalog.Create(profiles);
+        var primarySources = (decisionContext?.StorageSources ?? [])
+            .Where(source => source.EvidenceBytes > 0)
+            .OrderByDescending(source => source.EvidenceBytes)
+            .Take(3)
+            .ToArray();
+        var sourceSummary = primarySources.Length == 0
+            ? "本次还没有形成可排序的主要占用线索。"
+            : "主要线索是"
+              + string.Join("、", primarySources.Select(source =>
+                  BeginnerSafeEvidence(source.PrimaryText, "一项已隐藏路径的占用")))
+              + "。这些线索可能互相包含，不能直接相加，也不等于都能清理。";
         var cleanupGuidance = cleanCount > 0
             ? "先处理低风险候选，再观察哪些内容会继续增长。"
             : higherRiskCleanCount > 0
@@ -548,19 +631,158 @@ public static class AgentConversationPresenter
 
         return Reply(
             AgentQuestionIntent.CDrive,
-            "C 盘先看可清理项和持续增长",
+            primarySources.Length == 0
+                ? "C 盘先看可清理项和持续增长"
+                : "C 盘为什么满：先看最大的几类来源",
             disk is null
-                ? "体检已经完成，但磁盘摘要不完整；建议打开 C 盘页查看本次证据。"
-                : $"本次磁盘结果：{BeginnerSafeEvidence(disk.Result, "占用摘要已生成，详细路径已隐藏")}。{cleanupGuidance}",
-            [
-                $"综合评分 {health.OverallScore} 分。",
-                $"低风险清理发现 {cleanCount} 项；风险偏高清理提醒 {higherRiskCleanCount} 项；持续增长提醒 {growthCount} 项。",
-                $"有 {candidates.OrdinaryCDriveProfiles.Count} 个普通应用被观察到安装或写入 C 盘。",
-                $"另有 {candidates.ReadOnlyCDriveProfiles.Count} 个系统相关或归属待确认项也有 C 盘线索，仅供查看。"
-            ],
+                ? $"体检已经完成，但磁盘摘要不完整。{sourceSummary}{cleanupGuidance}"
+                : $"本次磁盘结果：{BeginnerSafeEvidence(disk.Result, "占用摘要已生成，详细路径已隐藏")}。{sourceSummary}{cleanupGuidance}",
+            primarySources
+                .Select((source, index) =>
+                    $"主要线索 {index + 1}：{BeginnerSafeEvidence(source.PrimaryText, "占用来源已隐藏")}；{BeginnerSafeEvidence(source.Suggestion, "先确认来源，不直接处理")}")
+                .Concat(
+                [
+                    $"综合评分 {health.OverallScore} 分。",
+                    $"低风险清理发现 {cleanCount} 项；风险偏高清理提醒 {higherRiskCleanCount} 项；持续增长提醒 {growthCount} 项。",
+                    $"有 {candidates.OrdinaryCDriveProfiles.Count} 个普通应用被观察到安装或写入 C 盘。",
+                    $"另有 {candidates.ReadOnlyCDriveProfiles.Count} 个系统相关或归属待确认项也有 C 盘线索，仅供查看。"
+                ])
+                .Take(7)
+                .ToArray(),
             cleanupNextSteps,
             navigationTargetPage: "CDrive",
             navigationLabel: "打开 C 盘清理");
+    }
+
+    private static AgentConversationReply GrowthRankingReply(
+        AgentDecisionContext? decisionContext,
+        string question)
+    {
+        var snapshotCount = Math.Max(0, decisionContext?.ObservedSnapshotCount ?? 0);
+        var ranked = (decisionContext?.GrowthSources ?? [])
+            .Where(source => !source.IsFirstObservation && source.LatestGrowthBytes > 0)
+            .OrderByDescending(GrowthEvidenceBytes)
+            .ThenByDescending(source => source.IsSustainedGrowth)
+            .Take(3)
+            .ToArray();
+        if (snapshotCount < 2 || ranked.Length == 0)
+        {
+            return Reply(
+                AgentQuestionIntent.Growth,
+                "现在还不能判断谁增长最快",
+                snapshotCount <= 1
+                    ? "目前只有一次体检基线，没有前后对比；我不会把当前占用最大的项目说成增长最快。"
+                    : "已有多次体检，但当前比较窗口没有形成可验证的正增长来源；这不代表以后不会增长。",
+                [
+                    $"可用体检快照：{snapshotCount} 次。",
+                    "增长排名必须来自至少两次同范围体检，不能根据单次大小猜测。"
+                ],
+                ["保留这次基线，之后对同一磁盘再做一次体检。", "下次有变化时再区分缓存、日志、下载、模型或个人文件。"],
+                navigationTargetPage: "CDrive",
+                navigationLabel: "查看增长记录");
+        }
+
+        var first = ranked[0];
+        var window = GrowthEvidenceWindow(first);
+        var asksForWeek = ContainsAny(question, ["一周", "这周", "7天", "7 天"]);
+        var windowText = FormatObservationWindow(window);
+        var windowCaveat = asksForWeek && window < TimeSpan.FromDays(6.5)
+            ? $"当前观察只有{windowText}，不是完整一周。"
+            : $"当前排名来自{windowText}的可比观察。";
+        var evidence = ranked.Select((source, index) =>
+        {
+            var sustained = source.IsSustainedGrowth ? "，已多次变大" : "，目前只确认这一次变化";
+            return $"第 {index + 1}：{BeginnerSafeEvidence(source.OwnerLabel, "未知来源")} +{FormatBytes(GrowthEvidenceBytes(source))}{sustained}；观察窗口{FormatObservationWindow(GrowthEvidenceWindow(source))}。";
+        }).Append("排名按各自可比窗口的增长量排列，不代表每小时速度；不同线索也可能互相包含，不能相加成可释放空间。")
+          .ToArray();
+
+        return Reply(
+            AgentQuestionIntent.Growth,
+            $"目前增长最快的是 {BeginnerSafeEvidence(first.OwnerLabel, "一个未确认来源")}",
+            $"{BeginnerSafeEvidence(first.OwnerLabel, "这个来源")} 目前增长最快，最新可比证据增加约 {FormatBytes(GrowthEvidenceBytes(first))}。{windowCaveat}增长只说明占用变大，还不能单独证明内容可以删除。",
+            evidence,
+            [first.OneTimeAction, first.PreventionAction],
+            navigationTargetPage: "CDrive",
+            navigationLabel: "查看增长来源");
+    }
+
+    private static AgentConversationReply StoragePlanReply(
+        HealthCheckSummary? health,
+        AgentDecisionContext? decisionContext,
+        long requestedReleaseBytes)
+    {
+        var plan = decisionContext?.DrivePlan;
+        if (health is null || plan is null)
+        {
+            return Reply(
+                AgentQuestionIntent.StoragePlan,
+                "先体检，再计算安全释放方案",
+                $"你希望释放 {FormatBytes(requestedReleaseBytes)}，但当前没有本次磁盘计划和低风险候选数量；我不会用经验值承诺能清出多少。",
+                ["缺少当前磁盘的可回滚清理量和主要占用来源。"],
+                ["先完成一次只读体检。", "体检后再按低风险清理、主要来源确认和防止继续增长三个步骤计算。"],
+                navigationTargetPage: "Home",
+                navigationLabel: "去首页体检");
+        }
+
+        var confirmedSafeBytes = Math.Min(
+            requestedReleaseBytes,
+            Math.Max(0, plan.SafeCleanupBytes));
+        var remainingGapBytes = Math.Max(0, requestedReleaseBytes - confirmedSafeBytes);
+        var contribution = requestedReleaseBytes == 0
+            ? 0
+            : confirmedSafeBytes * 100d / requestedReleaseBytes;
+        var sources = (decisionContext?.StorageSources ?? [])
+            .Where(source => source.EvidenceBytes > 0)
+            .OrderByDescending(source => source.EvidenceBytes)
+            .Take(3)
+            .ToArray();
+        var answer = remainingGapBytes == 0
+            ? $"目标是 {FormatBytes(requestedReleaseBytes)}；当前低风险、可回滚候选最多约 {FormatBytes(confirmedSafeBytes)}，数量上可以覆盖目标，但仍要逐项确认后进入隔离区。"
+            : $"目标是 {FormatBytes(requestedReleaseBytes)}；当前已确认的低风险、可回滚候选最多约 {FormatBytes(confirmedSafeBytes)}，约完成 {contribution:0.0}%，处理后还差 {FormatBytes(remainingGapBytes)}。差额必须继续确认应用数据、个人文件或持续增长来源，不能拿系统文件凑数。";
+        var evidence = new List<string>
+        {
+            $"安全候选：最多约 {FormatBytes(confirmedSafeBytes)}；请求目标：{FormatBytes(requestedReleaseBytes)}。"
+        };
+        evidence.AddRange(sources.Select((source, index) =>
+            $"待确认大项 {index + 1}：{BeginnerSafeEvidence(source.PrimaryText, "占用来源已隐藏")}。"));
+        evidence.Add("这些大项只是定位线索，可能互相包含，不能相加，也不代表全部可处理。");
+        var firstStep = confirmedSafeBytes > 0
+            ? $"先复核低风险、可回滚候选，最多约 {FormatBytes(confirmedSafeBytes)}；确认后先进隔离区，不永久删除。"
+            : "先不清理：当前没有已确认的低风险、可回滚候选。";
+
+        return Reply(
+            AgentQuestionIntent.StoragePlan,
+            $"最安全释放 {FormatBytes(requestedReleaseBytes)} 的顺序",
+            answer,
+            evidence,
+            [
+                firstStep,
+                remainingGapBytes > 0
+                    ? $"再补差额 {FormatBytes(remainingGapBytes)}：只读查看最大的应用数据和个人文件，逐项确认；不碰系统保留文件。"
+                    : "达到目标后停止，不为了分数继续清理。",
+                "最后防止再长：只在软件明确支持时，把缓存、下载或模型位置改到 D 盘；不全局重定向 Windows 目录。"
+            ],
+            navigationTargetPage: "CDrive",
+            navigationLabel: "查看这份安全方案");
+    }
+
+    private static long GrowthEvidenceBytes(AgentGrowthSourceEvidence source) =>
+        source.IsSustainedGrowth && source.TrendGrowthBytes > 0
+            ? source.TrendGrowthBytes
+            : source.LatestGrowthBytes;
+
+    private static TimeSpan GrowthEvidenceWindow(AgentGrowthSourceEvidence source) =>
+        source.IsSustainedGrowth && source.TrendWindow > TimeSpan.Zero
+            ? source.TrendWindow
+            : source.ObservationInterval;
+
+    private static string FormatObservationWindow(TimeSpan window)
+    {
+        if (window >= TimeSpan.FromDays(1))
+            return $"约 {Math.Max(1, (int)Math.Round(window.TotalDays))} 天";
+        if (window >= TimeSpan.FromHours(1))
+            return $"约 {Math.Max(1, (int)Math.Round(window.TotalHours))} 小时";
+        return "当前较短时间";
     }
 
     private static AgentConversationReply MachineHealthReply(
@@ -826,14 +1048,146 @@ public static class AgentConversationPresenter
             navigationTargetPage: "Timeline",
             navigationLabel: "打开后悔药中心");
 
+    private static AgentConversationReply FamilyUninstallReply(FamilyMention family)
+    {
+        var entries = family.Profiles
+            .Select(profile => new FamilyEntry(
+                profile,
+                AppPresentationBuilder.CreateDrawer(profile, family.Profiles)))
+            .ToArray();
+        var eligible = entries
+            .Where(entry => AppActionEntryPolicy.Evaluate(
+                entry.Drawer,
+                AppActionKind.Uninstall).IsAllowed)
+            .ToArray();
+        var exactTarget = eligible.Length == 1
+            && family.Profiles.Count(profile => profile.Name.Equals(
+                eligible[0].Profile.Name,
+                StringComparison.CurrentCultureIgnoreCase)) == 1
+                ? eligible[0].Profile
+                : null;
+        var familyName = SafeAppName(family.FamilyName);
+        var answer = exactTarget is not null
+            ? $"扫描到 {family.Profiles.Count} 条 {familyName} 相关记录。只有 {SafeAppName(exactTarget.Name)} 能进入官方卸载审核；其他记录可能是便携副本、更新载荷或数据线索，不能当成同一个软件一起删除。"
+            : eligible.Length == 0
+                ? $"扫描到 {family.Profiles.Count} 条 {familyName} 相关记录，但当前没有一条具备可审核的官方卸载入口；我不会把目录或数据线索当成软件强制删除。"
+                : $"扫描到 {family.Profiles.Count} 条 {familyName} 相关记录，其中 {eligible.Length} 条各自有官方卸载入口。需要先按版本和位置选中具体一条，我不会替你猜。";
+
+        return Reply(
+            AgentQuestionIntent.Uninstall,
+            "同名应用要按具体记录判断",
+            answer,
+            entries.Select(EntryUninstallEvidence).ToArray(),
+            exactTarget is null
+                ? ["打开应用管理，用版本、位置和“官方卸载入口”确认具体记录。", "没有官方卸载入口的目录、便携副本和数据线索保持只读。"]
+                : [$"先打开 {SafeAppName(exactTarget.Name)} 的卸载审核。", "核对恢复准备和官方卸载命令后仍要再次确认；残留另行扫描。"],
+            navigationTargetPage: "Apps",
+            navigationLabel: exactTarget is null ? "打开应用管理" : "审核这个版本的卸载",
+            targetAppName: exactTarget?.Name,
+            targetAppHandoff: exactTarget is null
+                ? AgentApplicationHandoff.Details
+                : AgentApplicationHandoff.UninstallReview,
+            targetAppFilter: exactTarget is null ? AppCatalogFilter.Uninstallable : null);
+    }
+
+    private static string EntryUninstallEvidence(FamilyEntry entry)
+    {
+        var profile = entry.Profile;
+        var drawer = entry.Drawer;
+        var safeName = SafeAppName(profile.Name);
+        var allowed = AppActionEntryPolicy.Evaluate(drawer, AppActionKind.Uninstall).IsAllowed;
+        if (allowed)
+            return $"{safeName}：有官方卸载入口，可进入审核；操作只针对这条记录。";
+        if (string.IsNullOrWhiteSpace(profile.InstallPath)
+            && (profile.CDriveDataSizeBytes > 0 || profile.CDriveWritePaths.Count > 0))
+        {
+            return $"{safeName}：只识别到 C 盘数据、缓存或更新线索，不是可卸载主程序。";
+        }
+        if (IsOnDrive(profile.InstallPath, 'D'))
+            return $"{safeName}：D 盘程序或便携副本没有官方卸载入口，不可直接卸载。";
+        return $"{safeName}：没有可审核的官方卸载入口，不可直接卸载。";
+    }
+
+    private static AgentConversationReply FamilyCacheLocationReply(FamilyMention family)
+    {
+        var mainProgram = family.Profiles
+            .Where(profile => !string.IsNullOrWhiteSpace(profile.InstallPath))
+            .OrderByDescending(InstallAuthorityRank)
+            .FirstOrDefault();
+        if (mainProgram is null)
+        {
+            return Reply(
+                AgentQuestionIntent.ApplicationSpecific,
+                $"{SafeAppName(family.FamilyName)} 的主程序位置还没确认",
+                "当前只识别到数据或缓存线索，没有可验证的主程序位置，因此不能判断是否已经迁到 D 盘。",
+                ["同名记录可能分别代表主程序、副本、更新载荷或用户数据。"],
+                ["打开应用管理，先确认带安装位置的具体记录。", "不要直接剪切 AppData 或删除更新目录。"],
+                navigationTargetPage: "Apps",
+                navigationLabel: "查看同名记录");
+        }
+
+        var familyContext = AppFamilyPresentationBuilder.Create(mainProgram, family.Profiles);
+        var cDriveBytes = Math.Max(0, familyContext.CDriveDataBytes);
+        var cDriveLocationCount = family.Profiles
+            .SelectMany(profile => profile.CDriveWritePaths)
+            .Where(path => IsOnDrive(path, 'C'))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .Count();
+        var mainOnD = IsOnDrive(mainProgram.InstallPath, 'D');
+        var cDriveSummary = cDriveBytes > 0
+            ? $"至少 {FormatBytes(cDriveBytes)} 的 C 盘缓存或数据线索仍在原处"
+            : cDriveLocationCount > 0
+                ? $"仍发现 {cDriveLocationCount} 个 C 盘写入位置，但本次没有可靠体积"
+                : "本次没有确认到 C 盘缓存体积，但应用仍可能按自己的默认设置写入用户目录";
+        var answer = mainOnD
+            ? $"主程序在 D 盘，但缓存和数据是另一回事：{cDriveSummary}。迁移主程序不会自动改掉软件的用户数据规则；这不一定表示迁移失败，也不能保证所有缓存都支持改到 D 盘。"
+            : $"当前主程序并没有被确认在 D 盘；同时{cDriveSummary}。需要先确认安装记录，再分别判断主程序和缓存位置。";
+        var targetName = family.Profiles.Count(profile => profile.Name.Equals(
+            mainProgram.Name,
+            StringComparison.CurrentCultureIgnoreCase)) == 1
+                ? mainProgram.Name
+                : null;
+
+        return Reply(
+            AgentQuestionIntent.ApplicationSpecific,
+            $"{SafeAppName(family.FamilyName)}：程序位置和缓存位置要分开看",
+            answer,
+            [
+                familyContext.Summary,
+                mainOnD ? "主程序位置：D 盘。" : "主程序位置：尚未确认在 D 盘。",
+                cDriveBytes > 0
+                    ? $"C 盘数据或缓存：至少 {FormatBytes(cDriveBytes)}。"
+                    : $"C 盘写入线索：{cDriveLocationCount} 个位置，体积暂未确认。"
+            ],
+            [
+                "先到软件自己的设置里找缓存、下载、模型或工作区位置；只有软件明确支持时才改到 D 盘。",
+                "需要马上腾空间时，先生成一次性缓存复核方案；不能识别内容或仍在使用时只观察。",
+                "改完后再次体检原 C 盘位置；如果继续增长，就说明迁移还没有闭环。"
+            ],
+            navigationTargetPage: "Apps",
+            navigationLabel: targetName is null ? "查看同名记录" : "查看这个应用",
+            targetAppName: targetName);
+    }
+
+    private static int InstallAuthorityRank(SoftwareProfile profile)
+    {
+        var hasOfficialUninstaller = !string.IsNullOrWhiteSpace(profile.UninstallCommand);
+        if (hasOfficialUninstaller && IsOnDrive(profile.InstallPath, 'D'))
+            return 3;
+        if (hasOfficialUninstaller)
+            return 2;
+        return IsOnDrive(profile.InstallPath, 'D') ? 1 : 0;
+    }
+
     private static AgentConversationReply ApplicationReply(
         string normalizedQuestion,
         SoftwareProfile profile,
+        IReadOnlyList<SoftwareProfile> inventory,
         ApplicationCrashObservation? applicationCrashObservation,
         ApplicationRuntimeObservation? applicationRuntimeObservation,
         ApplicationGrowthObservation? applicationGrowthObservation)
     {
-        var drawer = AppPresentationBuilder.CreateDrawer(profile);
+        var drawer = AppPresentationBuilder.CreateDrawer(profile, inventory);
         var safeName = SafeAppName(profile.Name);
         var intent = AgentQuestionIntent.ApplicationSpecific;
         var headline = "关于 " + safeName;
@@ -1364,6 +1718,88 @@ public static class AgentConversationPresenter
             profiles.Count == 0 ? "应用画像：暂无结果。" : $"应用画像：已扫描 {profiles.Count} 个应用。"
         ];
 
+    private static bool TryParseRequestedReleaseBytes(string question, out long bytes)
+    {
+        bytes = 0;
+        if (!ContainsAny(question, SafeReleaseWords))
+            return false;
+
+        var match = Regex.Match(
+            question,
+            @"(?<value>\d+(?:\.\d+)?)\s*(?<unit>tb|gb|mb|个t|个g|个m|t|g|m)",
+            RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+        if (!match.Success
+            || !double.TryParse(
+                match.Groups["value"].Value,
+                NumberStyles.AllowDecimalPoint,
+                CultureInfo.InvariantCulture,
+                out var value)
+            || value <= 0)
+        {
+            return false;
+        }
+
+        var unit = match.Groups["unit"].Value.ToLowerInvariant();
+        var multiplier = unit switch
+        {
+            "tb" or "t" or "个t" => 1024d * 1024 * 1024 * 1024,
+            "gb" or "g" or "个g" => 1024d * 1024 * 1024,
+            _ => 1024d * 1024
+        };
+        var total = value * multiplier;
+        if (double.IsNaN(total) || double.IsInfinity(total) || total > long.MaxValue)
+            return false;
+
+        bytes = Math.Max(1, (long)Math.Round(total));
+        return true;
+    }
+
+    private static bool LooksLikeCacheLocationSplit(string question) =>
+        ContainsAny(question, CacheWords)
+        && ContainsAny(question, ["c盘", "c 盘"])
+        && ContainsAny(question, ["d盘", "d 盘", "迁移", "搬到", "移到"]);
+
+    private static FamilyMention ResolveFamilyMention(
+        string normalizedQuestion,
+        IReadOnlyList<SoftwareProfile> profiles)
+    {
+        var matches = profiles
+            .Where(profile => !string.IsNullOrWhiteSpace(profile.Name))
+            .GroupBy(
+                profile => AppFamilyPresentationBuilder.NormalizeFamilyName(profile.Name),
+                StringComparer.CurrentCultureIgnoreCase)
+            .Where(group =>
+                group.Key.Trim().Length >= 2
+                && normalizedQuestion.Contains(
+                    group.Key,
+                    StringComparison.CurrentCultureIgnoreCase))
+            .OrderByDescending(group => group.Key.Length)
+            .ToArray();
+        if (matches.Length == 0)
+            return new FamilyMention(string.Empty, []);
+
+        var best = matches[0];
+        return new FamilyMention(best.Key, best.ToArray());
+    }
+
+    private static bool IsOnDrive(string? path, char driveLetter)
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(path))
+                return false;
+            var root = Path.GetPathRoot(path);
+            return root is not null
+                && root.Equals(
+                    $"{char.ToUpperInvariant(driveLetter)}:\\",
+                    StringComparison.OrdinalIgnoreCase);
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
     private static ProfileMention ResolveProfileMention(
         string normalizedQuestion,
         IReadOnlyList<SoftwareProfile> profiles)
@@ -1483,6 +1919,14 @@ public static class AgentConversationPresenter
         string Answer,
         IReadOnlyList<string> Evidence,
         IReadOnlyList<string> NextSteps);
+
+    private sealed record FamilyMention(
+        string FamilyName,
+        IReadOnlyList<SoftwareProfile> Profiles);
+
+    private sealed record FamilyEntry(
+        SoftwareProfile Profile,
+        AppDrawerViewModel Drawer);
 
     private sealed record ProfileMention(SoftwareProfile? Profile, bool IsAmbiguous);
 }

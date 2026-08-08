@@ -83,6 +83,31 @@ function Find-ByAutomationId($root, [string]$automationId, [int]$timeoutMs = 100
     return $null
 }
 
+function Require-FullyVisibleElement {
+    param(
+        [System.Windows.Automation.AutomationElement]$Root,
+        [string]$AutomationId,
+        [int]$TimeoutMs = 1000
+    )
+
+    $element = Find-ByAutomationId $Root $AutomationId $TimeoutMs
+    if ($null -eq $element) {
+        throw "Missing UI element: $AutomationId"
+    }
+    if ($element.Current.IsOffscreen) {
+        throw "$AutomationId was reported offscreen."
+    }
+    $bounds = $element.Current.BoundingRectangle
+    $workingArea = [System.Windows.Forms.Screen]::PrimaryScreen.WorkingArea
+    if ($bounds.Width -le 0 -or $bounds.Height -le 0 -or
+        $bounds.Top -lt $workingArea.Top -or $bounds.Bottom -gt $workingArea.Bottom -or
+        $bounds.Left -lt $workingArea.Left -or $bounds.Right -gt $workingArea.Right) {
+        throw "$AutomationId was not fully inside the visible screen working area."
+    }
+
+    return $element
+}
+
 function Find-WindowByDescendantAutomationId {
     param(
         [System.Windows.Automation.AutomationElement]$Root,
@@ -255,6 +280,7 @@ function Save-WindowScreenshot($window, [string]$path) {
     $bitmap.Save($path, [System.Drawing.Imaging.ImageFormat]::Png)
     $graphics.Dispose()
     $bitmap.Dispose()
+    Assert-ScreenshotHasVisualVariation $path
 }
 
 function Save-DesktopScreenshot([string]$path) {
@@ -267,4 +293,31 @@ function Save-DesktopScreenshot([string]$path) {
     $bitmap.Save($path, [System.Drawing.Imaging.ImageFormat]::Png)
     $graphics.Dispose()
     $bitmap.Dispose()
+    Assert-ScreenshotHasVisualVariation $path
+}
+
+function Assert-ScreenshotHasVisualVariation([string]$path) {
+    $bitmap = [System.Drawing.Bitmap]::FromFile($path)
+    try {
+        if ($bitmap.Width -lt 2 -or $bitmap.Height -lt 2) {
+            throw "Screenshot dimensions were empty: $path"
+        }
+
+        $colors = [System.Collections.Generic.HashSet[int]]::new()
+        $stepX = [Math]::Max(1, [int]($bitmap.Width / 24))
+        $stepY = [Math]::Max(1, [int]($bitmap.Height / 18))
+        for ($x = 0; $x -lt $bitmap.Width; $x += $stepX) {
+            for ($y = 0; $y -lt $bitmap.Height; $y += $stepY) {
+                $null = $colors.Add($bitmap.GetPixel($x, $y).ToArgb())
+                if ($colors.Count -ge 4) {
+                    return
+                }
+            }
+        }
+
+        throw "Screenshot did not contain enough visual variation: $path"
+    }
+    finally {
+        $bitmap.Dispose()
+    }
 }

@@ -276,7 +276,9 @@ public class ProductExperienceTests
         script.Should().NotContain("Save-DesktopScreenshot")
             .And.NotContain("CleanupConfirmationConfirmButton")
             .And.NotContain("SafetyOperationPipeline");
-        script.Should().Contain("noOperationExecuted = $true");
+        script.Should().Contain("OMNIX_ENTROPY_QUARANTINE_ROOT")
+            .And.Contain("quarantineManifestCount")
+            .And.Contain("noOperationExecuted = ($quarantineManifestCount -eq 0)");
         script.Should().Contain("qa-home-agent-next-action.png");
         script.Should().Contain("finally");
         doc.Should().Contain("gui-home-agent-next-action-smoke.ps1");
@@ -3474,6 +3476,10 @@ public class ProductExperienceTests
         script.Should().Contain("recoveryPreparationVisible = $true");
         script.Should().Contain("finalChecklistVisible = $true");
         script.Should().Contain("evidenceRootCreated = $false");
+        script.Should().Contain("preparationAvailable = ($null -ne $preparationExpander)");
+        script.Should().Contain("preparationAvailable = $preparationAvailable");
+        script.Should().Contain("evidenceRootCreated = $evidenceRootCreated");
+        script.Should().Contain("UninstallPlanProductionReadinessConclusionTextBlock");
         script.Should().Contain("OMNIX_ENTROPY_UNINSTALL_EVIDENCE_ROOT");
         script.Should().NotContain("UninstallPlanConfirmButton");
         script.Should().NotContain("Start-Process -FilePath $uninstaller");
@@ -4362,11 +4368,13 @@ public class ProductExperienceTests
             .And.Contain("Click=\"OpenCDriveRootCauseAction_Click\"")
             .And.Contain("<DataTrigger Binding=\"{Binding HasAction}\" Value=\"True\">");
         handler.Should().Contain("CDriveRootCauseAction.OpenRecycleBin")
+            .And.Contain("CDriveRootCauseAction.OpenStorageSettings")
             .And.Contain("CDriveRootCauseAction.OpenCDriveApps")
             .And.Contain("CDriveRootCauseAction.ReviewPersonalStorage")
             .And.Contain("CDriveRootCauseAction.ReviewCleanupRecommendations")
             .And.Contain("SystemToolShortcutCatalog.RecycleBinId")
             .And.Contain("OpenAllowlistedSystemTool")
+            .And.Contain("OpenAllowlistedWindowsSettings(\"storage\")")
             .And.Contain("AppCatalogFilter.CDrive")
             .And.Contain("PersonalStorageFindingsListBox.BringIntoView")
             .And.Contain("RecommendationsListBox.SelectedItem")

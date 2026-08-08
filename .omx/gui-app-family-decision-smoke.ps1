@@ -66,10 +66,14 @@ function Require-Text {
 $repoRoot = Split-Path -Parent $PSScriptRoot
 $exe = Join-Path $repoRoot "src\Css.App\bin\Debug\net8.0-windows\Css.App.exe"
 $dataRoot = Join-Path $repoRoot ".omx\qa-app-family-data"
+$quarantineRoot = Join-Path $repoRoot ".omx\qa-app-family-quarantine"
+$uninstallEvidenceRoot = Join-Path $repoRoot ".omx\qa-app-family-uninstall-evidence"
 $fixturePath = Join-Path $repoRoot ".omx\qa-app-family-fixture.json"
 $screenshotPath = Join-Path $repoRoot ".omx\qa-app-family-decision.png"
 $previousDataRoot = $env:OMNIX_ENTROPY_DATA_ROOT
 $previousFixture = $env:OMNIX_ENTROPY_SOFTWARE_FIXTURE
+$previousQuarantineRoot = $env:OMNIX_ENTROPY_QUARANTINE_ROOT
+$previousUninstallEvidenceRoot = $env:OMNIX_ENTROPY_UNINSTALL_EVIDENCE_ROOT
 $process = $null
 $ui = [ordered]@{
     Family3 = (Get-UnicodeText @(0x540C, 0x7C7B)) + " 3 " + (Get-UnicodeText @(0x6761))
@@ -91,6 +95,8 @@ try {
     }
 
     Remove-Item -LiteralPath $dataRoot -Recurse -Force -ErrorAction SilentlyContinue
+    Remove-Item -LiteralPath $quarantineRoot -Recurse -Force -ErrorAction SilentlyContinue
+    Remove-Item -LiteralPath $uninstallEvidenceRoot -Recurse -Force -ErrorAction SilentlyContinue
     Remove-Item -LiteralPath $fixturePath -Force -ErrorAction SilentlyContinue
     New-Item -ItemType Directory -Path $dataRoot -Force | Out-Null
 
@@ -150,6 +156,8 @@ try {
 
     $env:OMNIX_ENTROPY_DATA_ROOT = $dataRoot
     $env:OMNIX_ENTROPY_SOFTWARE_FIXTURE = $fixturePath
+    $env:OMNIX_ENTROPY_QUARANTINE_ROOT = $quarantineRoot
+    $env:OMNIX_ENTROPY_UNINSTALL_EVIDENCE_ROOT = $uninstallEvidenceRoot
     $process = Start-Process -FilePath $exe -PassThru
 
     $root = [System.Windows.Automation.AutomationElement]::RootElement
@@ -234,6 +242,14 @@ try {
         throw "Unexpected portable uninstall label: $($portableUninstallButton.Current.Name)"
     }
 
+    $quarantineManifestCount = @(
+        Get-ChildItem -LiteralPath $quarantineRoot -Recurse -File -Filter 'manifest.json' -ErrorAction SilentlyContinue
+    ).Count
+    $uninstallEvidenceCreated = Test-Path -LiteralPath $uninstallEvidenceRoot
+    if ($quarantineManifestCount -ne 0 -or $uninstallEvidenceCreated) {
+        throw 'Application-family review created operation evidence unexpectedly.'
+    }
+
     [PSCustomObject]@{
         Family = $familyText
         RegisteredEntry = $entryText
@@ -242,7 +258,9 @@ try {
         PortableStorageOutcome = $portableStorageText
         RegisteredUninstallEnabled = $true
         PortableUninstallEnabled = $false
-        OperationExecuted = $false
+        NoOperationExecuted = ($quarantineManifestCount -eq 0 -and -not $uninstallEvidenceCreated)
+        QuarantineManifestCount = $quarantineManifestCount
+        UninstallEvidenceCreated = $uninstallEvidenceCreated
         Screenshot = $screenshotPath
     } | ConvertTo-Json -Depth 4
 }
@@ -252,6 +270,10 @@ finally {
     }
     $env:OMNIX_ENTROPY_DATA_ROOT = $previousDataRoot
     $env:OMNIX_ENTROPY_SOFTWARE_FIXTURE = $previousFixture
+    $env:OMNIX_ENTROPY_QUARANTINE_ROOT = $previousQuarantineRoot
+    $env:OMNIX_ENTROPY_UNINSTALL_EVIDENCE_ROOT = $previousUninstallEvidenceRoot
     Remove-Item -LiteralPath $dataRoot -Recurse -Force -ErrorAction SilentlyContinue
+    Remove-Item -LiteralPath $quarantineRoot -Recurse -Force -ErrorAction SilentlyContinue
+    Remove-Item -LiteralPath $uninstallEvidenceRoot -Recurse -Force -ErrorAction SilentlyContinue
     Remove-Item -LiteralPath $fixturePath -Force -ErrorAction SilentlyContinue
 }

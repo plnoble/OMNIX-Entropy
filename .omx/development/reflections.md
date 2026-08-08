@@ -3,6 +3,78 @@
 Add an entry at the top of this file before declaring a meaningful task finished.
 Keep entries short and focused on reusable learning.
 
+## 2026-08-02 - Beginner symptom triage
+
+- What worked: separating symptom reports from explicit navigation requests let the Agent add judgment without widening the system-tool allowlist or execution authority.
+- What review caught: natural-language substring matching fails at negation and clause boundaries; "没有蓝屏但突然重启" and "蓝牙正常但 Wi-Fi 连不上" need independent affirmed symptoms rather than one global keyword bag.
+- What GUI acceptance proved: six visible choices, one readable conclusion, and one next step are enough for a beginner entry point; protected tool confirmation remains a separate action.
+- Safety lesson: a useful Agent can say what remains unknown and choose the next observation. It does not need to claim a root cause or repair the machine to reduce user uncertainty.
+- Next improvement: audit the original cleanup/uninstall/install/migration scenarios by user outcome, then deepen Agent composition over verified local evidence.
+
+## 2026-08-02 - Phase 7 exact-file safety closure
+
+- What worked: keeping community exact files separate from trusted directory caches preserved a narrow evidence-to-authority boundary while reusing the mature quarantine, compensation, timeline, and restore machinery.
+- What tests caught: old source contracts encoded the three prior identity-binding entry points and broad method boundaries; updating them explicitly made the fourth path visible without weakening the old ones.
+- What GUI acceptance caught: coherent code can still present contradictory copy, a parent can be visible while its button is not, and a semantically passing screenshot can be black. Real geometry, nonblank pixels, and direct visual review all contributed distinct evidence.
+- Safety lesson: a stored hash label is weaker than reloading and verifying the actual current bytes. Every operation boundary should bind to the artifact, not only its metadata pointer.
+- Next improvement: Phase 8 should begin with a capability matrix so Agent expansion fills beginner decision gaps instead of adding another collection of technical controls.
+
+## 2026-08-02 - Phase 6 community candidate promotion
+
+- What worked: a pure candidate policy made safety refusal independently testable before any operation or UI button could exist.
+- What tests caught: actionable evidence must be complete by identity, not merely bounded by count; clearing a capped partial set avoids presenting an arbitrary subset as the reviewed result.
+- What GUI acceptance proved: a refusal is useful only when the first working area tells a beginner why promotion stopped and keeps cleanup disabled.
+- Safety lesson: eligibility is a transient observation, not authority. Phase 7 must rebind the active pack, exact profile, process state, and file identity before confirmation.
+- Next improvement: reuse the mature compensated quarantine/timeline/restore path while keeping community exact-file planning isolated from trusted directory cleanup.
+
+## 2026-08-02 - Phase 5 community rule center
+
+- What worked: one secondary modal kept provenance, consent, rollback, preview, and exclusions discoverable without increasing the beginner navigation burden.
+- What tests caught: the full suite exposed an authority contract scoped by namespace instead of architectural role; managed preference writes and read-only discovery now have separate proof boundaries.
+- What GUI acceptance caught: a visually correct WPF row can still be unusable to accessibility and automation when the item container announces a CLR type name. Explicit item-level accessible names are part of the feature contract.
+- Safety lesson: an ignore control is not a cleanup control. Persisting a user's display preference can be reversible OMNIX-owned data mutation while every discovered computer path remains non-executable.
+- Next improvement: Phase 6 should explain candidate refusal before Phase 7 creates any operation preview, so eligibility is independently testable and beginner-visible.
+
+## 2026-08-01 - Phase 4 profile and beginner Agent integration
+
+- What worked: separating community observations from trusted cache paths made it possible to improve diagnosis and still prove the cleanup button stayed disabled.
+- What tests caught: the central copy constructor prevented new evidence from disappearing during growth enrichment; old static order contracts identified every deliberate information-architecture change that needed an explicit decision.
+- What screenshots caught: a semantic UIAutomation result can still be visually false near the taskbar. Full working-area geometry plus direct screenshot review is required for first-viewport claims.
+- Product lesson: one application does not need a family explainer. Conditional density gives duplicate apps the context they need without making every drawer read like a report.
+- Next improvement: Phase 5 should expose rule provenance/consent and read-only preview as one contained workflow, not scatter technical controls across the main application page.
+
+## 2026-08-01 - Phase 3 optional community rule-pack management
+
+- What worked: immutable pack bytes plus a tiny atomic pointer turned update failure modes into harmless unreferenced data instead of a broken active database.
+- What tests caught: a security response fixture without final-URI evidence was correctly rejected, and an unnecessary project reference produced widespread assembly-version warnings before it became architecture debt.
+- Safety lesson: hash verification is useful only after the source/license/version/hash tuple shown to the user is bound to the exact activation request; transport should not happen before that check.
+- Product lesson: runtime data import avoids installer redistribution, but licensing still belongs in the visible product flow. Phase 4 must show source and license in plain language without turning the settings page into a technical manifest.
+
+## 2026-08-01 - Phase 2 bounded Winapp2 evidence resolution
+
+- What worked: keeping path semantics in `Css.Rules` and filesystem access behind a tiny `Css.Scanner` interface made wildcard behavior and boundary failures independently testable.
+- What caught real waste: the first green functional result still walked an unrelated sibling. Asserting visited-directory/file counts exposed a performance and privacy defect that output-only assertions missed.
+- Safety lesson: containment is necessary but insufficient. A bounded scanner also needs target-aware pruning, queue limits, per-item time checks, reparse refusal, and explicit lower-bound copy.
+- Next improvement: Phase 3 activation must validate the complete pack before replacing the active file and retain the prior known-good pack; source metadata alone is not an atomic update protocol.
+
+## 2026-08-01 - A compatible parser should still be an untrusted boundary
+
+- What worked: red contracts began with identity, limits, and absence of authority rather than parser convenience. The real-pack probe then proved format coverage without turning the database into a product dependency.
+- Product lesson: `Chrome*` is useful evidence because it carries a literal product anchor; `*` or a shared vendor parent is not ownership evidence. Conservative matching can still support real formats when ambiguity rules are explicit.
+- Safety lesson: preserve registry targets and raw source for explanation, but do not import their execution semantics. Data fidelity and mutation authority are independent.
+- Test lesson: synthetic fixtures proved failure boundaries; a separate disposable probe proved compatibility with 3,721 real sections. Both were needed.
+- Process lesson: temporary project builds need isolated project-local intermediates, and cleanup commands must fail on non-terminating errors before printing success.
+- Next improvement: resolve only attributed file expressions into bounded size evidence, skip reparse points, and show one beginner Agent conclusion before considering any operation eligibility.
+
+## 2026-08-01 - Coverage and authority must remain separate
+
+- What worked: reading parser, executor, update, automation, UI, license, and issue evidence together prevented a broad cleaner database from being mistaken for a safe cleanup engine.
+- Product lesson: community rules are valuable discovery evidence, especially for application caches, but every target still needs ownership, live-use, protected-path, warning, and rollback reasoning in OMNIX.
+- Safety lesson: a two-phase preview is insufficient if the second phase performs direct irreversible deletion or if a quiet scan can flow straight into cleanup. Preview and execution authority are separate controls.
+- License lesson: repository code and bundled data can have different licenses. Record both before choosing an integration architecture.
+- UX lesson: impact-sorted results, progress/cancel, exclusions, and inspectable raw evidence improve trust; thousands of technical checkboxes do not make a beginner safer.
+- Next improvement: prototype a pinned, read-only rule catalog against fixtures and prove that no parsed rule can create an `OperationDescriptor` without a separate OMNIX policy decision.
+
 ## 2026-08-01 - Public 0.1.5 release
 
 - What worked: one immutable source target bound CI, signed payload, setup, channel manifest, tag, and Release; the final records commit remained deliberately outside that product target.
@@ -180,6 +252,18 @@ Keep entries short and focused on reusable learning.
 - Persistence does not mean inventing local work after the product, safety pipeline, package transform, verifier, fixture, and acceptance protocol are ready. At that point, unrelated changes reduce confidence instead of moving the actual objective.
 - A self-signed certificate or primary-machine mutation run would make the final claim less true. Blocking with exact machine-readable prerequisites is the correct engineering outcome until the external state changes.
 - Resumption is deterministic: rerun the inspector, create the signed candidate with an explicitly approved thumbprint, independently verify transfer, then complete the ten evidence-bound cases on a resettable Windows environment.
+
+## 2026-08-02 - Phase 10 Agent decision workflows
+
+- Related task: turn completed diagnosis, growth, application-family, uninstall, install, and migration evidence into five beginner decisions.
+- What worked: one sanitized context let the conversation layer reuse numeric evidence without referencing Scanner types or gaining mutation authority. Red contracts caught wording and routing gaps quickly.
+- What failed or slowed down: quote-heavy PowerShell discovery failed twice; one source filename was guessed; the real GUI run was blocked by external host-approval quota before launch.
+- Root lessons: beginners need a ranked conclusion plus the missing evidence, not another technical list. “Largest source,” “grew most,” and “safe to release” are different quantities and must stay separate.
+- Token or time waste: the guessed path and combined regex search added avoidable retries; simple symbol searches would have been faster.
+- Process improvements: keep path sanitization at the Scanner-to-Core boundary as well as the UI boundary; maintain one deterministic isolated GUI script for all five decisions.
+- Future optimizations: after a successful visual run, consider a compact per-answer evidence badge for snapshot count and observation window, but do not add more first-view buttons.
+- Potential skill candidates: path-free decision-context composition and non-additive storage evidence are reusable patterns; record only if repeated outside this project.
+- Final-gate correction: the full Release test suite was mistakenly rerun despite an existing project note that its fake lifecycle worker is Debug-only. The correct boundary is now promoted to `AGENTS.md`, so future agents should not rediscover it through ten expected failures.
 
 ## Entry Template
 

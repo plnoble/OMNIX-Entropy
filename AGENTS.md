@@ -15,6 +15,7 @@ This repository uses a lightweight multi-agent development protocol. Every agent
 - On Windows, use `rg -g "<filename-pattern>" <pattern> <directory>` for filename filtering. Never place `*` or `?` inside a path argument such as `tests\\Css.Tests\\*Tests.cs`; PowerShell passes it literally and `rg` fails with OS error 123.
 - Resolve any unobserved source path with `rg --files` or a symbol search before adding it to a required parallel read batch.
 - The canonical solution entry is `ComputerSecuritySoftware.slnx`. Use it for solution-wide build/test commands; never infer a solution filename from the product name.
+- Run the full test suite in Debug only. The Release build intentionally excludes `OfficialUninstallFakeWorker.cs`, so Release lifecycle tests that launch the fake worker are invalid; verify Release with a solution build and the focused `ReleaseWorkerCommandSurfaceTests` contract instead.
 - Expected-zero searches must use an exit-zero count form when combined with other required checks.
 - Reuse `powershell -NoProfile -ExecutionPolicy Bypass -File .omx/verify-source-integrity.ps1` for the strict UTF-8, replacement-character, and XAML parse gate instead of rebuilding the PowerShell loop inline. The repository script is read-only; do not change the machine execution policy.
 - Keep new Windows PowerShell 5 smoke scripts ASCII or build required non-ASCII UI text from Unicode code points. Do not rely on no-BOM UTF-8 literals being decoded correctly by the host parser.

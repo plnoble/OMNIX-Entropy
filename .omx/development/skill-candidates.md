@@ -1,5 +1,53 @@
 # Skill Candidates
 
+### 2026-08-02 - Validate semantic screenshots with pixels and direct review
+
+- Trigger: a GUI smoke finds the expected UIAutomation elements and writes a screenshot artifact.
+- Reusable lesson: successful semantic assertions and image encoding do not prove visible pixels. Sample the captured bitmap for a minimum nonblack/nonblank ratio, then inspect the image directly for overlap, clipping, contradictory copy, and external overlays.
+- Evidence: the Phase 7 preview smoke passed every semantic assertion while one captured image was entirely black; pixel validation now rejects that false proof.
+- Proposed form: a shared screenshot helper that returns geometry, luminance/variance, and a human-review checklist result.
+- Reuse value: high for WPF, WinUI, browser, canvas, remote desktop, and virtualized GUI acceptance.
+
+### 2026-08-02 - Promote the actual primary control into view
+
+- Trigger: a variable-height scrollable panel becomes visible and contains a user-critical button near its bottom.
+- Reusable lesson: bringing the panel into view does not guarantee that its actionable child fits inside the screen working area. Promote the actual control, expose the owning scroll container to automation, and assert the child's final bounding rectangle.
+- Evidence: Phase 7 showed the correct preview panel while `DrawerActionPreviewPrimaryButton` remained below the usable desktop until the product explicitly brought it into view.
+- Proposed form: a WPF helper plus static/UIAutomation contract for primary-action visibility after dynamic panel expansion.
+- Reuse value: high for drawers, inspectors, wizards, confirmation panels, and narrow desktop layouts.
+
+### 2026-08-02 - Keep bounded actionable evidence all-or-nothing
+
+- Trigger: a bounded scanner retains exact identities for a later user-confirmed operation while separately computing aggregate diagnostic evidence.
+- Reusable lesson: when the identity cap is exceeded, never preserve the first N items as an apparently reviewed actionable subset. Clear the actionable set, mark identity completeness false, and keep aggregate read-only totals independent.
+- Evidence: Phase 6 initially needed to distinguish exact-candidate retention from scan-size completeness; the final resolver can report the full observed size while refusing operation promotion without every selected identity.
+- Proposed form: a reusable bounded collector with separate aggregate-completeness and actionable-identity-completeness outputs.
+- Reuse value: high for cleaners, backup selections, migration inventories, uninstall residues, duplicate-file actions, and security scans.
+
+### 2026-08-02 - Scope authority contracts by architectural role
+
+- Trigger: one namespace contains pure parsing/resolution code beside explicit adapters that persist only application-managed state.
+- Reusable lesson: a namespace-wide forbidden-API scan either blocks legitimate atomic persistence or becomes too permissive. Keep a named adapter allowlist, prove adapter confinement separately, and retain zero-mutation contracts for pure evidence code.
+- Evidence: Phase 5 full tests correctly found `File.Delete` in temporary preference cleanup, but the old catalog test had no role boundary for the new managed store.
+- Proposed form: a reusable source-contract helper that accepts pure scopes, named persistence adapters, allowed root types, and forbidden operation/registry/process APIs.
+- Reuse value: high for policy engines, caches, update metadata, user preferences, and audit stores.
+
+### 2026-08-02 - Give every data-bound WPF item an explicit accessible name
+
+- Trigger: a WPF `ListBox`, grid, or items control renders a domain object through a data template and automation must identify individual rows.
+- Reusable lesson: visible child text does not guarantee a useful item-container name; bind `AutomationProperties.Name` on the generated container and test the semantic value.
+- Evidence: Phase 5 rendered `Fixture App` correctly but UIAutomation announced `Css.Rules.Winapp2.Winapp2RulePreviewRow` until the `ListBoxItem` binding was added.
+- Proposed form: a static XAML contract plus a real UIAutomation helper that rejects namespace-like CLR type names for selectable items.
+- Reuse value: high for desktop app catalogs, findings, timelines, and accessibility acceptance.
+
+### 2026-08-01 - Prove WPF first-viewport claims with working-area geometry
+
+- Trigger: a beginner conclusion must be visible without scrolling and UIAutomation reports `IsOffscreen=false`.
+- Reusable lesson: `IsOffscreen` only describes provider state; compare the full bounding rectangle to the target screen working area and inspect a real screenshot, because a realized element can extend behind the taskbar.
+- Evidence: Phase 4 initially reported the Agent advice visible while the screenshot showed only its heading. Moving the conclusion and adding geometry checks produced a truthful acceptance result.
+- Proposed form: extend `wpf-smoke-helpers.ps1` with `Require-FullyVisibleElement` and use it for every first-viewport acceptance.
+- Promotion status: met. Phase 5 reused `Require-FullyVisibleElement` for rule-center status and preview acceptance; promote this helper pattern when a cross-project WPF skill is next maintained.
+
 ### 2026-07-30 - Guard model enrichment against dropped fields
 
 - Trigger: a shared immutable model gains fields while enrichers or presenters rebuild it with object initializers or copy methods.
@@ -14,7 +62,8 @@
 - Reusable lesson: resolve the active shell/runtime first, use an explicit result collection around `foreach`, cap files/time, report lower bounds and inaccessible paths, and never turn approximate size into deletion authority.
 - Evidence: ad hoc audit commands twice used invalid `foreach |` grammar and once assumed `System.IO.EnumerationOptions`; a bounded Windows PowerShell-compatible fallback then produced useful lower-bound evidence without mutation.
 - Proposed form: a repository script accepting literal paths and limits, returning JSON fields for visibility, count, bytes, truncation, access errors, and reparse skips.
-- Promotion threshold: create the helper before the next host cleanup-store or application-data audit.
+- Promotion status: reached on 2026-08-01. The FluentCleaner reference audit repeated the invalid direct `foreach |` pattern, proving that prose guidance alone has not prevented recurrence.
+- Next action: create the bounded helper before the next host cleanup-store, application-data, or multi-URL audit; until then, require explicit `$rows = @(foreach (...))` collection.
 
 ### 2026-07-30 - Reconcile release transport instead of retrying blindly
 

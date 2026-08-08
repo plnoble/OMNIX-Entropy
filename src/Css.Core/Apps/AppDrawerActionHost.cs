@@ -145,6 +145,30 @@ public static class AppDrawerActionHostPresenter
         };
     }
 
+    public static AppDrawerActionHostViewModel ShowCommunityCacheCleanup(
+        AppDrawerViewModel drawer,
+        CommunityRuleCacheCleanupPlan plan)
+    {
+        return new AppDrawerActionHostViewModel
+        {
+            IsVisible = true,
+            Title = "旧缓存文件安全预演",
+            Summary = plan.Summary,
+            AgentTakeaway = plan.CanContinue
+                ? "Agent 判断：这些精确旧缓存文件通过了第一轮筛选，但点击下一步后还要重新核验。"
+                : "Agent 判断：当前规则、应用或文件证据不够稳定，所以先不处理。",
+            NextStepText = plan.NextStepText,
+            SafetyText = plan.SafetyText,
+            Lines = plan.Lines,
+            CanExecuteDirectly = false,
+            StatusText = plan.CanContinue
+                ? "旧缓存文件预演已准备；当前没有移动文件，下一步仍会重新扫描。"
+                : "旧缓存文件预演已停止；没有移动或删除文件。",
+            PrimaryActionText = plan.CanContinue ? "重新核验并查看清单" : "",
+            PrimaryActionKey = plan.CanContinue ? "CommunityCacheCleanup" : ""
+        };
+    }
+
     public static AppDrawerActionHostViewModel CacheCleanupRefused(string reason) =>
         new()
         {

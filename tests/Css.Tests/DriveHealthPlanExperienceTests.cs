@@ -97,7 +97,10 @@ public sealed class DriveHealthPlanExperienceTests
             rootCauseCount: 1);
 
         plan.SafeCleanupBytes.Should().Be(0);
-        plan.Progress.Should().Contain("没有已确认").And.Contain("不要删除");
+        plan.Progress.Should().Contain("没有已确认")
+            .And.Contain("不要删除")
+            .And.Contain("只读线索")
+            .And.Contain("可能指向同一批文件");
         plan.PrimaryAction.Should().Be(DriveHealthPlanAction.ReviewPersonalStorage);
         plan.PrimaryActionLabel.Should().Contain("大文件");
         plan.Steps.Should().Contain(line => line.Contains("只读"));

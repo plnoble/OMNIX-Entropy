@@ -112,13 +112,23 @@ public sealed class AutomaticAppInventoryLoadingTests
         var core = Method(
             code,
             "private async Task<bool> RunSoftwareScanCoreAsync",
-            "private Task<IReadOnlyList<SoftwareProfile>> ScanSoftwareProfilesAsync");
+            "private async Task<IReadOnlyList<SoftwareProfile>> ScanSoftwareProfilesAsync");
+        var scan = Method(
+            code,
+            "private async Task<IReadOnlyList<SoftwareProfile>> ScanSoftwareProfilesAsync",
+            "private async Task<bool> RefreshMigrationClosureAsync");
 
         showPage.Should().Contain("EnsureSoftwareInventoryLoadedAsync");
         ensure.Should().Contain("EnsureLoadedAsync");
         refresh.Should().Contain("RefreshAsync");
         core.Should().Contain("ScanSoftwareProfilesAsync");
         core.Should().NotContain("ex.Message");
+        scan.Should().Contain("LoadActiveCatalog")
+            .And.Contain("Winapp2SoftwareProfileEnricher")
+            .And.NotContain("SafetyOperationPipeline")
+            .And.NotContain("File.Delete")
+            .And.NotContain("File.Move")
+            .And.NotContain("Process.Start");
         string.Join("\n", showPage, ensure, refresh).Should().NotContain("Process.Start");
         string.Join("\n", showPage, ensure, refresh).Should().NotContain("SafetyOperationPipeline");
     }

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Css.Core.Software;
 
@@ -48,6 +49,47 @@ public sealed class SoftwareCategoryAssessment
 /// </summary>
 public sealed class SoftwareProfile
 {
+    public SoftwareProfile()
+    {
+    }
+
+    [SetsRequiredMembers]
+    public SoftwareProfile(SoftwareProfile source)
+    {
+        ArgumentNullException.ThrowIfNull(source);
+        Name = source.Name;
+        Publisher = source.Publisher;
+        SignatureSubject = source.SignatureSubject;
+        Category = source.Category;
+        CategoryAssessment = source.CategoryAssessment;
+        DisplayVersion = source.DisplayVersion;
+        InventorySource = source.InventorySource;
+        InstallPath = source.InstallPath;
+        UninstallCommand = source.UninstallCommand;
+        DisplayIconPath = source.DisplayIconPath;
+        DisplayIconIndex = source.DisplayIconIndex;
+        ReinstallSource = source.ReinstallSource;
+        IsWindowsInstaller = source.IsWindowsInstaller;
+        WindowsInstallerProductCode = source.WindowsInstallerProductCode;
+        InstallDate = source.InstallDate;
+        InstalledSizeBytes = source.InstalledSizeBytes;
+        DataSizeBytes = source.DataSizeBytes;
+        CDriveDataSizeBytes = source.CDriveDataSizeBytes;
+        CacheSizeBytes = source.CacheSizeBytes;
+        RecentGrowthBytes = source.RecentGrowthBytes;
+        DataPaths = source.DataPaths;
+        CachePaths = source.CachePaths;
+        LogPaths = source.LogPaths;
+        CDriveWritePaths = source.CDriveWritePaths;
+        RunningProcesses = source.RunningProcesses;
+        StartupEntries = source.StartupEntries;
+        Services = source.Services;
+        ScheduledTasks = source.ScheduledTasks;
+        BackgroundComponents = source.BackgroundComponents;
+        SystemFootprints = source.SystemFootprints;
+        CommunityCacheEvidence = source.CommunityCacheEvidence;
+    }
+
     public required string Name { get; init; }
     public string? Publisher { get; init; }
     public string? SignatureSubject { get; init; }
@@ -78,4 +120,5 @@ public sealed class SoftwareProfile
     public IReadOnlyList<string> ScheduledTasks { get; init; } = [];
     public IReadOnlyList<BackgroundComponentObservation> BackgroundComponents { get; init; } = [];
     public IReadOnlyList<SoftwareSystemFootprintObservation> SystemFootprints { get; init; } = [];
+    public IReadOnlyList<CommunityRuleCacheEvidence> CommunityCacheEvidence { get; init; } = [];
 }

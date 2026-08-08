@@ -1,5 +1,86 @@
 # Agent Handoff
 
+## Latest Update - 2026-08-02 Phase 10 decision workflows complete in source
+
+- Current objective: publish the completed Phase 1-10 work as 0.2.0 from one immutable CI-passing revision. Public/installed latest remains 0.1.5 until the guarded release flow completes.
+- What changed: `AgentDecisionContext` and its Scanner adapter provide path-free numeric drive, source, and growth evidence. Agent answers five beginner decisions: why C remains full, who grew most in the observed window, why D-drive programs may retain C-drive cache, which exact duplicate entry can enter official uninstall review, and the safest plan for a requested release amount. Three compact first-view decision choices were added without replacing symptom triage.
+- What is verified: Agent 54/54; related Agent/growth/family/drive regression 235/235; final full Debug 1208/1208; Release build 0 warnings/errors; Release command-surface 2/2; source integrity 427 files and 19/19 XAML; diff, smoke parser/ASCII/static non-execution, and direct-authority contracts pass. The real isolated Phase 10 WPF smoke proves five decisions, three first-view prompts, no operation, no quarantine/uninstall evidence, and four inspected screenshots.
+- What is not verified: versioned 0.2.0 build metadata, source commit/push, GitHub CI, signed payload/setup, download-back hashes, public Release, and update manifest remain pending. No maintenance operation or installer ran.
+- Known risks or blockers: the combined worktree is large and must be committed intentionally; personal signing has no public SmartScreen reputation; full Release lifecycle tests remain invalid because their fake worker is deliberately excluded. No current product blocker remains.
+- Exact next recommended action: finish 0.2.0 source gates, commit and push, require passing CI, then run only the guarded package/signing/installer/draft verification scripts and publish after remote download-back verification.
+
+## Latest Update - 2026-08-02 Beginner symptom triage complete
+
+- Current objective: close the original Phase 7-9 system-cleanup, uninstall, install-control, and migration scenarios before the final Phase 10 Agent decision workflows and unified release.
+- What changed: the Agent page has six first-view symptom choices. Natural-language symptom reports now show checked evidence, unknowns, urgency, and one exact allowlisted next step; explicit open requests retain protected navigation. Routing handles negation, clause locality, informational Bluetooth questions, and mixed-symptom sentences conservatively.
+- What is verified: focused 81/81; full Debug 1181/1181; Release 0 warnings/errors; integrity 425 files/19 XAML; diff and both PowerShell parse checks pass. Real GUI smokes show first-view choices/conclusion, protected device-manager confirmation, cancellation, no external tool, no operation, zero quarantine manifests, and nonblank screenshots.
+- What is not verified: no real network/audio/device fault was induced; no system tool was accepted/launched; no system-cleanup/uninstall/install/migration operation ran; no version, commit, push, package, signing, installer, installed-product, certificate, or Release action occurred.
+- Known risks: symptom rules are a conservative presentation layer, not root-cause diagnosis; the combined Phase 1+ worktree remains large and uncommitted; original system-cleanup coverage still lacks explicit old installer/download remnants and recognizable browser/developer cache categories.
+- Exact next recommended action: add red contracts for expanded known-cleanup locations, age/use confidence, overlap honesty, and explicit OMNIX-versus-Windows handling; implement read-only evidence and beginner cards before auditing remaining uninstall/install/migration scenario gaps.
+
+## Latest Update - 2026-08-02 Phase 7 exact-file safety closure complete
+
+- Current objective: implement Phase 8 beginner system diagnosis and Agent capability expansion on the verified uncommitted Phase 1-7 foundation.
+- What changed: eligible community-rule evidence now creates a separate exact-file plan bound to the loaded-and-hash-verified active pack, exact software registration identity, complete file metadata/lineage, and a 64-file all-or-nothing ceiling. The UI reloads the pack and rescans the exact profile before and after confirmation; quarantine identity is bound before display and revalidated at execution. Existing compensated quarantine, timeline, and restore are reused. Trusted directory-cache handling is unchanged.
+- What is verified: focused related suite 51/51; full Debug 1155/1155; Release 0 warnings/errors; integrity 423 files/19 XAML; diff/direct-authority/PowerShell gates pass. Temp-file integration proves two-file quarantine, timeline, and restore. Real WPF smoke shows count/bytes, kept recent file, visible scrolled action, exact-file confirmation, cancellation, no manifest, and `OperationExecuted=false`; nonblank screenshots are `.omx/qa-community-cache-preview.png` and `.omx/qa-community-cache-confirmation.png`.
+- What is not verified: no real third-party pack or user cache was processed; GUI smoke cancels before operation while the operation/restore path is covered by isolated integration; no Phase 8 gap audit, cloud AI, arbitrary repair, version, commit, push, package, signing, installer, or release occurred.
+- Known risks: active packs and files can change at any time, so the flow deliberately stops rather than adapting an old plan; rule overlap counts are conservative; personal signing/public 0.1.5 remain unchanged; the combined Phase 1-7 worktree is large and must remain uncommitted until unified Phase 10 release.
+- Exact next recommended action: inventory current Agent skills, conversation routing, read-only observers, settings/system-tool allowlists, and operation handoffs against the approved Marvis capability categories; identify the highest-value beginner troubleshooting gap and add failing user-shaped contracts before implementation.
+
+## Latest Update - 2026-08-02 Phase 6 candidate promotion complete
+
+- Current objective: implement Phase 7 rule-driven preview, exact identity binding, quarantine, timeline, and restore on the verified uncommitted Phase 1-6 foundation.
+- What changed: resolved community rules now retain an all-or-nothing bounded exact file set. `CommunityRuleCandidatePolicy` independently classifies evidence as preview-only, refused, or eligible for safe preview using scan completeness, approved Local/Roaming user-data roots, protected/install/cache location, active processes, rule warning, registry/remove-self intent, age, extension, current existence, reparse chain, attributes, and duplicates. App drawer/rule center show the decision and first refusal reason without ordinary-path leakage.
+- What is verified: Phase 6 focused 27/27; full Debug 1146/1146; Release 0 warnings/errors; integrity 420 files/19 XAML; diff, authority, beginner path-leak, bundled-data, and PowerShell checks pass. Real app-drawer/rule-center smokes report `CandidateDecision=Refused`, disabled cleanup, preference round-trip, first-view explanation, and `OperationExecuted=false`.
+- What is not verified: no community candidate has an `OperationDescriptor`, confirmation preview, bound identity, quarantine record, timeline entry, or restore receipt; no real third-party pack, version, commit, push, package, signing, installer, or release occurred.
+- Known risks: eligibility is scan-time evidence and must be treated as stale after pack/profile/process/file changes; exact candidates are deliberately unavailable when a rule exceeds 128 files; only conservative cache directories/extensions are eligible; Phase 7 must not reuse community evidence through the older trusted-directory plan.
+- Exact next recommended action: trace `AppCacheCleanupPlanBuilder`, `QuarantineOperationPolicy.PrepareForConfirmation`, confirmation-window wiring, and post-attempt refresh; add red contracts for a separate community-file plan bound to active pack SHA and exact selected profile before enabling any UI action.
+
+## Latest Update - 2026-08-02 Phase 5 rule center complete
+
+- Current objective: implement Phase 6 exclusions and safe-candidate promotion on top of the verified, uncommitted Phase 1-5 foundation.
+- What changed: the application page now opens a contained community-rule modal with visible status/source/license/version, conservative read-only preview, exact local/HTTPS activation consent, stale-safe rollback, cancellation, technical-only paths, and atomic ignore/restore preferences. No community rule data is bundled or silently discovered.
+- What is verified: focused catalog/preference contracts pass 10/10; full Debug 1136/1136; Release 0 warnings/errors; integrity 418 files/19 XAML; diff, authority, resolver-mutation, third-party-data, and PowerShell syntax gates pass. `.omx/gui-community-rule-center-smoke.ps1` proves status and preview first-view visibility, ignore/restore round-trip, and `OperationExecuted=false`; screenshots are `.omx/qa-rule-center-status.png` and `.omx/qa-rule-center-preview.png`.
+- What is not verified: no real third-party pack was imported or downloaded through the UI; no community rule has been promoted into a cleanup candidate, operation, quarantine, or rollback plan; no version, commit, push, package, signing, installer, or release occurred.
+- Known risks: community matches can be wrong, overlapping sizes intentionally understate totals, user-entered source metadata is not an upstream discovery mechanism, and the preference store mutates only OMNIX-managed JSON while parser/resolver code must remain read-only.
+- Exact next recommended action: trace existing protected-path, cleanup eligibility, active-process, and evidence-completeness policies; add red contracts for preview-only/refused/eligible classifications before implementing a pure non-executable candidate evaluator.
+
+## Latest Update - 2026-08-01 Phase 3 optional community rule-pack management complete
+
+- Current objective: begin Phase 4 software-profile and beginner Agent presentation integration on top of the uncommitted Phase 1-3 foundation.
+- What changed: per-user storage now includes `RulePacks\Winapp2`; the store requires source/license/version/hash confirmation, copies with an 8 MiB limit, fully validates before activation, keeps immutable SHA-256-named packs, atomically switches one bounded state file, verifies active/previous bytes on load, and supports expected-hash rollback. A manual HTTPS transport requires the same reviewed consent before any request and has no update discovery or background loop.
+- What is verified: focused 27/27; full Debug 1119/1119; Release 0 warnings/errors; integrity 407 files/18 XAML; formatting/diff checks pass; maintenance authority search is zero.
+- What is not verified: no third-party database was imported, downloaded, bundled, or redistributed; no UI/profile/Agent integration, cleanup eligibility, operation, version, commit, push, or release was added.
+- Known risks: the product still needs a user-visible source/license/consent surface; a pinned descriptor must originate from a separately trusted or explicitly reviewed channel; immutable orphan files after a crash are harmless but not yet pruned.
+- Exact next recommended action: add a bounded profile enrichment service and beginner summary model that consume only an already active validated catalog, preserve lower-bound/warning/source evidence, and remain non-executable.
+
+## Latest Update - 2026-08-01 Phase 2 bounded Winapp2 evidence resolution complete
+
+- Current objective: begin Phase 3 optional community rule-pack management while preserving the verified, uncommitted Phase 1-2 foundation.
+- What changed: `Css.Rules.Winapp2` now shares strict file-target/path semantics; `Css.Scanner.Winapp2` resolves attributed targets through a bounded read-only filesystem adapter. It handles recurse/remove-self syntax, semicolon patterns, FILE/PATH exclusions, overlap deduplication, stale-size evidence, cancellation, progress, reparse/escape refusal, branch pruning, samples, and explicit lower-bound reasons.
+- What is verified: focused 11/11; full Debug 1111/1111; Release 0 warnings/errors; source integrity 403 files/18 XAML; whitespace/diff checks pass; forbidden execution-authority search is zero.
+- What is not verified: no third-party database is bundled, downloaded, persisted, activated, or updated; no product UI/profile enrichment/Agent copy/cleanup/registry operation/version/commit/push/release is included.
+- Known risks: community expressions remain untrusted; inaccessible or skipped paths make totals lower bounds; rule-data license/attribution and update supply-chain boundaries remain unresolved for redistribution.
+- Exact next recommended action: implement a user-enabled local rule-pack store that validates source/version/license/hash and parser compatibility before atomic activation, retains one previous version for rollback, and never grants execution authority.
+
+## Latest Update - 2026-08-01 Read-only Winapp2 catalog complete
+
+- Current objective: preserve the completed uncommitted rule-catalog foundation and choose the next read-only software-profile/Agent integration slice.
+- What changed: `Css.Rules.Winapp2` now has required source/version/license/hash metadata, bounded strict-UTF-8 parsing, raw source and diagnostics, warnings/defaults/file/registry/exclusion evidence, and `SoftwareProfile` attribution that requires an owned path. Literal-anchored wildcards such as `Chrome*` are supported; broad parent paths and wildcard-only ownership are rejected.
+- What is verified: focused 6/6; real Winapp2 260730 probe 3,721 rules/11,110 file targets/3,368 registry targets/17 warnings/0 diagnostics/false execution authority; full Debug 1106/1106; Release 0 warnings/errors; integrity 399 files/18 XAML; changed-file whitespace/diff checks and authority search pass.
+- What is not verified: no database is bundled, downloaded, updated, or persisted by the product; no UI, software scan enrichment, Agent wording, cache sizing, filesystem enumeration, operation, cleanup, registry access, package, version, commit, push, or release was added.
+- Known risks: compatible rule data remains third-party CC BY-SA content; raw wildcard expressions can still be ambiguous; path attribution proves relationship, not safe deletion; real pack acceptance was a local compatibility probe rather than a committed dependency.
+- Exact next recommended action: add a bounded read-only resolver that expands attributed file expressions into existing paths and sizes without following reparse points, then present only an Agent summary. Keep every result non-executable until separate OMNIX ownership and cleanup-policy gates approve exact targets.
+
+## Latest Update - 2026-08-01 FluentCleaner reference analysis complete
+
+- Current objective: preserve the FluentCleaner comparison and wait for explicit scope approval before implementing any rule-catalog integration.
+- What changed: analysis records now capture the source review, license boundary, safety comparison, prioritized opportunities, and rejected execution patterns. No product source or release artifact changed.
+- What is verified: FluentCleaner commit `be347511ae8c639bdc9ca1cfc38dec02fe92c7c5` has a simple Winapp2 parser, two-phase analyze/clean flow, dry-run Rule Lab, exclusions, size-ranked results, direct file/registry deletion, custom PowerShell execution, unsigned direct database replacement, and no unit-test files. Public issues report aggressive cleanup and localization/system damage concerns. OMNIX already has stronger exact-path validation, confirmation, quarantine, rollback, and timeline boundaries.
+- What is not verified: no prototype parser, imported rule pack, licensing decision, package update verifier, UI, test fixture, or real cleanup was implemented or executed.
+- Known risks: Winapp2 data is CC BY-SA 4.0 while FluentCleaner code is MIT; warnings cover only a small fraction of the large rule set; third-party rule updates are a supply-chain boundary; a matching rule does not prove ownership or safe deletion.
+- Exact next recommended action: implement only a read-only, source-pinned rule catalog with parse/schema/hash checks and app ownership attribution. Keep registry/custom-script/automatic cleanup unsupported and route any later low-risk file action through the existing OMNIX safety pipeline.
+
 ## Latest Update - 2026-08-01 Public 0.1.5 released
 
 - Current objective: preserve the completed 0.1.5 release evidence and obtain a user-run in-app update receipt from the currently installed version.

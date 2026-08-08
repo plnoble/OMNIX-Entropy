@@ -19,6 +19,7 @@ public enum CDriveRootCauseAction
 {
     None,
     OpenRecycleBin,
+    OpenStorageSettings,
     OpenCDriveApps,
     ReviewPersonalStorage,
     ReviewCleanupRecommendations
@@ -32,6 +33,9 @@ public sealed class CDriveRootCauseCard
     public required string AgentSuggestion { get; init; }
     public required string SizeText { get; init; }
     public required int Severity { get; init; }
+    public long EvidenceBytes { get; init; }
+    public bool IsSizeLowerBound { get; init; }
+    public string? AutomationId { get; init; }
     public CDriveRootCauseAction Action { get; init; }
     public string? ActionLabel { get; init; }
     public bool HasAction => Action != CDriveRootCauseAction.None;
@@ -48,8 +52,9 @@ public static class CDriveRootCauseSummaryBuilder
             Environment.GetFolderPath(Environment.SpecialFolder.Windows));
 
         cards.AddRange(result.SystemCleanupOpportunities
-            .Where(item => item.IsAccessible && item.SizeBytes > 0)
-            .OrderByDescending(item => item.SizeBytes)
+            .Where(item => item.IsAccessible
+                && (DisplayBytes(item) > 0 || IsIncompleteWithoutCandidate(item)))
+            .OrderByDescending(DisplayBytes)
             .Take(4)
             .Select(CreateCleanupOpportunityCard));
 
@@ -79,26 +84,97 @@ public static class CDriveRootCauseSummaryBuilder
     private static CDriveRootCauseCard CreateCleanupOpportunityCard(
         SystemCleanupOpportunity opportunity)
     {
-        var size = RootCauseReportBuilder.Fmt(opportunity.SizeBytes);
+        var isWindowsManaged = opportunity.Handling == CleanupHandling.WindowsManaged;
+        var displayBytes = DisplayBytes(opportunity);
+        var size = RootCauseReportBuilder.Fmt(displayBytes);
         var sizeWithConfidence = opportunity.IsSizeLowerBound
             ? "至少 " + size
             : size;
-        var isWindowsManaged = opportunity.Handling == CleanupHandling.WindowsManaged;
+
+        if (IsIncompleteWithoutCandidate(opportunity))
+        {
+            return new CDriveRootCauseCard
+            {
+                Title = "扫描还没看完",
+                PrimaryText = $"{opportunity.Title}：暂时不能判断",
+                Explanation = "扫描达到数量上限或有部分位置无法读取。当前结果可能漏掉更靠后的旧文件，不能据此说这里没有可处理内容。",
+                AgentSuggestion = "处理方式：先保留。下次缩小范围或关闭相关应用后重新扫描；当前不会生成清理方案。",
+                SizeText = "结果不完整",
+                Severity = 1,
+                EvidenceBytes = 0,
+                IsSizeLowerBound = true,
+                AutomationId = "CDriveRootCauseCard_SystemCleanup_" + opportunity.Kind
+            };
+        }
+
+        if (isWindowsManaged)
+        {
+            return new CDriveRootCauseCard
+            {
+                Title = "交给 Windows 清理",
+                PrimaryText = $"{opportunity.Title} {sizeWithConfidence}",
+                Explanation = "这是 Windows 管理的临时、更新或诊断位置。能检测到占用，不代表适合手动删除目录。",
+                AgentSuggestion = "处理方式：由 Windows 处理；OMNIX 只打开存储设置供你复查，不会自行删除这个目录。",
+                SizeText = sizeWithConfidence,
+                Severity = 2,
+                EvidenceBytes = displayBytes,
+                IsSizeLowerBound = opportunity.IsSizeLowerBound,
+                AutomationId = "CDriveRootCauseCard_SystemCleanup_" + opportunity.Kind,
+                Action = CDriveRootCauseAction.OpenStorageSettings,
+                ActionLabel = "打开 Windows 存储设置",
+                ActionAutomationId = BuildActionAutomationId(
+                    CDriveRootCauseAction.OpenStorageSettings,
+                    opportunity.Kind.ToString())
+            };
+        }
+
+        var hasAgeRule = opportunity.ReviewAgeDays > 0;
+        var hasMixedAgeRules = opportunity.HasAgeFilteredLocations && !hasAgeRule;
+        var usesFilteredEvidence = hasAgeRule || hasMixedAgeRules;
+        var hasReviewableFiles = usesFilteredEvidence
+            ? opportunity.ReviewableFileCount > 0
+            : opportunity.SizeBytes > 0;
+        var primaryText = hasAgeRule && hasReviewableFiles
+            ? $"{opportunity.Title}：{opportunity.ReviewAgeDays} 天以上旧文件 {sizeWithConfidence}"
+            : hasAgeRule
+                ? $"{opportunity.Title}：暂未发现达到 {opportunity.ReviewAgeDays} 天的旧文件"
+                : hasMixedAgeRules && hasReviewableFiles
+                    ? $"{opportunity.Title}：可先复核的文件 {sizeWithConfidence}"
+                    : hasMixedAgeRules
+                        ? $"{opportunity.Title}：暂未发现符合各位置规则的文件"
+                        : $"{opportunity.Title} {sizeWithConfidence}";
+        var totalText = RootCauseReportBuilder.Fmt(opportunity.SizeBytes);
+        var ageEvidence = hasAgeRule
+            ? $"本次共看到 {totalText}；其中近期文件 {opportunity.RecentFileCount} 个、年龄未知 {opportunity.AgeUnknownFileCount} 个。不是整个目录里的文件都是垃圾。"
+            : hasMixedAgeRules
+                ? $"多个位置使用不同的复核条件；这里只合计各位置分别符合条件的文件。另有近期文件 {opportunity.RecentFileCount} 个、年龄未知 {opportunity.AgeUnknownFileCount} 个，不是整个目录里的文件都是垃圾。"
+                : "这里通常是可重新生成的临时、着色器或崩溃诊断文件，但正在使用的文件仍要先排除。";
 
         return new CDriveRootCauseCard
         {
-            Title = isWindowsManaged ? "交给 Windows 清理" : "可评估清理",
-            PrimaryText = $"{opportunity.Title} {sizeWithConfidence}",
-            Explanation = isWindowsManaged
-                ? "这是 Windows 管理的临时或下载缓存位置。能检测到占用，不代表适合手动删除目录。"
-                : "这里通常是可重新生成的临时、着色器或崩溃诊断文件，但正在使用和近期文件仍要先排除。",
-            AgentSuggestion = isWindowsManaged
-                ? "Agent 建议：通过 Windows 存储设置复查；OMNIX 不会自行处理这个目录。"
-                : "Agent 建议：先检查文件年龄和占用状态，再生成低风险隔离方案。",
+            Title = hasReviewableFiles ? "OMNIX 先筛选" : "先保留",
+            PrimaryText = primaryText,
+            Explanation = ageEvidence,
+            AgentSuggestion = hasReviewableFiles
+                ? "处理方式：OMNIX 先排除近期和正在使用的文件；只有通过安全规则后才会生成隔离方案，当前没有执行。"
+                : "处理方式：OMNIX 暂不生成清理方案；等文件更旧或有更明确证据后再评估。",
             SizeText = sizeWithConfidence,
-            Severity = isWindowsManaged ? 2 : 1
+            Severity = hasReviewableFiles ? 1 : 0,
+            EvidenceBytes = displayBytes,
+            IsSizeLowerBound = opportunity.IsSizeLowerBound,
+            AutomationId = "CDriveRootCauseCard_SystemCleanup_" + opportunity.Kind
         };
     }
+
+    private static long DisplayBytes(SystemCleanupOpportunity opportunity) =>
+        opportunity.Handling == CleanupHandling.WindowsManaged
+            ? opportunity.SizeBytes
+            : opportunity.ReviewAgeDays > 0 || opportunity.HasAgeFilteredLocations
+                ? opportunity.ReviewableSizeBytes
+                : opportunity.SizeBytes;
+
+    private static bool IsIncompleteWithoutCandidate(SystemCleanupOpportunity opportunity) =>
+        opportunity.IsSizeLowerBound && DisplayBytes(opportunity) == 0;
 
     private static CDriveRootCauseCard CreateTopLevelCard(
         CategoryNode node,
@@ -118,6 +194,7 @@ public static class CDriveRootCauseSummaryBuilder
             AgentSuggestion = CategorySuggestion(node, isSystemDrive),
             SizeText = RootCauseReportBuilder.Fmt(node.SizeBytes),
             Severity = Severity(node),
+            EvidenceBytes = Math.Max(0, node.SizeBytes),
             Action = action,
             ActionLabel = ActionLabel(action, driveRoot),
             ActionAutomationId = BuildActionAutomationId(action, node.Name)
@@ -136,6 +213,7 @@ public static class CDriveRootCauseSummaryBuilder
                 AgentSuggestion = "Agent 建议：先打开查看，确认没有要恢复的文件；OMNIX-Entropy 不会替你清空。",
                 SizeText = RootCauseReportBuilder.Fmt(rock.SizeBytes),
                 Severity = 1,
+                EvidenceBytes = Math.Max(0, rock.SizeBytes),
                 Action = CDriveRootCauseAction.OpenRecycleBin,
                 ActionLabel = "打开回收站查看",
                 ActionAutomationId = "CDriveRootCauseAction_OpenRecycleBin"
@@ -149,7 +227,8 @@ public static class CDriveRootCauseSummaryBuilder
             Explanation = "\u8fd9\u7c7b\u7a7a\u95f4\u901a\u5e38\u7531 Windows \u7ba1\u7406\uff0c\u4e0d\u9002\u5408\u76f4\u63a5\u5220\u6587\u4ef6\u3002",
             AgentSuggestion = "\u5982\u679c\u5b83\u589e\u957f\u5f88\u5feb\uff0c\u5148\u8ba9 Agent \u89e3\u91ca\u539f\u56e0\uff0c\u518d\u8003\u8651\u7cfb\u7edf\u8bbe\u7f6e\u7ea7\u65b9\u6848\u3002",
             SizeText = RootCauseReportBuilder.Fmt(rock.SizeBytes),
-            Severity = 2
+            Severity = 2,
+            EvidenceBytes = Math.Max(0, rock.SizeBytes)
         };
     }
 
@@ -192,6 +271,7 @@ public static class CDriveRootCauseSummaryBuilder
             CDriveRootCauseAction.ReviewPersonalStorage => "查看大文件候选",
             CDriveRootCauseAction.ReviewCleanupRecommendations => "查看可安全清理项",
             CDriveRootCauseAction.OpenRecycleBin => "打开回收站查看",
+            CDriveRootCauseAction.OpenStorageSettings => "打开 Windows 存储设置",
             _ => null
         };
 

@@ -1,5 +1,265 @@
 # Error Ledger
 
+## 2026-08-02 - Repeated the prohibited wildcard-in-path search form
+
+- Symptom: `rg` returned Windows error 123 for `tests\\Css.Tests\\Uninstall*Tests.cs` and `Migration*Tests.cs`.
+- Wrong assumption: PowerShell would expand the wildcard before passing the path to `rg`.
+- Root cause: the wildcard was embedded in a path argument instead of using repository-approved `-g` filename filters.
+- Detection method: immediate `rg` OS error and comparison with `AGENTS.md` search rules.
+- Fix: reran the audit with `rg ... tests\\Css.Tests -g "*Uninstall*Tests.cs" -g "*Migration*Tests.cs"`.
+- Prevention rule: on Windows, use `-g` for every filename wildcard and keep directory arguments literal.
+- Skill candidate: no; this is already an explicit repository rule.
+
+## 2026-08-02 - Guessed the BigRocks source filename before resolving it
+
+- Symptom: `Get-Content src\\Css.Scanner\\Disk\\BigRocksProbe.cs` failed because the file does not exist.
+- Wrong assumption: the `BigRocksProbe` type lived in a same-named file.
+- Root cause: the type is defined in `BigRock.cs`, and the path was included in a required read batch without prior symbol resolution.
+- Detection method: PowerShell path-not-found followed by `rg -n "class BigRocksProbe" src\\Css.Scanner`.
+- Fix: resolved the actual file before any later read.
+- Prevention rule: use `rg --files` or a symbol search before adding an unobserved source path to a batch.
+- Skill candidate: no; already a repository rule.
+
+## 2026-08-02 - Nested PowerShell validation command lost variable tokens
+
+- Symptom: the first script-parse validation failed with `Missing variable name after foreach`.
+- Wrong assumption: `$files` and `$file` would survive an outer PowerShell command string unchanged.
+- Root cause: invoking `powershell -Command "..."` from PowerShell expanded the variables in the outer shell before the nested command parsed them.
+- Detection method: parser output showed `foreach ( in )`.
+- Fix: executed the scriptblock parser directly in the current PowerShell process; both smoke scripts passed.
+- Prevention rule: do not nest `powershell -Command` for simple local validation; use the current shell or a repository script.
+- Skill candidate: no.
+
+## 2026-08-02 - Guessed a quarantine policy filename before resolving the symbol
+
+- Symptom: `Get-Content` failed for a nonexistent `QuarantineCandidatePathPolicy.cs`.
+- Wrong assumption: the public policy type had a same-named source file.
+- Root cause: the type is defined inside `QuarantineCandidateIdentity.cs`; the path was not first resolved with `rg`.
+- Detection method: PowerShell path-not-found error, followed by `rg -n "class QuarantineCandidatePathPolicy"`.
+- Fix: resolved and read the actual source file before continuing.
+- Prevention rule: even when a type name is known, resolve its source path with `rg --files` or symbol search before a required read.
+- Skill candidate: no; already a repository rule.
+
+## 2026-08-02 - Broad patch anchor temporarily changed the trusted cache overload
+
+- Symptom: a patch intended to remove contradictory community preview lines matched the preceding trusted-cache overload and changed its line composition instead.
+- Wrong assumption: the repeated `Lines` context uniquely identified `ShowCommunityCacheCleanup`.
+- Root cause: both overloads had nearly identical initializer shapes and the patch lacked the method declaration as an anchor.
+- Detection method: immediate UTF-8 source inspection after the patch showed the wrong overload changed.
+- Fix: restored the trusted flow exactly and applied the community-only change with both method declarations in context; adjacent regression tests passed.
+- Prevention rule: anchor edits inside repeated overload initializers with the full target method signature and inspect the resulting method bodies before testing.
+- Skill candidate: no.
+
+## 2026-08-02 - Semantic WPF smoke passed while one screenshot was black
+
+- Symptom: UIAutomation proved a valid preview, but direct screenshot inspection found the saved preview image entirely black.
+- Wrong assumption: a successful `CopyFromScreen` call guaranteed useful pixels after the window waited in the background.
+- Root cause: the capture occurred without reactivating/repainting the window after a delay; the helper did not validate image content.
+- Detection method: mandatory `view_image` inspection.
+- Fix: reactivated the window immediately before capture and added sampled-pixel rejection for blank or nearly black screenshots.
+- Prevention rule: pair semantic GUI assertions with nonblank pixel validation and direct screenshot review.
+- Skill candidate: yes.
+
+## 2026-08-02 - Preview panel visibility did not guarantee primary-button visibility
+
+- Symptom: the real WPF smoke found the community preview but rejected its main button as outside the screen working area on a shorter desktop.
+- Wrong assumption: `DrawerActionPreviewPanel.BringIntoView()` made the entire variable-height panel actionable.
+- Root cause: WPF scrolled the panel boundary into view while its bottom child remained below the usable desktop.
+- Detection method: strict UIAutomation bounding-rectangle check against the working area.
+- Fix: gave the drawer scroll viewer a stable AutomationId and explicitly brings the visible primary button into view; smoke retains a scroll-pattern fallback and strict final geometry assertion.
+- Prevention rule: for variable-height action panels, promote the actual primary control into view and test its geometry, not only its parent container.
+- Skill candidate: yes.
+
+## 2026-08-02 - Candidate-policy default-root helper was placed in the wrong class scope
+
+- Symptom: the first Phase 6 build reported `CS0103` because the policy constructor could not resolve the default approved-root helper.
+- Wrong assumption: the helper added near the related code remained in the policy class scope.
+- Root cause: the patch placed it inside a neighboring private type while the constructor referenced it from `CommunityRuleCandidatePolicy`.
+- Detection method: focused compile before running policy tests.
+- Fix: moved the helper into the owning policy class and reran the focused suite.
+- Prevention rule: after structural patches, inspect the enclosing type boundaries before debugging symbols or widening visibility.
+- Skill candidate: no; local patch-placement error.
+
+## 2026-08-02 - Test helper named File shadowed System.IO.File
+
+- Symptom: Phase 6 tests failed to compile with `CS0119` on file-system calls.
+- Wrong assumption: a concise fixture helper named `File` would remain unambiguous in the test class.
+- Root cause: the helper method shadowed `System.IO.File` references in the same scope.
+- Detection method: focused test compilation.
+- Fix: renamed the fixture helper to describe candidate evidence and retained explicit framework file calls.
+- Prevention rule: do not name test factories after common framework types such as `File`, `Path`, `Directory`, or `Task`.
+- Skill candidate: no.
+
+## 2026-08-02 - Multi-file patch context assumed punctuation without observing UTF-8 text
+
+- Symptom: one combined presentation patch did not apply because an exact punctuation/context fragment differed from the source.
+- Wrong assumption: remembered terminal text was a reliable patch anchor.
+- Root cause: the source had not been reread with explicit UTF-8 after earlier default-host output displayed mojibake.
+- Detection method: `apply_patch` rejected the context before changing those files.
+- Fix: confirmed no partial changes, reread the exact source with `Get-Content -Encoding utf8`, and applied smaller anchored patches.
+- Prevention rule: resolve visible localized source with explicit UTF-8 and use symbol/structure anchors before a multi-file patch.
+- Skill candidate: no; repository protocol already covers strict encoding.
+
+## 2026-08-02 - Rule-catalog authority contract included the managed preference store
+
+- Symptom: the first Phase 5 full suite failed because the parser/catalog source-surface test found `File.Delete` in `Winapp2RulePreferenceStore`.
+- Wrong assumption: every class under one namespace should share the parser's zero-write contract.
+- Root cause: Phase 5 added an explicit OMNIX-managed atomic JSON preference store, but the older test allowlisted only the Phase 3 pack store and download transport.
+- Detection method: full Debug failed 1/1136 at `Winapp2_source_surface_has_no_mutation_process_or_operation_authority`; the hit was temporary-file cleanup inside the preference store.
+- Fix: exclude the named preference-storage class from the parser/discovery source aggregation while retaining its dedicated confinement, atomicity, corruption, and no-operation-authority tests.
+- Prevention rule: scope static authority contracts by architectural role, not a whole namespace; allowlist named persistence adapters and keep pure parsing/resolution tests strict.
+- Skill candidate: yes; reusable for mixed read-only and managed-state namespaces.
+
+## 2026-08-02 - ListBox preview rows exposed CLR type names to UIAutomation
+
+- Symptom: the first real rule-center smoke found one preview row, but its accessible name was `Css.Rules.Winapp2.Winapp2RulePreviewRow` rather than the visible application conclusion.
+- Wrong assumption: a data template's visible `TextBlock` text would automatically become the parent `ListBoxItem` accessible name.
+- Root cause: WPF generated the item container from the object and UIAutomation used the object's default string representation.
+- Detection method: the GUI smoke enumerated the list items and printed the type-name value despite a correct screenshot.
+- Fix: bind `AutomationProperties.Name` on both preview and ignored-rule `ListBoxItem` containers to `VisibleText`, then rerun static and real GUI contracts.
+- Prevention rule: every data-bound WPF list used in acceptance must bind an explicit accessible item name and test the semantic value, not only item count.
+- Skill candidate: yes; repeated cross-project accessibility pattern.
+
+## 2026-08-02 - Phase 5 discovery used one invalid ripgrep option and one raw expected-zero search
+
+- Symptom: one search used unsupported `rg -Context` syntax, and another expected-zero search returned exit code 1 as a command failure.
+- Wrong assumption: PowerShell-style context naming applied to ripgrep, and a no-match result could be left raw in a required check.
+- Root cause: repository search rules were not applied consistently during exploratory batching.
+- Detection method: command errors appeared before source evidence; corrected `rg -n -C` and count-normalized searches then returned the intended results.
+- Fix: rerun with supported `-C` syntax and explicit `$hits.Count` handling for expected-zero checks.
+- Prevention rule: use only repository-documented `rg` forms and normalize no-match before composing required checks.
+- Skill candidate: no; repeated compliance issue already covered by repository rules.
+
+## 2026-08-01 - Phase 4 discovery repeated raw optional search and guessed a test path
+
+- Symptom: one parallel discovery batch aborted on a zero-result filename pipeline; a later test read failed on a nonexistent `SoftwareGrowthProfileEnricherTests.cs` path.
+- Wrong assumption: the broad filename pattern had to match, and a test filename could be inferred from the production type.
+- Root cause: the batch's final `rg --files | rg` was not normalized for exit code 1, then an unobserved source path was placed directly in a required read despite explicit `AGENTS.md` rules.
+- Detection method: orchestration returned exit 1 without companion output; `Get-Content` then returned `PathNotFound`; symbol search found the real coverage in `GrowthDecisionTests.cs` and `SoftwareInventoryEvidenceTests.cs`.
+- Fix: rerun optional searches with an explicit `NO_MATCHES` branch and resolve test files by symbol before reading.
+- Prevention rule: treat every filename inference as untrusted on Windows; resolve it first, and normalize every optional search before batching.
+- Skill candidate: no; repeated compliance issue with repository rules.
+
+## 2026-08-01 - Rule download transport was first placed across a noisy project boundary
+
+- Symptom: focused tests built but emitted many `System.Text.Json` 8.0/10.0 conflict warnings through `Css.Win32` and its downstream projects.
+- Wrong assumption: adding a direct `Css.Win32 -> Css.Rules` reference was harmless because both projects already participated in the solution graph.
+- Root cause: the new reference propagated `Css.Rules` package assets through the Windows assembly output and exposed a framework/package version conflict that the existing scanner edge did not spread across the same consumers.
+- Detection method: the first download-client build printed MSB3277 warnings for `Css.Win32`, `Css.Snapshot`, `Css.Elevated`, and `Css.SmokeTools`.
+- Fix: keep the small `HttpClient` transport beside the rule descriptor/store in `Css.Rules`, remove the new project reference, and rerun the same contracts with zero warnings.
+- Prevention rule: inspect transitive package assets before adding a project-reference edge; prefer the lowest existing cohesive project when the code needs no platform API.
+- Skill candidate: no; repository-specific dependency graph.
+
+## 2026-08-01 - Fake HTTP response omitted the final request URI security evidence
+
+- Symptom: two download tests failed with `response did not remain on HTTPS` before hash or size validation.
+- Wrong assumption: `HttpClient` would populate `HttpResponseMessage.RequestMessage` for a response returned by a custom test handler.
+- Root cause: the recording handler created a bare response and did not attach the request, while production transport deliberately requires the final response URI to remain HTTPS after redirects.
+- Detection method: both failures stopped at the same redirect-scheme gate and no store pointer changed.
+- Fix: make the fake handler assign its received request to `response.RequestMessage`, matching a real transport response.
+- Prevention rule: HTTP security fixtures must populate status, content, headers, and final request URI rather than only payload bytes.
+- Skill candidate: no; narrow fixture fidelity rule.
+
+## 2026-08-01 - Phase 3 discovery repeated an unnormalized expected-zero search
+
+- Symptom: the first parallel repository discovery aborted with exit code 1 and hid all companion reads.
+- Wrong assumption: a filename-pattern pipeline would necessarily find a matching persisted-store filename.
+- Root cause: the optional `rg --files | rg ...` result was not converted to an exit-zero `NO_MATCHES` branch despite the explicit repository rule and prior ledger entries.
+- Detection method: orchestration returned only exit code 1; the corrected per-command result collection returned `NO_MATCHES` while the other searches succeeded.
+- Fix: rerun every optional search with collected output and explicit handling for ripgrep exit code 1.
+- Prevention rule: do not put a raw optional `rg` in `Promise.all`; build the exit-zero branch before composing the batch.
+- Skill candidate: no; repeated compliance failure with an existing repository rule.
+
+## 2026-08-01 - Multi-file record patch partially applied before a later hunk failed
+
+- Symptom: the record update tool reported failure for stale `current.md` context even though preceding file hunks had already been applied.
+- Wrong assumption: a multi-file `apply_patch` request would be atomic when any later hunk failed.
+- Root cause: the patch tool commits successful earlier hunks before reporting a later context mismatch; `current.md` had already been updated by the successful prefix of the same request.
+- Detection method: a direct top-of-file and `git diff` inspection showed Phase 2 completion present in five records while the reflection hunk was absent.
+- Fix: inspect every intended record, then apply only the missing reflection and ledger hunks against exact local context.
+- Prevention rule: after any multi-file patch failure, assume partial application and inventory every target before retrying; keep protocol-record patches small when practical.
+- Skill candidate: no; project-local tool discipline.
+
+## 2026-08-01 - Fake-filesystem resolver fixture omitted its variable expander
+
+- Symptom: the first Phase 2 focused run passed 9/10 but the reparse/escape fixture resolved zero files instead of one.
+- Wrong assumption: `%PROFILE%` would be expanded in a test call that used the default machine environment expander.
+- Root cause: the fixture did not inject its local `%PROFILE%` replacement, so the target correctly failed as non-absolute/unresolved before traversal.
+- Detection method: only the fake-filesystem test failed; its result shape was consistent with unresolved target behavior while real temp-directory tests passed.
+- Fix: use the already known absolute fake root in that target expression.
+- Prevention rule: synthetic rule expressions must either use literal absolute paths or pass an explicit deterministic expander in every resolver call.
+- Skill candidate: no; narrow fixture correction.
+
+## 2026-08-01 - Final whitespace gate was broader than the changed test surface
+
+- Symptom: `dotnet format whitespace` failed on unrelated existing files such as `DiskScannerTests.cs`, `HealthDigestTests.cs`, and `UninstallPostScanActionTests.cs`.
+- Wrong assumption: the entire historical test project already satisfied the current SDK whitespace formatter.
+- Root cause: the verification command targeted the whole test project instead of the newly added Winapp2 test file.
+- Detection method: formatter output named only pre-existing unrelated paths and did not identify `Winapp2RuleCatalogTests.cs`.
+- Fix: rerun the read-only formatter with `--include tests\\Css.Tests\\Winapp2RuleCatalogTests.cs`; the changed test surface passed. Unrelated formatting was preserved.
+- Prevention rule: use changed-file `--include` scope for formatter verification unless a repository-wide formatting migration is explicitly authorized.
+- Skill candidate: no; standard scope discipline.
+
+## 2026-08-01 - Temporary cleanup printed success after non-terminating removal errors
+
+- Symptom: workspace probe directories were removed, but the same loop printed `Removed C:\\tmp\\OmnixWinapp2Probe` after `Remove-Item` reported access-denied errors for its files.
+- Wrong assumption: a failed `Remove-Item` would terminate the loop before the success message.
+- Root cause: PowerShell emitted non-terminating errors because `-ErrorAction Stop` was omitted.
+- Detection method: command output contained both the success text and removal errors; the literal temp path still existed.
+- Fix: delete the two known source files with exact `apply_patch` paths and leave no generated build output there.
+- Prevention rule: cleanup receipts must use `-ErrorAction Stop` and verify `Test-Path` is false before reporting removal success.
+- Skill candidate: no; add to any future reusable cleanup helper.
+
+## 2026-08-01 - Compatibility probe output isolation was configured twice incorrectly
+
+- Symptom: the first real-pack probe could not create `C:\\tmp\\OmnixWinapp2Probe\\obj`; the retry produced duplicate assembly attributes across referenced projects.
+- Wrong assumption: the child `dotnet` process could write build intermediates beside a readable `C:\\tmp` project, then that one shared `BaseIntermediateOutputPath` could safely be passed through project references.
+- Root cause: sandbox write behavior differed for the child build, and global MSBuild properties propagated the same intermediate directory to every referenced project.
+- Detection method: first an access-denied build error, then deterministic CS0579 duplicate-attribute errors; the probe never executed.
+- Fix: place the one-off probe project under an isolated workspace directory and let each referenced project retain its normal project-local output path; clean the verified temporary directory afterward.
+- Prevention rule: temporary project probes belong under an approved workspace root, and build-output overrides must be project-unique or avoided entirely when project references are present.
+- Skill candidate: no; one-off environment correction.
+
+## 2026-08-01 - FluentCleaner database path was guessed before resolution
+
+- Symptom: the first key-inventory command failed because it looked for `FluentCleaner\\Assets\\Winapp2.ini`.
+- Wrong assumption: the downloaded database lived beside the modern UI assets.
+- Root cause: an external-clone path was inferred from architecture instead of resolved from the clone.
+- Detection method: `Get-Content` returned `PathNotFound`; `rg --files -g "Winapp2.ini"` found the root-level file.
+- Fix: rerun the read-only inventory against the resolved literal path.
+- Prevention rule: apply the repository's path-resolution rule to temporary reference clones as well as project source.
+- Skill candidate: no; existing `AGENTS.md` rule is sufficient.
+
+## 2026-08-01 - Path separator fields were used as constant patterns
+
+- Symptom: the first Winapp2 focused build failed with CS9135 in `IsDirectorySeparator`.
+- Wrong assumption: `Path.DirectorySeparatorChar` and `Path.AltDirectorySeparatorChar` could be used as constant pattern operands.
+- Root cause: they are runtime static fields rather than compile-time `const char` values.
+- Detection method: the first focused test build failed before any test or product behavior ran.
+- Fix: replace the pattern expression with direct `==` comparisons.
+- Prevention rule: use equality comparisons for framework separator fields unless the referenced member is confirmed `const`.
+- Skill candidate: no; narrow language-level correction.
+
+## 2026-08-01 - Expected-zero reference searches aborted a parallel read
+
+- Symptom: a parallel metadata read returned no issue or license output because the OMNIX license-file search exited 1 when no file matched.
+- Wrong assumption: every read-only `rg` command in a required parallel batch would find at least one result.
+- Root cause: expected-zero search status was allowed to reject the whole orchestration call, repeating a repository rule already documented in `AGENTS.md`.
+- Detection method: the orchestration error showed exit code 1 with no command output; an explicit result collection then returned `NO_LICENSE_FILE`.
+- Fix: rerun the expected-zero search with an explicit exit-zero branch, then run issue reads independently.
+- Prevention rule: every optional/expected-zero `rg` search must normalize exit code 1 before it joins a required batch.
+- Skill candidate: no; this is already a repository rule and requires compliance, not a new abstraction.
+
+## 2026-08-01 - Reference audit repeated invalid Windows PowerShell loop piping
+
+- Symptom: an early external rule-URL audit failed at parse time when a `foreach` statement was piped directly.
+- Wrong assumption: the compact one-line form was acceptable despite the same grammar failure already appearing in this ledger.
+- Root cause: the review used an ad hoc host-audit command instead of the proposed bounded helper and explicit `$rows = @(foreach (...))` pattern.
+- Detection method: immediate `EmptyPipeElement` parser error; no remote or local state changed.
+- Fix: collect loop output before formatting/filtering and rerun the read-only check.
+- Prevention rule: promote the existing bounded read-only audit helper candidate before the next multi-path or multi-URL host audit; do not author another direct `foreach |` command.
+- Skill candidate: yes; the existing candidate's promotion threshold is now reached.
+
 ## 2026-08-01 - Record patch reconstructed an inexact source line
 
 - Symptom: the first patch that closed the stale active-slice status failed verification without changing the file.
@@ -624,3 +884,101 @@
 ## Archived History
 
 Entries before 2026-07-22 were moved verbatim to [error-ledger-archive-part1.md](archive/error-ledger-archive-part1.md), [error-ledger-archive-part2.md](archive/error-ledger-archive-part2.md).
+# 2026-08-01 - Guessed a fixture source path during Phase 4 GUI discovery
+
+- Symptom: a required parallel read failed because `src\Css.AcceptanceFixtures\SoftwareInventoryFixtureScanner.cs` did not exist.
+- Wrong assumption: inferred the source directory from the fixture assembly name instead of resolving the symbol first.
+- Root cause: skipped the repository rule requiring `rg --files` or a symbol search before a required batch read.
+- Detection method: `Get-Content` returned `PathNotFound`; `rg -l "class SoftwareInventoryFixtureScanner" src tests -g "*.cs"` found the real file under `src\Css.Scanner\Software`.
+- Fix: resolved and read the actual path, then continued from the existing fixture contract.
+- Prevention rule: every unobserved source path must be resolved before it enters a required read batch; a class-to-project naming guess is not evidence.
+- Skill candidate: no
+# 2026-08-01 - Trusted UIAutomation IsOffscreen without screenshot geometry
+
+- Symptom: the Phase 4 smoke reported the Agent advice as visible, but the screenshot showed only its heading at the bottom edge while the advice body was behind the taskbar.
+- Wrong assumption: `AutomationElement.Current.IsOffscreen == false` was sufficient proof that the full beginner conclusion was visible.
+- Root cause: UIAutomation considered the realized text element onscreen even though its bounding rectangle extended beyond the primary screen working area.
+- Detection method: direct review of `.omx\qa-community-cache-conclusion.png` contradicted the automation result.
+- Fix: moved the Agent conclusion to the top of the drawer and added bounding-rectangle checks against `Screen.PrimaryScreen.WorkingArea`.
+- Prevention rule: first-viewport WPF acceptance needs both UIAutomation semantics and screenshot/working-area geometry; never treat `IsOffscreen` alone as proof.
+- Skill candidate: yes
+
+# 2026-08-02 - Mixed cleanup aggregation reintroduced recent files
+
+- Symptom: a group containing one unfiltered location and one seven-day-filtered location received aggregate `ReviewAgeDays=0`; presentation then displayed total bytes and counted the filtered location's recent files as candidates.
+- Wrong assumption: the aggregate age label was sufficient to decide whether candidate bytes were filtered.
+- Root cause: label semantics and candidate-selection semantics shared one integer, although a mixed group has no single truthful positive threshold.
+- Detection method: independent review traced `Aggregate` into both `DisplayBytes` and `CleanupCandidateBytes`; a new `0+7` fixture reproduced 60 displayed bytes from only 30 reviewable bytes.
+- Fix: added `HasAgeFilteredLocations`, preserved summed `ReviewableSizeBytes`, added mixed-policy beginner copy, and covered probe/card/home behavior end to end.
+- Prevention rule: aggregated labels must not be reused as policy authority; retain an explicit signal for every selection rule that affects totals.
+- Skill candidate: yes
+
+# 2026-08-02 - Cleanup GUI smoke hid initial-placement regression
+
+- Symptom: the smoke scrolled the user-temp conclusion into view before asserting and taking the screenshot.
+- Wrong assumption: rendering plus successful `ScrollIntoView` proved the beginner conclusion occupied the initial working area.
+- Root cause: the test repaired the layout state it was supposed to validate.
+- Detection method: independent review compared the UX rule with the smoke's explicit `ScrollIntoView` call.
+- Fix: removed the scroll and require the card to be onscreen immediately after navigation; the real smoke passed and captured the initial state.
+- Prevention rule: first-view acceptance must inspect the untouched initial viewport; scrolling is allowed only for controls whose requirement is discoverability after navigation.
+- Skill candidate: yes
+
+# 2026-08-02 - Nested PowerShell parser probe lost variables
+
+- Symptom: an inline child `powershell -Command` parse check produced an empty assignment and empty pipe parser errors.
+- Wrong assumption: `$` variables would survive the outer PowerShell string unchanged.
+- Root cause: the outer host expanded the child command before the child parser received it.
+- Detection method: the emitted command showed missing variable names.
+- Fix: called `System.Management.Automation.Language.Parser` directly in the active shell; both scripts parsed successfully.
+- Prevention rule: do not nest nontrivial PowerShell expressions inside an expandable `-Command` string; invoke the parser directly or use a repository script.
+- Skill candidate: yes
+
+# 2026-08-02 - Phase 10 discovery used invalid PowerShell quoting
+
+- Symptom: two read-only `rg` searches failed, first with an unterminated PowerShell string and then with repository paths being parsed as part of the regular expression.
+- Wrong assumption: backslash-escaped double quotes and a mixed quoted expression would survive the PowerShell command layer unchanged.
+- Root cause: PowerShell does not use backslash as its general quote escape, and the combined expression made the argument boundary ambiguous.
+- Detection method: PowerShell reported a missing terminator; the retry produced an `rg` regex containing the source paths.
+- Fix: split the discovery into simple symbol searches with no embedded quote pattern.
+- Prevention rule: for Windows repository discovery, prefer several literal symbol searches over one mixed quote-heavy expression; reserve complex patterns for a reviewed script.
+- Skill candidate: no; the repository already records the broader nested-PowerShell rule.
+
+# 2026-08-02 - Guessed the growth presentation filename
+
+- Symptom: a required read failed because `src\Css.Scanner\Experience\GrowthFindingPresentation.cs` did not exist.
+- Wrong assumption: inferred the filename from the presentation type instead of resolving the symbol.
+- Root cause: skipped the repository rule requiring a symbol or file search before reading an unobserved path.
+- Detection method: `Get-Content` returned `PathNotFound`; `rg -n GrowthFindingPresenter src tests` found `GrowthFindingPresenter.cs`.
+- Fix: resolved the exact source file and continued from it.
+- Prevention rule: class-to-filename inference is not evidence; resolve every unobserved source path before a required read.
+- Skill candidate: no; this rule already exists in `AGENTS.md`.
+
+# 2026-08-02 - Repeated the invalid Release full-suite run
+
+- Symptom: `dotnet test ComputerSecuritySoftware.slnx -c Release --no-build` failed 10 official-uninstall lifecycle tests with transport or cleanup mismatches while Debug remained 1208/1208.
+- Wrong assumption: a full Release test run was a useful extra gate after the Release build.
+- Root cause: the lifecycle fixtures invoke `OfficialUninstallFakeWorker`, which is intentionally removed from the privileged Release worker; the existing handoff and error ledger already documented this boundary, but it was not extracted before selecting the command.
+- Detection method: all failures clustered in `OfficialUninstallWorkerLifecycleTests`; `Css.Elevated.csproj` and prior records confirmed the fake worker is excluded in Release.
+- Fix: retained Debug as the full-suite configuration, kept the Release solution build, and ran the focused Release command-surface contract (2/2) that proves the fake entry remains absent.
+- Prevention rule: never run the full OMNIX suite in Release; use Debug full tests plus Release build and `ReleaseWorkerCommandSurfaceTests`.
+- Skill candidate: no; this is a stable project rule and is now promoted to `AGENTS.md`.
+
+# 2026-08-02 - Final version search guessed a file and searched names instead of contents
+
+- Symptom: the first version audit reported an `os error 2` for nonexistent `Directory.Build.props`; the retry incorrectly reported zero matches even though `Css.App.csproj` still contains `0.1.5`.
+- Wrong assumption: a conventional root props file existed, and piping paths into `Select-String` would make it read those files.
+- Root cause: the path was not resolved first, and `Select-String` without `-Path` or `-LiteralPath` searched the incoming path strings themselves.
+- Detection method: the first command named the missing file; the contradictory zero count was checked against the earlier direct `rg` result.
+- Fix: enumerate existing version-capable files with `rg --files`, then pass the resolved array through `Select-String -LiteralPath`; exactly one `0.1.5` product-version match was found.
+- Prevention rule: resolve optional conventional files before required checks, and distinguish searching a list of path strings from searching file contents.
+- Skill candidate: no; path resolution is already a repository rule.
+
+# 2026-08-08 - Phase 10 smoke relied on a decorative response container
+
+- Symptom: the authorized GUI smoke completed the first four Agent decisions but failed before the cache screenshot because `AgentConversationResponsePanel` was absent from UIAutomation and `Get-DescendantText` received null.
+- Wrong assumption: a named WPF response container with an AutomationId would reliably appear as an automation element.
+- Root cause: the smoke used a decorative container as its privacy-inspection root even though the repository UX rule permits only reliably exposed controls as proof targets.
+- Detection method: real host execution failed at `Get-DescendantText`; three earlier screenshots existed, the fourth did not, and no OMNIX process remained.
+- Fix: inspect all text descendants of the already verified top-level window, add a clear null guard, and add a static regression forbidding the response-panel lookup in this smoke.
+- Prevention rule: use the top-level window or a reliably exposed text/list/button element as UIAutomation evidence; decorative containers may guide layout but must not be the only semantic proof root.
+- Skill candidate: no; this rule already exists in `AGENTS.md`.

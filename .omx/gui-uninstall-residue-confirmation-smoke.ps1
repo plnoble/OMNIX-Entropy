@@ -82,10 +82,6 @@ try {
     if ($null -eq $appsNav) { throw 'AppsNavButton was not found.' }
     Invoke-Element $appsNav
 
-    $scanSoftware = Find-ByAutomationId $window 'ScanSoftwareButton'
-    if ($null -eq $scanSoftware) { throw 'ScanSoftwareButton was not found.' }
-    Invoke-Element $scanSoftware
-
     $appList = Find-ByAutomationId $window 'AppTilesListBox' 1000
     if ($null -eq $appList) {
         throw 'AppTilesListBox was not found.'

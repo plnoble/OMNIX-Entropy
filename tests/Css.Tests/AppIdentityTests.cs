@@ -28,6 +28,8 @@ public class AppIdentityTests
         paths.DatabasePath.Should().Be(@"C:\tmp\omnix-smoke-data\data.db");
         paths.MigrationRollbackRoot.Should().Be(@"C:\tmp\omnix-smoke-data\MigrationRollback");
         paths.InstallRoutingMemoryPath.Should().Be(@"C:\tmp\omnix-smoke-data\install-routing-memory.json");
+        paths.Winapp2RulePackRoot.Should().Be(@"C:\tmp\omnix-smoke-data\RulePacks\Winapp2");
+        paths.Winapp2RulePreferencesPath.Should().Be(@"C:\tmp\omnix-smoke-data\RulePacks\winapp2-preferences.json");
         paths.QuarantineRoot.Should().Be(@"C:\tmp\omnix-smoke-quarantine");
     }
 
@@ -39,6 +41,8 @@ public class AppIdentityTests
         paths.DatabasePath.Should().Be(@"C:\Users\Me\AppData\Local\OMNIX-Entropy\data.db");
         paths.MigrationRollbackRoot.Should().Be(@"C:\Users\Me\AppData\Local\OMNIX-Entropy\MigrationRollback");
         paths.InstallRoutingMemoryPath.Should().Be(@"C:\Users\Me\AppData\Local\OMNIX-Entropy\install-routing-memory.json");
+        paths.Winapp2RulePackRoot.Should().Be(@"C:\Users\Me\AppData\Local\OMNIX-Entropy\RulePacks\Winapp2");
+        paths.Winapp2RulePreferencesPath.Should().Be(@"C:\Users\Me\AppData\Local\OMNIX-Entropy\RulePacks\winapp2-preferences.json");
         paths.QuarantineRoot.Should().Be(AppIdentity.DefaultQuarantineRootOnD);
     }
 

@@ -204,7 +204,7 @@ public class QuarantineCandidateIdentityTests
             root, "src", "Css.Core", "Quarantine", "FileQuarantineService.cs"));
 
         Occurrences(main, "QuarantineOperationPolicy.PrepareForConfirmation(")
-            .Should().Be(3, "C-drive cleanup, application cache, and uninstall residue all prepare identity");
+            .Should().Be(4, "C-drive cleanup, trusted application cache, community exact-file cache, and uninstall residue all prepare identity");
         Occurrences(main, "CleanupConfirmationPresenter.Create(preparedOperation")
             .Should().Be(3, "all three dialogs must show only an identity-bound operation");
         handler.IndexOf("var preflight = QuarantineCandidateEvidencePolicy.Revalidate", StringComparison.Ordinal)

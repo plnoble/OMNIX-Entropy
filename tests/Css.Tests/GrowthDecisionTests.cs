@@ -21,7 +21,19 @@ public sealed class GrowthDecisionTests
             DisplayIconPath = @"D:\Software\Docker\Docker.exe",
             DisplayIconIndex = -1,
             CachePaths = [@"C:\Fixture\Docker\Cache"],
-            Services = ["DockerService"]
+            Services = ["DockerService"],
+            CommunityCacheEvidence =
+            [
+                new CommunityRuleCacheEvidence
+                {
+                    RuleName = "Docker Cache",
+                    RulePackSource = "Fixture",
+                    RulePackVersion = "1",
+                    RulePackSha256 = new string('C', 64),
+                    FileCount = 1,
+                    SizeBytes = 256
+                }
+            ]
         };
         var findings = new[]
         {
@@ -42,6 +54,7 @@ public sealed class GrowthDecisionTests
         enriched.DisplayIconPath.Should().Be(profile.DisplayIconPath);
         enriched.DisplayIconIndex.Should().Be(-1);
         enriched.Services.Should().Equal(profile.Services);
+        enriched.CommunityCacheEvidence.Should().Equal(profile.CommunityCacheEvidence);
         tile.Status.Should().Be(AppTileStatus.Warning);
         tile.ShortTag.Should().Be("最近变大");
         drawer.SizeSummary.Should().Contain("最近增长 140 B");

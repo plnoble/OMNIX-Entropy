@@ -155,7 +155,7 @@ public sealed class AppCacheCleanupTests
         var execute = Extract(
             main,
             "private async Task ExecutePendingAppCacheCleanupAsync()",
-            "private async void ReviewUninstallResidue_Click");
+            "private async Task ExecutePendingCommunityRuleCacheCleanupAsync()");
 
         host.Should().Contain("PrimaryActionKey = plan.CanContinue ? \"CacheCleanup\"");
         host.Should().Contain("PrimaryActionKey = \"Timeline\"");
@@ -186,7 +186,7 @@ public sealed class AppCacheCleanupTests
         var execute = Extract(
             main,
             "private async Task ExecutePendingAppCacheCleanupAsync()",
-            "private async void ReviewUninstallResidue_Click");
+            "private async Task ExecutePendingCommunityRuleCacheCleanupAsync()");
         var helper = SourceMethodExtractor.Extract(
             main,
             "private async Task RefreshCacheCleanupStateAfterAttemptAsync()");
