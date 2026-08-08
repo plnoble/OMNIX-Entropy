@@ -1,5 +1,15 @@
 # Agent Handoff
 
+## Latest Update - 2026-08-08 Public 0.2.0 released
+
+- Current objective: preserve the completed 0.2.0 release evidence and obtain a user-run in-app update receipt from the currently installed version.
+- What changed: the full Phase 1-10 rules foundation, optional community Rule Lab, conservative exact-file quarantine/restore, broader cleanup diagnosis, application-family decisions, install/migration closure, symptom triage, and five Computer Agent decision workflows are publicly available.
+- What is verified: source target `349e7fc2a5649d58af41687255479534422e129c`; CI `31243516928` passed; Debug 1208/1208; Release zero warnings/errors; integrity 427/19; real Phase 10 GUI smoke passed with no operation; 110 signed payload files and the setup share signer `5688958FEA0056861558E8DCF9D2381AF46074B2`; four draft assets matched after download-back; downloaded setup returned `CanStageGitHubRelease=true`; public latest and channel manifest report stable 0.2.0 with the exact target, length, hash, and signer.
+- Public artifact: `https://github.com/plnoble/OMNIX-Entropy/releases/tag/v0.2.0`; setup length 14,946,904 bytes; SHA-256 `B743FF64F881350D78921355053E64087D36468759D2149A95BE65DE10572AC3`.
+- What is not verified: the installer was not run and formal disposable-machine behavioral acceptance remains unclaimed. The installed app has not yet produced a 0.1.5-to-0.2.0 update receipt.
+- Known risks or blockers: personal signing does not create public SmartScreen reputation; community-rule results remain conservative and depend on user-imported validated data; installed update still requires visible user confirmation.
+- Exact next recommended action: use the installed OMNIX update window to check for 0.2.0, review both visible confirmations, complete the install manually, and report the installed version/path. Do not automate the installer.
+
 ## Latest Update - 2026-08-02 Phase 10 decision workflows complete in source
 
 - Current objective: publish the completed Phase 1-10 work as 0.2.0 from one immutable CI-passing revision. Public/installed latest remains 0.1.5 until the guarded release flow completes.

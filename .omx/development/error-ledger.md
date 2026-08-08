@@ -982,3 +982,13 @@ Entries before 2026-07-22 were moved verbatim to [error-ledger-archive-part1.md]
 - Fix: inspect all text descendants of the already verified top-level window, add a clear null guard, and add a static regression forbidding the response-panel lookup in this smoke.
 - Prevention rule: use the top-level window or a reliably exposed text/list/button element as UIAutomation evidence; decorative containers may guide layout but must not be the only semantic proof root.
 - Skill candidate: no; this rule already exists in `AGENTS.md`.
+
+# 2026-08-08 - Download-back installer verifier received the whole release directory
+
+- Symptom: `verify-personal-installer.ps1` refused the downloaded draft directory with `InstallerDirectory contains an unlisted file`.
+- Wrong assumption: the installer verifier could ignore the channel manifest and checksum asset beside the setup and installer manifest.
+- Root cause: the verifier deliberately accepts an exact minimal directory so unrelated files cannot influence or hide installer evidence; the prior 0.1.5 flow already used a fresh two-file directory.
+- Detection method: verifier failed before signature inspection while the preceding four-asset length/SHA-256 comparison had passed.
+- Fix: copied only the already hash-matched setup and `installer-manifest.json` into a new direct child under `.artifacts`; independent verification then returned `CanStageGitHubRelease=true`.
+- Prevention rule: after whole-release download-back hashing, create a fresh exact two-file directory for independent installer verification.
+- Skill candidate: no; this is a stable repository release detail already demonstrated by prior artifacts.

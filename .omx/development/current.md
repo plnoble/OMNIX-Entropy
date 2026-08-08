@@ -1,5 +1,16 @@
 # Current Development State
 
+## Completed Release - 2026-08-08 Public 0.2.0
+
+- Objective: deliver the complete Phase 1-10 rules, reversible cleanup, diagnosis, application decision, install/migration, and Computer Agent program as one verified personal Windows release.
+- Status: complete. Source target `349e7fc2a5649d58af41687255479534422e129c` is pushed and GitHub CI run `31243516928` passed restore, Release build, the full Debug test suite, and source integrity. Local final gates passed Debug 1208/1208, Release build with zero warnings/errors, Release command-surface 2/2, 427 strict UTF-8 source files, and 19/19 XAML.
+- GUI evidence: the isolated five-decision WPF smoke passed with three first-view choices, no quarantine manifest, no uninstall evidence, `noOperationExecuted=true`, and four directly inspected screenshots for C-drive cause, 10 GB planning, exact-family uninstall, and D-program/C-cache separation.
+- Package evidence: the target-bound 110-file payload, App, Elevated Worker, uninstaller, and setup use personal signer `5688958FEA0056861558E8DCF9D2381AF46074B2` with valid timestamps. Independent setup verification confirmed version 0.2.0, default `D:\Software\OMNIX-Entropy\Install`, visible directory selection, no silent install, and `CanStageGitHubRelease=true`.
+- Publication evidence: exactly four draft assets were downloaded back and matched length/SHA-256; the downloaded setup independently passed. Public `releases/latest` reports stable `v0.2.0`, target `349e7fc`, four assets, and the public channel manifest reports the same version, commit, signer, length, and hash.
+- Public artifact: `https://github.com/plnoble/OMNIX-Entropy/releases/tag/v0.2.0`; setup length 14,946,904 bytes; SHA-256 `B743FF64F881350D78921355053E64087D36468759D2149A95BE65DE10572AC3`.
+- Safety boundary: no installer was run; no cleanup, uninstall, migration, service/registry change, certificate creation/export, trust-store change, antivirus change, or silent update occurred. Formal disposable-machine behavioral acceptance remains unclaimed for the personal channel.
+- Exact next action: the user can open the installed app's update page, check for 0.2.0, review the visible download/install confirmations, and report the resulting installed version. The app must not automate those confirmations.
+
 ## Completed Slice - 2026-08-02 Phase 10 Agent decision workflows
 
 - Objective: make Computer Agent answer the five beginner decisions that connect the completed diagnosis, application-family, install-control, and migration evidence: why C is still full, what grew fastest, why cache stays on C after a D install/move, which exact duplicate entry can be uninstalled, and the safest way to release a requested amount of space.
@@ -11,8 +22,8 @@
 - UX result: three compact first-view choices cover C-drive cause, fastest growth, and a 10 GB safety plan; named application/family questions use the existing text box and exact app-drawer handoff. Replies distinguish one-time cleanup from prevention, say when a week is not fully observed, never add overlapping clues, and never promise cache relocation without application support.
 - Safety result: the decision context sanitizes path-like source labels before Core receives them; duplicate families remain explanation-only except for one unique exact registered entry; `CanExecuteDirectly` and `UsedCloudAi` remain false. No new mutation handler, registry/service authority, installer launch, or operation bypass was added.
 - Verification: Phase 10 Agent contracts 54/54; related Agent/growth/family/drive-health regression 235/235; final full Debug 1208/1208; Release build 0 warnings/errors; Release command-surface contract 2/2; source integrity 427 files and 19/19 XAML; diff check, PowerShell smoke parser/ASCII, and decision-context direct-authority count all pass. The authorized isolated GUI smoke now passes all five decisions, reports `noOperationExecuted=true`, creates no quarantine manifest or uninstall evidence, and produced four directly inspected nonblank screenshots with no fixture-path leak.
-- Delivery boundary: Phase 1-10 source and GUI acceptance are complete in the worktree. Product source is now prepared as 0.2.0; public/installed latest remains 0.1.5 until commit, CI, signing, installer verification, and GitHub publication complete.
-- Exact next action: run versioned source gates, commit and push one immutable 0.2.0 revision, require passing CI, then use the guarded personal-signing and GitHub draft/download-back/publication flow without running the installer or changing trust.
+- Delivery result: Phase 1-10 source and GUI acceptance are included in public v0.2.0 at target `349e7fc`.
+- Exact next action: obtain a user-visible installed-update receipt; do not automate the installer or confirmation dialogs.
 
 ## Completed Slice - 2026-08-02 Phase 9 system cleanup, clean uninstall, install control, and migration closure
 

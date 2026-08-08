@@ -265,6 +265,15 @@ Keep entries short and focused on reusable learning.
 - Potential skill candidates: path-free decision-context composition and non-additive storage evidence are reusable patterns; record only if repeated outside this project.
 - Final-gate correction: the full Release test suite was mistakenly rerun despite an existing project note that its fake lifecycle worker is Debug-only. The correct boundary is now promoted to `AGENTS.md`, so future agents should not rediscover it through ten expected failures.
 
+## 2026-08-08 - Public 0.2.0 unified release
+
+- Related task: finish and publish all Phase 1-10 work as one personal Windows release.
+- What worked: immutable commit/CI binding, independent signature verification, draft-first publication, complete download-back hashing, and a public unauthenticated latest/channel receipt kept source, binary, installer, and updater evidence aligned.
+- What failed or slowed down: the first GUI smoke relied on a decorative automation container; the first downloaded-installer verification passed the whole four-file release directory instead of the verifier's exact two-file input.
+- Root lessons: visual acceptance must use reliable semantic roots plus screenshots; artifact verification should intentionally use different scopes for whole-release hashing and installer-only policy verification.
+- Process improvements: retain the new full-window privacy smoke and make the two-file download-back verification directory an explicit release checklist item.
+- Safety result: no installer, maintenance operation, certificate export, trust mutation, antivirus change, or silent update ran.
+
 ## Entry Template
 
 ### YYYY-MM-DD - Task or milestone

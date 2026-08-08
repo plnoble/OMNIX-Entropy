@@ -450,3 +450,12 @@ Entries before 2026-07-22 were moved verbatim to [worklog-archive-part1.md](arch
 - The rerun passed all five beginner decisions, three first-view prompts, privacy checks, four nonblank screenshots, zero quarantine manifests, zero uninstall evidence, and `noOperationExecuted=true`; all screenshots were directly inspected.
 - Final unversioned gates passed again: Debug 1208/1208, Release build 0 warnings/errors, Release command-surface 2/2, integrity 427 files and 19/19 XAML, diff and PowerShell checks.
 - Began the unified 0.2.0 release because Phase 1-10 add several new capability families. Product version and release notes are being prepared; public 0.1.5 remains unchanged until the full guarded publication flow completes.
+
+## 2026-08-08 - Published public 0.2.0
+
+- Committed and pushed source target `349e7fc`; GitHub CI run `31243516928` passed the exact target.
+- Read-only prerequisites found SignTool, Inno Setup, and one eligible RSA CurrentUser signer. Generated a fresh target-bound portable package, signed App/Worker candidate, independently verified 110 payload files, and built the D-first interactive setup without running it.
+- Independent setup verification confirmed 0.2.0, visible directory selection, no silent install, valid same signer/timestamp, and `CanStageGitHubRelease=true`.
+- Created a four-asset draft, downloaded every asset back, matched lengths and SHA-256, and independently verified the downloaded setup from a minimal evidence directory.
+- Published stable `v0.2.0`. Public latest and the update channel bind commit `349e7fc`, setup length 14,946,904, SHA-256 `B743FF64F881350D78921355053E64087D36468759D2149A95BE65DE10572AC3`, and signer `5688958FEA0056861558E8DCF9D2381AF46074B2`.
+- No installer or maintenance operation ran, and no certificate/trust/security setting changed.

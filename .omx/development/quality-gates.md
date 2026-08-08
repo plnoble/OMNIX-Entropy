@@ -554,6 +554,18 @@ Open issues:
 | Frontend, accessibility, and UX | Pass | Stable AutomationIds, static placement contracts, real five-decision smoke, four directly inspected screenshots | First attempted smoke exposed and then fixed a decorative-container automation dependency. |
 | Operations, dependencies, and release | Warn | `ProductVersion=0.2.0`, `FileVersion=0.2.0.0`, release notes present, credential audit clean | Commit, push, CI, signing, installer, draft download-back, public latest, and final record commit remain pending. |
 
+### 2026-08-08 - 0.2.0 public release completion
+
+| Category | Status | Evidence | Notes |
+| --- | --- | --- | --- |
+| Scope and consent | Pass | Active user goal required unified publication; all privileged prompts were scoped to signing or read-only verification | No installer execution, trust change, certificate export, antivirus change, or maintenance operation. |
+| Security and privacy | Pass | Credential audit zero; same-signer/timestamp verification; Agent whole-window privacy smoke; no third-party rule data bundled | Personal signing does not create public SmartScreen reputation. |
+| Data, API, and consistency | Pass | Source/tag/channel target `349e7fc`; four draft assets byte-match; public manifest version/hash/length/signer match setup evidence | Public updater metadata is internally consistent. |
+| Code quality and maintainability | Pass | Final source commit contains only text source/tests/records; existing guarded release scripts used | No release-only product bypass was added. |
+| Testing and verification | Pass | Local Debug 1208/1208; Release 0 warnings/errors; command-surface 2/2; integrity 427/19; CI `31243516928` passed | Formal disposable-machine behavioral acceptance remains unclaimed. |
+| Frontend, accessibility, and UX | Pass | Five-decision real WPF smoke, no operation, four inspected screenshots | Installer/update confirmations remain manual and visible. |
+| Operations, dependencies, and release | Pass | Public stable `v0.2.0`, four assets, target `349e7fc`; downloaded setup reverified; public latest/channel receipt passed | Setup SHA-256 `B743FF64F881350D78921355053E64087D36468759D2149A95BE65DE10572AC3`. |
+
 
 ## Archived History
 
